@@ -1,0 +1,24 @@
+﻿
+            //var ghClient = new GitHubClient(new ProductHeaderValue("Octokit-Test"));
+            //ghClient.Credentials = new Credentials(ConfigurationManager.AppSettings["GitPassword"]);//"-personal access token here-");
+
+            //ghClient.Credentials = new Credentials("syamrull@microsoft.com", "");
+            //// github variables
+            //var owner = "dspdeppm";
+            //var repo = "https://dspdeppm.visualstudio.com/MCOI%20BOSE%20Compass/_git/Compass%20Commissioning";
+            //var branch = "16jan2019";
+
+            //// create file
+            //try
+            //{
+            //    var createChangeSet = ghClient.Repository.Content.CreateFile(owner, repo, "path/file2.txt", new CreateFileRequest("File creation", "Hello World!", branch));
+            //    createChangeSet.Wait();
+            //}
+            //catch(Exception ex)
+            //{
+
+            //}
+
+            
+            //// update file
+            //var updateChangeSet = ghClient.Repository.Content.UpdateFile(owner, repo, "path/file2.txt", new UpdateFileRequest("File update", "Hello Universe!", "SHA value should be here", branch));

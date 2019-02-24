@@ -1,0 +1,167 @@
+﻿//-----------------------------------------------------------------------
+// <copyright file="RepositoryHelper.cs" company="Microsoft">
+//     Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+// <author>Syed Amrullah Mazhar</author>
+//-----------------------------------------------------------------------
+
+namespace CrmSolution
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Configuration;
+    using System.IO;
+    using System.Linq;
+
+    /// <summary>
+    /// Repository helper
+    /// </summary>
+    internal class RepositoryHelper
+    {
+        /// <summary>
+        /// Method tries to update repository
+        /// </summary>
+        /// <param name="solutionUniqueName">unique solution name</param>
+        /// <param name="committerName">committer name</param>
+        /// <param name="committerEmail">committer email</param>
+        /// <param name="authorEmail">author email</param>
+        public static void TryUpdateToRepository(string solutionUniqueName, string committerName, string committerEmail, string authorEmail)
+        {
+            ICrmSolutionHelper crmSolutionHelper = new CrmSolutionHelper(
+                            ConfigurationManager.AppSettings["RepositoryUrl"],
+                            ConfigurationManager.AppSettings["BranchName"],
+                            ConfigurationManager.AppSettings["OrgServiceUrl"],
+                            ConfigurationManager.AppSettings["UserName"],
+                            ConfigurationManager.AppSettings["Password"]);
+
+            int timeOut = Convert.ToInt32(ConfigurationManager.AppSettings["SleepTimeoutInMillis"]);
+            while (true)
+            {
+                HashSet<string> hashSet = new HashSet<string>();
+
+                try
+                {
+                    var solutionFiles = crmSolutionHelper.DownloadSolutionFile(solutionUniqueName);
+
+                    if (!crmSolutionHelper.CanPush)
+                    {
+                        System.Threading.Thread.Sleep(timeOut);
+                        continue;
+                    }
+
+                    string solutionFilePath = ConfigurationManager.AppSettings["RepositoryLocalDirectory"] + "solutions.txt";
+                    foreach (var solutionFile in solutionFiles)
+                    {
+                        if (solutionFile.CheckInSolution)
+                        {
+                            TryPushToRepository(committerName, committerEmail, authorEmail, solutionFile, solutionFilePath, hashSet);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Write(ex.Message);
+                    Console.ReadLine();
+                }
+
+                System.Threading.Thread.Sleep(timeOut);
+            }
+        }
+
+        /// <summary>
+        /// Method gets repository manager instance
+        /// </summary>
+        /// <param name="committerName">committer name</param>
+        /// <param name="committerEmail">committer email</param>
+        /// <param name="authorEmail">author email</param>
+        /// <param name="solutionFile">solution file info</param>
+        /// <returns>returns repository manager</returns>
+        private static GitDeploy.GitRepositoryManager GetRepositoryManager(string committerName, string committerEmail, string authorEmail, SolutionFileInfo solutionFile)
+        {
+            return new GitDeploy.GitRepositoryManager(
+                                                    ConfigurationManager.AppSettings["UserName"],
+                                                    ConfigurationManager.AppSettings["GitPassword"],
+                                                    ConfigurationManager.AppSettings["RepositoryUrl"],
+                                                    ConfigurationManager.AppSettings["RemoteName"],
+                                                    ConfigurationManager.AppSettings["BranchName"],
+                                                    Convert.ToBoolean(ConfigurationManager.AppSettings["CloneRepositoryAlways"]),
+                                                    ConfigurationManager.AppSettings["RepositoryLocalDirectory"], // Path.GetTempFileName().Replace(".","") + "\\",
+                                                    solutionFile.OwnerName ?? committerName, 
+                                                    authorEmail, 
+                                                    committerName, 
+                                                    committerEmail);
+        }
+
+        /// <summary>
+        /// Method populates hash set from source control release file
+        /// </summary>
+        /// <param name="solutionFilePath">path of file that contains list of solution to be released</param>
+        /// <param name="hashSet">hash set to store release solution</param>
+        private static void PopulateHashset(string solutionFilePath, HashSet<string> hashSet)
+        {
+            if (File.Exists(solutionFilePath))
+            {
+                string[] lines = File.ReadAllLines(solutionFilePath);
+                foreach (var line in lines)
+                {
+                    hashSet.Add(line);
+                }
+            }
+            else
+            {
+                File.Create(solutionFilePath);
+            }
+        }
+
+        /// <summary>
+        /// method saves Hash set to the specified file
+        /// </summary>
+        /// <param name="solutionFilePath">path of file that contains list of solution to be released</param>
+        /// <param name="hashSet">hash set to store release solution</param>
+        private static void SaveHashSet(string solutionFilePath, HashSet<string> hashSet)
+        {
+            File.WriteAllText(solutionFilePath, string.Empty);
+            File.WriteAllLines(solutionFilePath, hashSet.ToArray());
+        }
+
+        /// <summary>
+        /// method tries to push to repository
+        /// </summary>
+        /// <param name="committerName">committer name</param>
+        /// <param name="committerEmail">committer detail</param>
+        /// <param name="authorEmail">author email id</param>
+        /// <param name="solutionFile">solution file info</param>
+        /// <param name="solutionFilePath">path of file that contains list of solution to be released</param>
+        /// <param name="hashSet">hash set to store release solution</param>
+        private static void TryPushToRepository(
+                                                string committerName, 
+                                                string committerEmail, 
+                                                string authorEmail,
+                                                SolutionFileInfo solutionFile, 
+                                                string solutionFilePath, 
+                                                HashSet<string> hashSet)
+        {
+            solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushingToStatus;
+            solutionFile.Update();
+
+            GitDeploy.GitRepositoryManager gitRepositoryManager = GetRepositoryManager(committerName, committerEmail, authorEmail, solutionFile);
+
+            gitRepositoryManager.UpdateRepository();
+
+            PopulateHashset(solutionFilePath, hashSet);
+
+            if (!hashSet.Contains(solutionFile.SolutionUniqueName) && solutionFile.IncludeInRelease)
+            {
+                hashSet.Add(solutionFile.SolutionUniqueName);
+            }
+
+            SaveHashSet(solutionFilePath, hashSet);
+            gitRepositoryManager.CommitAllChanges(solutionFile, solutionFilePath);
+
+            gitRepositoryManager.PushCommits();
+
+            solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushToRepositorySuccessStatus;
+            solutionFile.Update();
+        }
+    }
+}

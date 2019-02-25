@@ -173,7 +173,17 @@ namespace GitDeploy
                     commitOptions.AllowEmptyCommit = false;
 
                     var commit = repo.Commit(solutionFileInfo.Message, author, committer);
-                    solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForCommitIds] = string.Format("Commit Info <br/><a href='{0}/commit/{1}'>{1}</a>", this.repoUrl, commit.Id.Sha, commit.Message);
+                    string commitIds = solutionFileInfo.Solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForCommitIds);
+                    if (string.IsNullOrEmpty(commitIds))
+                    {
+                        commitIds = string.Empty;
+                    }
+                    else
+                    {
+                        commitIds += string.Format("Commit Info <br/><a href='{0}/commit/{1}'>{2}</a>", this.repoUrl, commit.Id.Sha, commit.Message);
+                    }
+
+                    solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForCommitIds] = commitIds;
                 }
             }
             catch (EmptyCommitException ex)

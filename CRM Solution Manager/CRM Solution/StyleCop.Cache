@@ -32,9 +32,6 @@
   <project key="1132816814">
     <configuration>DEBUG;TRACE</configuration>
   </project>
-  <project key="-869957017">
-    <configuration>DEBUG;TRACE</configuration>
-  </project>
   <sourcecode name="Constants.cs" parser="StyleCop.CSharp.CsParser">
     <timestamps>
       <styleCop>2019/02/23 12:45:45.106</styleCop>
@@ -86,29 +83,6 @@
       <styleCop>2019/02/23 12:45:45.106</styleCop>
       <settingsFile>2019/02/23 12:45:45.000</settingsFile>
       <sourceFile>2019/02/25 21:15:39.328</sourceFile>
-      <parser>2019/02/23 12:45:45.106</parser>
-      <StyleCop.CSharp.DocumentationRules>2019/02/23 12:45:45.106</StyleCop.CSharp.DocumentationRules>
-      <StyleCop.CSharp.DocumentationRules.FilesHashCode>-2139845779</StyleCop.CSharp.DocumentationRules.FilesHashCode>
-      <StyleCop.CSharp.LayoutRules>2019/02/23 12:45:45.106</StyleCop.CSharp.LayoutRules>
-      <StyleCop.CSharp.LayoutRules.FilesHashCode>0</StyleCop.CSharp.LayoutRules.FilesHashCode>
-      <StyleCop.CSharp.MaintainabilityRules>2019/02/23 12:45:45.106</StyleCop.CSharp.MaintainabilityRules>
-      <StyleCop.CSharp.MaintainabilityRules.FilesHashCode>0</StyleCop.CSharp.MaintainabilityRules.FilesHashCode>
-      <StyleCop.CSharp.NamingRules>2019/02/23 12:45:45.106</StyleCop.CSharp.NamingRules>
-      <StyleCop.CSharp.NamingRules.FilesHashCode>0</StyleCop.CSharp.NamingRules.FilesHashCode>
-      <StyleCop.CSharp.OrderingRules>2019/02/23 12:45:45.106</StyleCop.CSharp.OrderingRules>
-      <StyleCop.CSharp.OrderingRules.FilesHashCode>0</StyleCop.CSharp.OrderingRules.FilesHashCode>
-      <StyleCop.CSharp.ReadabilityRules>2019/02/23 12:45:45.106</StyleCop.CSharp.ReadabilityRules>
-      <StyleCop.CSharp.ReadabilityRules.FilesHashCode>0</StyleCop.CSharp.ReadabilityRules.FilesHashCode>
-      <StyleCop.CSharp.SpacingRules>2019/02/23 12:45:45.106</StyleCop.CSharp.SpacingRules>
-      <StyleCop.CSharp.SpacingRules.FilesHashCode>0</StyleCop.CSharp.SpacingRules.FilesHashCode>
-    </timestamps>
-    <violations />
-  </sourcecode>
-  <sourcecode name="GitRepositoryManager.cs" parser="StyleCop.CSharp.CsParser">
-    <timestamps>
-      <styleCop>2019/02/23 12:45:45.106</styleCop>
-      <settingsFile>2019/02/23 12:45:45.000</settingsFile>
-      <sourceFile>2019/02/25 20:36:25.068</sourceFile>
       <parser>2019/02/23 12:45:45.106</parser>
       <StyleCop.CSharp.DocumentationRules>2019/02/23 12:45:45.106</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>-2139845779</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -247,6 +221,32 @@
       <styleCop>2019/02/23 12:45:45.106</styleCop>
       <settingsFile>2019/02/23 12:45:45.000</settingsFile>
       <sourceFile>2019/02/24 19:30:51.530</sourceFile>
+      <parser>2019/02/23 12:45:45.106</parser>
+      <StyleCop.CSharp.DocumentationRules>2019/02/23 12:45:45.106</StyleCop.CSharp.DocumentationRules>
+      <StyleCop.CSharp.DocumentationRules.FilesHashCode>-2139845779</StyleCop.CSharp.DocumentationRules.FilesHashCode>
+      <StyleCop.CSharp.LayoutRules>2019/02/23 12:45:45.106</StyleCop.CSharp.LayoutRules>
+      <StyleCop.CSharp.LayoutRules.FilesHashCode>0</StyleCop.CSharp.LayoutRules.FilesHashCode>
+      <StyleCop.CSharp.MaintainabilityRules>2019/02/23 12:45:45.106</StyleCop.CSharp.MaintainabilityRules>
+      <StyleCop.CSharp.MaintainabilityRules.FilesHashCode>0</StyleCop.CSharp.MaintainabilityRules.FilesHashCode>
+      <StyleCop.CSharp.NamingRules>2019/02/23 12:45:45.106</StyleCop.CSharp.NamingRules>
+      <StyleCop.CSharp.NamingRules.FilesHashCode>0</StyleCop.CSharp.NamingRules.FilesHashCode>
+      <StyleCop.CSharp.OrderingRules>2019/02/23 12:45:45.106</StyleCop.CSharp.OrderingRules>
+      <StyleCop.CSharp.OrderingRules.FilesHashCode>0</StyleCop.CSharp.OrderingRules.FilesHashCode>
+      <StyleCop.CSharp.ReadabilityRules>2019/02/23 12:45:45.106</StyleCop.CSharp.ReadabilityRules>
+      <StyleCop.CSharp.ReadabilityRules.FilesHashCode>0</StyleCop.CSharp.ReadabilityRules.FilesHashCode>
+      <StyleCop.CSharp.SpacingRules>2019/02/23 12:45:45.106</StyleCop.CSharp.SpacingRules>
+      <StyleCop.CSharp.SpacingRules.FilesHashCode>0</StyleCop.CSharp.SpacingRules.FilesHashCode>
+    </timestamps>
+    <violations />
+  </sourcecode>
+  <project key="-869957017">
+    <configuration>DEBUG;TRACE</configuration>
+  </project>
+  <sourcecode name="GitRepositoryManager.cs" parser="StyleCop.CSharp.CsParser">
+    <timestamps>
+      <styleCop>2019/02/23 12:45:45.106</styleCop>
+      <settingsFile>2019/02/23 12:45:45.000</settingsFile>
+      <sourceFile>2019/02/25 22:01:31.431</sourceFile>
       <parser>2019/02/23 12:45:45.106</parser>
       <StyleCop.CSharp.DocumentationRules>2019/02/23 12:45:45.106</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>-2139845779</StyleCop.CSharp.DocumentationRules.FilesHashCode>

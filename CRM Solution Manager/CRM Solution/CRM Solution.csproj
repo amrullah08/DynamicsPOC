@@ -85,7 +85,9 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="TextFile1.txt" />

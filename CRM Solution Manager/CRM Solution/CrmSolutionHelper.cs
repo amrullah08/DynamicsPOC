@@ -91,21 +91,31 @@ namespace CrmSolution
 
             for (int i = 0; i < querySampleSolutionResults.Entities.Count; i++)
             {
-                SolutionFileInfo solutioninfo = null;
                 try
                 {
-                    solutioninfo = this.ExportSolution(serviceProxy, querySampleSolutionResults.Entities[i]);
-                    solutionFileInfos.Add(solutioninfo);
-
-                    if (solutioninfo.CheckInSolution)
+                    var infos = SolutionFileInfo.GetSolutionFileInfo(querySampleSolutionResults.Entities[i], serviceProxy);
+                    foreach (var info in infos)
                     {
-                        this.CanPush = true;
+                        try
+                        {
+                            this.ExportSolution(serviceProxy, info);
+                            solutionFileInfos.Add(info);
+                            if (info.CheckInSolution)
+                            {
+                                this.CanPush = true;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            info.Solution[Constants.SourceControlQueueAttributeNameForStatus] = "Error +" + ex.Message;
+                            info.Update();
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    solutioninfo.Solution[Constants.SourceControlQueueAttributeNameForStatus] = "Error +" + ex.Message;
-                    solutioninfo.Update();
+                    querySampleSolutionResults.Entities[i][Constants.SourceControlQueueAttributeNameForStatus] = "Error +" + ex.Message;
+                    serviceProxy.Update(querySampleSolutionResults.Entities[i]);
                 }
             }
 
@@ -157,11 +167,9 @@ namespace CrmSolution
         /// Method exports solution
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
-        /// <param name="solution">entity solution</param>
-        /// <returns>returns solution file info</returns>
-        private SolutionFileInfo ExportSolution(OrganizationServiceProxy serviceProxy, Entity solution)
+        /// <param name="solutionFile">solution file info</param>
+        private void ExportSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
         {
-            SolutionFileInfo solutionFile = new SolutionFileInfo(solution, serviceProxy);
             if (solutionFile.SolutionsToBeMerged.Count > 0)
             {
                 this.MergeSolutions(solutionFile, serviceProxy);
@@ -169,7 +177,7 @@ namespace CrmSolution
 
             if (!solutionFile.CheckInSolution)
             {
-                return solutionFile;
+                return;
             }
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForRepositoryUrl] = this.RepositoryUrl;
@@ -197,8 +205,6 @@ namespace CrmSolution
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportSuccessful;
             solutionFile.Update();
-
-            return solutionFile;
         }
     }
 }

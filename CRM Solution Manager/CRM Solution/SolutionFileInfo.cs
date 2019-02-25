@@ -9,6 +9,7 @@ namespace CrmSolution
 {
     using System.Collections.Generic;
     using Microsoft.Xrm.Sdk;
+    using Microsoft.Xrm.Sdk.Client;
 
     /// <summary>
     /// solution file info
@@ -29,11 +30,14 @@ namespace CrmSolution
         /// </summary>
         /// <param name="solution">solution entity</param>
         /// <param name="organizationServiceProxy">Organization proxy</param>
-        public SolutionFileInfo(Entity solution, Microsoft.Xrm.Sdk.Client.OrganizationServiceProxy organizationServiceProxy)
+        /// <param name="uniqueSolutionName">unique solution name</param>
+        public SolutionFileInfo(Entity solution, OrganizationServiceProxy organizationServiceProxy, string uniqueSolutionName)
         {
             this.OrganizationServiceProxy = organizationServiceProxy;
             this.SolutionsToBeMerged = new List<string>();
-            this.SolutionUniqueName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSolutionName);
+            this.SolutionUniqueName = uniqueSolutionName;
+            
+            // solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSolutionName);
             this.Message = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForComment);
             this.OwnerName = solution.GetAttributeValue<EntityReference>(Constants.SourceControlQueueAttributeNameForOwnerId).Name;
             this.IncludeInRelease = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForIncludeInRelease);
@@ -118,6 +122,24 @@ namespace CrmSolution
         /// </summary>
         public Microsoft.Xrm.Sdk.Client.OrganizationServiceProxy OrganizationServiceProxy { get; set; }
         
+        /// <summary>
+        ///  Method returns solution info based on unique solution name
+        /// </summary>
+        /// <param name="solution">solution entity</param>
+        /// <param name="organizationServiceProxy">organization proxy</param>
+        /// <returns>returns list of solution file info by splitting source solution by comma</returns>
+        public static List<SolutionFileInfo> GetSolutionFileInfo(Entity solution, OrganizationServiceProxy organizationServiceProxy)
+        {
+            List<SolutionFileInfo> solutionFileInfos = new List<SolutionFileInfo>();
+            foreach (var s in solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSolutionName).Split(new string[] { "," }, System.StringSplitOptions.RemoveEmptyEntries))
+            {
+                var solutionFile = new SolutionFileInfo(solution, organizationServiceProxy, s);
+                solutionFileInfos.Add(solutionFile);
+            }
+
+            return solutionFileInfos;
+        }
+
         /// <summary>
         /// Method commits the changes done to the solution object
         /// </summary>

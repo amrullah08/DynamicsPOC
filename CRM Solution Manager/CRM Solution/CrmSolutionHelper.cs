@@ -180,7 +180,7 @@ namespace CrmSolution
             string tempFolder = Path.GetTempFileName();
             ExportSolutionRequest exportRequest = new ExportSolutionRequest
             {
-                Managed = true,
+                Managed = false,
                 SolutionName = solutionFile.SolutionUniqueName
             };
 

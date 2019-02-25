@@ -104,7 +104,8 @@ namespace CrmSolution
                 string[] lines = File.ReadAllLines(solutionFilePath);
                 foreach (var line in lines)
                 {
-                    hashSet.Add(line);
+                    if (!string.IsNullOrEmpty(line))
+                        hashSet.Add(line);
                 }
             }
             else
@@ -121,7 +122,7 @@ namespace CrmSolution
         private static void SaveHashSet(string solutionFilePath, HashSet<string> hashSet)
         {
             File.WriteAllText(solutionFilePath, string.Empty);
-            File.WriteAllLines(solutionFilePath, hashSet.ToArray());
+            File.WriteAllLines(solutionFilePath, hashSet.Where(cc => !string.IsNullOrEmpty(cc)).ToArray());
         }
 
         /// <summary>
@@ -150,9 +151,9 @@ namespace CrmSolution
 
             PopulateHashset(solutionFilePath, hashSet);
 
-            if (!hashSet.Contains(solutionFile.SolutionUniqueName) && solutionFile.IncludeInRelease)
+            if (!hashSet.Contains(solutionFile.SolutionFileUniqueName) && solutionFile.IncludeInRelease)
             {
-                hashSet.Add(solutionFile.SolutionUniqueName);
+                hashSet.Add(solutionFile.SolutionFileUniqueName);
             }
 
             SaveHashSet(solutionFilePath, hashSet);

@@ -63,6 +63,22 @@ namespace CrmSolution
         public string SolutionUniqueName { get; set; }
 
         /// <summary>
+        /// Gets Unique solution name
+        /// </summary>
+        public string SolutionFileUniqueName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(this.SolutionUniqueName))
+                {
+                    return null;
+                }
+
+                return this.SolutionUniqueName + "_.zip";
+            }
+        }
+
+        /// <summary>
         /// Gets or sets solution entity
         /// </summary>
         public Entity Solution { get; set; }

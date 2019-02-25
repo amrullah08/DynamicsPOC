@@ -134,7 +134,7 @@ namespace GitDeploy
             try
             {
                 Console.WriteLine("Committing solutions");
-                string file = this.localFolder + solutionFileInfo.SolutionUniqueName + "_.zip";
+                string file = this.localFolder + solutionFileInfo.SolutionFileUniqueName;
                 File.Copy(solutionFileInfo.SolutionFilePath, file, true);
                 using (var repo = new Repository(this.localFolder.FullName))
                 {

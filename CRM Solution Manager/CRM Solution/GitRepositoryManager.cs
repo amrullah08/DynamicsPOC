@@ -172,7 +172,8 @@ namespace GitDeploy
                     CommitOptions commitOptions = new CommitOptions();
                     commitOptions.AllowEmptyCommit = false;
 
-                    repo.Commit(solutionFileInfo.Message, author, committer);
+                    var commit = repo.Commit(solutionFileInfo.Message, author, committer);
+                    solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForCommitIds] = string.Format("Commit Info <br/><a href='{0}/commit/{1}'>{1}</a>", this.repoUrl, commit.Id.Sha, commit.Message);
                 }
             }
             catch (EmptyCommitException ex)

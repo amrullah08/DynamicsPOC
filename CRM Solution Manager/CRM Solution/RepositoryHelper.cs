@@ -105,7 +105,9 @@ namespace CrmSolution
                 foreach (var line in lines)
                 {
                     if (!string.IsNullOrEmpty(line))
+                    {
                         hashSet.Add(line);
+                    }
                 }
             }
             else

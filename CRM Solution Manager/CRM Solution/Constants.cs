@@ -85,6 +85,11 @@ namespace CrmSolution
         public const string SourceControlQueueAttributeNameForComment = "syed_comment";
 
         /// <summary>
+        /// comment column name
+        /// </summary>
+        public const string SourceControlQueueAttributeNameForCommitIds = "syed_commitids";
+
+        /// <summary>
         /// owner id column name
         /// </summary>
         public const string SourceControlQueueAttributeNameForOwnerId = "ownerid";

@@ -10,13 +10,10 @@ namespace CrmSolution
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.ServiceModel.Description;
     using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Client;
-    using Microsoft.Xrm.Sdk.Messages;
-    using Microsoft.Xrm.Sdk.Metadata;
     using Microsoft.Xrm.Sdk.Query;
     using MsCrmTools.SolutionComponentsMover.AppCode;
 
@@ -54,7 +51,7 @@ namespace CrmSolution
             this.clientCredentials.UserName.Password = password;
             this.InitializeOrganizationService();
         }
-
+        
         /// <summary>
         /// Gets or sets Repository url
         /// </summary>
@@ -74,6 +71,20 @@ namespace CrmSolution
         /// Gets or sets solution file info
         /// </summary>
         public List<SolutionFileInfo> SolutionFileInfos { get; set; }
+
+        /// <summary>
+        /// Empties folder
+        /// </summary>
+        /// <param name="directory">folder to be emptied</param>
+        public static void CreateEmptyFolder(string directory)
+        {
+            if (Directory.Exists(directory))
+            {
+                DeleteDirectory(directory);
+            }
+
+            Directory.CreateDirectory(directory);
+        }
 
         /// <summary>
         /// Method downloads unique solution name
@@ -144,6 +155,31 @@ namespace CrmSolution
         }
 
         /// <summary>
+        /// Deletes directory
+        /// </summary>
+        /// <param name="path">folder path</param>
+        private static void DeleteDirectory(string path)
+        {
+            if (Directory.Exists(path))
+            {
+                // Delete all files from the Directory
+                foreach (string file in Directory.GetFiles(path))
+                {
+                    File.Delete(file);
+                }
+
+                // Delete all child Directories
+                foreach (string directory in Directory.GetDirectories(path))
+                {
+                    DeleteDirectory(directory);
+                }
+
+                // Delete a Directory
+                Directory.Delete(path);
+            }
+        }
+
+        /// <summary>
         /// returns new instance of organization service
         /// </summary>
         /// <returns>returns organization service</returns>
@@ -205,6 +241,7 @@ namespace CrmSolution
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportSuccessful;
             solutionFile.Update();
+            solutionFile.ProcessSolutionZipFile();
         }
     }
 }

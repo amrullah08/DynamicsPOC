@@ -10,6 +10,7 @@ namespace GitDeploy
     using System;
     using System.IO;
     using System.Linq;
+    using System.Xml;
     using CrmSolution;
     using LibGit2Sharp;
     using LibGit2Sharp.Handlers;
@@ -65,6 +66,21 @@ namespace GitDeploy
         private readonly DirectoryInfo localFolder;
 
         /// <summary>
+        /// local java script folder
+        /// </summary>
+        private readonly DirectoryInfo webResourcesJsFolder;
+
+        /// <summary>
+        /// local Images folder
+        /// </summary>
+        private readonly DirectoryInfo webResourcesImageslocalFolder;
+
+        /// <summary>
+        /// local html folder
+        /// </summary>
+        private readonly DirectoryInfo webResourcesHtmllocalFolder;
+
+        /// <summary>
         /// Every time repository will be cloned
         /// </summary>
         private bool cloneAlways;
@@ -79,18 +95,24 @@ namespace GitDeploy
         /// <param name="branchName">branch name</param>
         /// <param name="cloneAlways">clone always</param>
         /// <param name="localFolder">The full path to local folder.</param>
+        /// <param name="javascriptLocalFolder">The full path to java script local folder.</param>
+        /// <param name="htmlLocalFolder">The full path to html local folder.</param>
+        /// <param name="imagesLocalFolder">The full path to images local folder.</param>
         /// <param name="authorname">author name</param>
         /// <param name="authoremail">author email</param>
         /// <param name="committername">committer name</param>
         /// <param name="committeremail">committer email</param>
         public GitRepositoryManager(
-            string username, 
-            string password, 
-            string gitRepoUrl, 
-            string remoteName, 
-            string branchName, 
+            string username,
+            string password,
+            string gitRepoUrl,
+            string remoteName,
+            string branchName,
             bool cloneAlways,
             string localFolder,
+            string javascriptLocalFolder,
+            string htmlLocalFolder,
+            string imagesLocalFolder,
             string authorname,
             string authoremail,
             string committername,
@@ -98,6 +120,10 @@ namespace GitDeploy
         {
             var folder = new DirectoryInfo(localFolder);
             this.localFolder = folder;
+            this.webResourcesJsFolder = new DirectoryInfo(javascriptLocalFolder);
+            this.webResourcesHtmllocalFolder = new DirectoryInfo(htmlLocalFolder);
+            this.webResourcesImageslocalFolder = new DirectoryInfo(imagesLocalFolder);
+
             this.credentials = new UsernamePasswordCredentials
             {
                 Username = username,
@@ -134,8 +160,10 @@ namespace GitDeploy
             try
             {
                 Console.WriteLine("Committing solutions");
-                string file = this.localFolder + solutionFileInfo.SolutionFileUniqueName;
+                string file = this.localFolder + solutionFileInfo.SolutionFileZipName;
                 File.Copy(solutionFileInfo.SolutionFilePath, file, true);
+                string webResources = solutionFileInfo.SolutionExtractionPath + "\\WebResources";
+
                 using (var repo = new Repository(this.localFolder.FullName))
                 {
                     if (string.IsNullOrEmpty(file))
@@ -163,6 +191,8 @@ namespace GitDeploy
                     {
                         repo.Index.Add(file.Replace(this.localFolder.FullName, string.Empty));
                     }
+
+                    this.AddWebResourcesToRepository(webResources, repo);
 
                     repo.Index.Add(solutionFilePath.Replace(this.localFolder.FullName, string.Empty));
 
@@ -246,7 +276,7 @@ namespace GitDeploy
                 Console.WriteLine("Pushed changes");
             }
         }
-     
+
         /// <summary>
         /// Method updates repository
         /// </summary>
@@ -259,7 +289,7 @@ namespace GitDeploy
             bool cloneAlways = this.cloneAlways;
             string url = this.repoUrl;
             CredentialsHandler crednt = (curl, usernameFromUrl, types) => this.credentials;
-            
+
             string workingDirectory = this.localFolder.FullName;
             if (Directory.Exists(workingDirectory))
             {
@@ -273,7 +303,7 @@ namespace GitDeploy
                             repo.RemoveUntrackedFiles();
 
                             var remote = repo.Network.Remotes.FirstOrDefault(r => r.Name == remoteName);
-                            
+
                             string pushRefs = "refs/heads/testsyed";
                             Branch branchs = null;
                             foreach (var branch in repo.Branches)
@@ -363,6 +393,40 @@ namespace GitDeploy
         private void PushSatusErrorHandler(PushStatusError pushStatusErrors)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Method adds web resources to repository
+        /// </summary>
+        /// <param name="webResources">web resources folder</param>
+        /// <param name="repo">repository to be committed</param>
+        private void AddWebResourcesToRepository(string webResources, Repository repo)
+        {
+            foreach (var dataFile in Directory.GetFiles(webResources, "*.data.xml"))
+            {
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.Load(dataFile);
+                var webResourceType = xmlDoc.SelectSingleNode("//WebResource/WebResourceType").InnerText;
+                var webResournceName = xmlDoc.SelectSingleNode("//WebResource/Name").InnerText;
+                string commitFileLoc = null;
+                switch (webResourceType)
+                {
+                    case "1":
+                        commitFileLoc = this.webResourcesHtmllocalFolder + webResournceName;
+                        break;
+
+                    case "3":
+                        commitFileLoc = this.webResourcesJsFolder + webResournceName;
+                        break;
+
+                    case "5":
+                        commitFileLoc = this.webResourcesImageslocalFolder + webResournceName;
+                        break;
+                }
+
+                File.Copy(webResources + "\\" + webResournceName, commitFileLoc, true);
+                repo.Index.Add(commitFileLoc.Replace(this.localFolder.FullName, string.Empty));
+            }
         }
     }
 }

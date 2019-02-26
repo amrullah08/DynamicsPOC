@@ -7,7 +7,10 @@
 
 namespace CrmSolution
 {
+    using System;
     using System.Collections.Generic;
+    using System.IO;
+    using CliWrap;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Client;
 
@@ -45,6 +48,12 @@ namespace CrmSolution
             this.MergeSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForMergeSolution);
             var solutions = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSourceSolutions);
 
+            if (this.CheckInSolution)
+            {
+                this.SolutionExtractionPath = Path.GetTempPath() + this.SolutionUniqueName;
+                CrmSolutionHelper.CreateEmptyFolder(this.SolutionExtractionPath);
+            }
+
             if (!string.IsNullOrEmpty(solutions) && this.MergeSolution)
             {
                 foreach (var s in solutions.Split(new string[] { "," }, System.StringSplitOptions.RemoveEmptyEntries))
@@ -57,7 +66,7 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Gets or sets Downloaded solution file path
+        /// Gets or sets where solution is downloaded
         /// </summary>
         public string SolutionFilePath { get; set; }
 
@@ -67,9 +76,9 @@ namespace CrmSolution
         public string SolutionUniqueName { get; set; }
 
         /// <summary>
-        /// Gets Unique solution name
+        /// Gets Unique solution file zip name
         /// </summary>
-        public string SolutionFileUniqueName
+        public string SolutionFileZipName
         {
             get
             {
@@ -121,7 +130,12 @@ namespace CrmSolution
         /// Gets or sets value of Organization service
         /// </summary>
         public Microsoft.Xrm.Sdk.Client.OrganizationServiceProxy OrganizationServiceProxy { get; set; }
-        
+
+        /// <summary>
+        /// Gets value of solution extraction path
+        /// </summary>
+        public string SolutionExtractionPath { get; private set; }
+
         /// <summary>
         ///  Method returns solution info based on unique solution name
         /// </summary>
@@ -146,6 +160,19 @@ namespace CrmSolution
         public void Update()
         {
             this.OrganizationServiceProxy.Update(this.Solution);
+        }
+
+        /// <summary>
+        /// Method extracts solution zip file using solution packager
+        /// </summary>
+        public void ProcessSolutionZipFile()
+        {
+            string solutionPackagerPath = "E:\\dynamics training\\mcio\\coretools\\solutionpackager.exe";
+            var result = Cli.Wrap(solutionPackagerPath)
+                            .SetArguments("/action:Extract /zipfile:\"" + this.SolutionFilePath + "\" /folder:\"" + this.SolutionExtractionPath + "\"")
+                           .SetStandardOutputCallback(l => Console.WriteLine($"StdOut> {l}")) // triggered on every line in stdout
+                           .SetStandardErrorCallback(l => Console.WriteLine($"StdErr> {l}")) // triggered on every line in stderr
+                           .Execute();
         }
     }
 }

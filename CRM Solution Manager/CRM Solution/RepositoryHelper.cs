@@ -85,7 +85,10 @@ namespace CrmSolution
                                                     ConfigurationManager.AppSettings["RemoteName"],
                                                     ConfigurationManager.AppSettings["BranchName"],
                                                     Convert.ToBoolean(ConfigurationManager.AppSettings["CloneRepositoryAlways"]),
-                                                    ConfigurationManager.AppSettings["RepositoryLocalDirectory"], // Path.GetTempFileName().Replace(".","") + "\\",
+                                                    ConfigurationManager.AppSettings["RepositoryLocalDirectory"],
+                                                    ConfigurationManager.AppSettings["RepositoryJsDirectory"],
+                                                    ConfigurationManager.AppSettings["RepositoryHtmlDirectory"],
+                                                    ConfigurationManager.AppSettings["RepositoryImagesDirectory"],
                                                     solutionFile.OwnerName ?? committerName, 
                                                     authorEmail, 
                                                     committerName, 
@@ -153,9 +156,9 @@ namespace CrmSolution
 
             PopulateHashset(solutionFilePath, hashSet);
 
-            if (!hashSet.Contains(solutionFile.SolutionFileUniqueName) && solutionFile.IncludeInRelease)
+            if (!hashSet.Contains(solutionFile.SolutionFileZipName) && solutionFile.IncludeInRelease)
             {
-                hashSet.Add(solutionFile.SolutionFileUniqueName);
+                hashSet.Add(solutionFile.SolutionFileZipName);
             }
 
             SaveHashSet(solutionFilePath, hashSet);

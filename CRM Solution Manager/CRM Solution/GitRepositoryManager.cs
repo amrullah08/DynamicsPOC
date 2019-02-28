@@ -402,6 +402,8 @@ namespace GitDeploy
         /// <param name="repo">repository to be committed</param>
         private void AddWebResourcesToRepository(string webResources, Repository repo)
         {
+            if (!Directory.Exists(webResources))
+                return;
             foreach (var dataFile in Directory.GetFiles(webResources, "*.data.xml"))
             {
                 XmlDocument xmlDoc = new XmlDocument();

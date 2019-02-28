@@ -89,11 +89,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
             CopySettings copySettings = this.GetCopySettings();
             foreach (var solution in solutions)
             {
-                if (solution["uniquename"].Equals(solutionFileInfo.SolutionUniqueName))
+                if (solution["uniquename"].ToString().ToLower().Equals(solutionFileInfo.SolutionUniqueName.ToString().ToLower()))
                 {
                     copySettings.TargetSolutions.Add(solution);
                 }
-                else if (solutionFileInfo.SolutionsToBeMerged.Any(cc => cc.Equals(solution["uniquename"])))
+                else if (solutionFileInfo.SolutionsToBeMerged.Any(cc => cc.ToString().ToLower().Equals(solution["uniquename"].ToString().ToLower())))
                 {
                     copySettings.SourceSolutions.Add(solution);
                 }

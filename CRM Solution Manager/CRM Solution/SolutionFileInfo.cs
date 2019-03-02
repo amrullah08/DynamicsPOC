@@ -97,6 +97,21 @@ namespace CrmSolution
         public Entity Solution { get; set; }
 
         /// <summary>
+        /// Gets or sets Git repo url
+        /// </summary>
+        public string GitRepoUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets remote name
+        /// </summary>
+        public string RemoteName { get; set; }
+
+        /// <summary>
+        /// Gets or sets branch name
+        /// </summary>
+        public string BranchName { get; set; }
+
+        /// <summary>
         /// Gets or sets message
         /// </summary>
         public string Message { get; set; }

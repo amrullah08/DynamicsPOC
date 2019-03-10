@@ -208,11 +208,8 @@ namespace GitDeploy
                     {
                         commitIds = string.Empty;
                     }
-                    else
-                    {
-                        commitIds += string.Format("Commit Info <br/><a href='{0}/commit/{1}'>{2}</a>", this.repoUrl, commit.Id.Sha, commit.Message);
-                    }
 
+                    commitIds += string.Format("Commit Info <br/><a href='{0}/commit/{1}'>{2}</a>", this.repoUrl, commit.Id.Sha, commit.Message);
                     solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForCommitIds] = commitIds;
                 }
             }
@@ -403,7 +400,10 @@ namespace GitDeploy
         private void AddWebResourcesToRepository(string webResources, Repository repo)
         {
             if (!Directory.Exists(webResources))
+            {
                 return;
+            }
+
             foreach (var dataFile in Directory.GetFiles(webResources, "*.data.xml"))
             {
                 XmlDocument xmlDoc = new XmlDocument();

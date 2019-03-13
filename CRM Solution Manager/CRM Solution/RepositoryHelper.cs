@@ -31,8 +31,8 @@ namespace CrmSolution
                             ConfigurationManager.AppSettings["RepositoryUrl"],
                             ConfigurationManager.AppSettings["BranchName"],
                             ConfigurationManager.AppSettings["OrgServiceUrl"],
-                            ConfigurationManager.AppSettings["UserName"],
-                            ConfigurationManager.AppSettings["Password"]);
+                            ConfigurationManager.AppSettings["DynamicsUserName"],
+                            ConfigurationManager.AppSettings["DynamicsPassword"]);
 
             int timeOut = Convert.ToInt32(ConfigurationManager.AppSettings["SleepTimeoutInMillis"]);
             while (true)
@@ -79,7 +79,7 @@ namespace CrmSolution
         private static GitDeploy.GitRepositoryManager GetRepositoryManager(string committerName, string committerEmail, string authorEmail, SolutionFileInfo solutionFile)
         {
             return new GitDeploy.GitRepositoryManager(
-                                                    ConfigurationManager.AppSettings["UserName"],
+                                                    ConfigurationManager.AppSettings["GitUserName"],
                                                     ConfigurationManager.AppSettings["GitPassword"],
                                                     ConfigurationManager.AppSettings["RepositoryUrl"],
                                                     ConfigurationManager.AppSettings["RemoteName"],

@@ -61,7 +61,7 @@ namespace CrmSolution
                 catch (Exception ex)
                 {
                     Console.Write(ex.Message);
-                    Console.ReadLine();
+                    System.Threading.Thread.Sleep(timeOut);
                 }
 
                 System.Threading.Thread.Sleep(timeOut);

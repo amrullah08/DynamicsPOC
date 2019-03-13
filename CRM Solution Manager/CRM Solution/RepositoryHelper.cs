@@ -83,7 +83,7 @@ namespace CrmSolution
                                                     ConfigurationManager.AppSettings["GitPassword"],
                                                     ConfigurationManager.AppSettings["RepositoryUrl"],
                                                     ConfigurationManager.AppSettings["RemoteName"],
-                                                    ConfigurationManager.AppSettings["BranchName"],
+                                                    solutionFile.BranchName ?? ConfigurationManager.AppSettings["BranchName"],
                                                     Convert.ToBoolean(ConfigurationManager.AppSettings["CloneRepositoryAlways"]),
                                                     ConfigurationManager.AppSettings["RepositoryLocalDirectory"],
                                                     ConfigurationManager.AppSettings["RepositoryJsDirectory"],

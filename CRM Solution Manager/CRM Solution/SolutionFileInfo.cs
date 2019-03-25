@@ -51,6 +51,7 @@ namespace CrmSolution
             if (this.CheckInSolution)
             {
                 this.SolutionExtractionPath = Path.GetTempPath() + this.SolutionUniqueName;
+                this.BranchName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForBranch);
                 CrmSolutionHelper.CreateEmptyFolder(this.SolutionExtractionPath);
             }
 

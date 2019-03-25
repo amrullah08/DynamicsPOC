@@ -180,9 +180,14 @@ namespace CrmSolution
         /// <summary>
         /// Method extracts solution zip file using solution packager
         /// </summary>
-        public void ProcessSolutionZipFile()
+        public void ProcessSolutionZipFile(string solutionPackagerPath)
         {
-            string solutionPackagerPath = "E:\\dynamics training\\mcio\\coretools\\solutionpackager.exe";
+            if (!File.Exists(solutionPackagerPath))
+            {
+                Console.WriteLine("SolutionPackager.exe doesnot exists in the specified location : " + solutionPackagerPath);
+                return;
+            }
+
             var result = Cli.Wrap(solutionPackagerPath)
                             .SetArguments("/action:Extract /zipfile:\"" + this.SolutionFilePath + "\" /folder:\"" + this.SolutionExtractionPath + "\"")
                            .SetStandardOutputCallback(l => Console.WriteLine($"StdOut> {l}")) // triggered on every line in stdout

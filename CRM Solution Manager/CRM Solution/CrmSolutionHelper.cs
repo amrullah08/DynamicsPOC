@@ -40,11 +40,11 @@ namespace CrmSolution
         /// <param name="organizationServiceUrl">organization service url</param>
         /// <param name="userName">user name</param>
         /// <param name="password">password token</param>
-        public CrmSolutionHelper(string repositoryUrl, string branch, string organizationServiceUrl, string userName, string password)
+        public CrmSolutionHelper(string repositoryUrl, string branch, string organizationServiceUrl, string userName, string password, string solutionPackagerPath)
         {
             this.RepositoryUrl = repositoryUrl;
             this.Branch = branch;
-
+            this.SolutionPackagerPath = solutionPackagerPath;
             this.serviceUri = new Uri(organizationServiceUrl);
             this.clientCredentials = new ClientCredentials();
             this.clientCredentials.UserName.UserName = userName;
@@ -61,6 +61,11 @@ namespace CrmSolution
         /// Gets or sets Repository branch
         /// </summary>
         public string Branch { get; set; }
+
+        /// <summary>
+        /// Gets or sets solution packager path
+        /// </summary>
+        public string SolutionPackagerPath { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether pushing code changes is required or not
@@ -228,7 +233,7 @@ namespace CrmSolution
                 SolutionName = solutionFile.SolutionUniqueName
             };
 
-            Console.WriteLine("Downloading Solutions");
+            Console.WriteLine("Downloading Solution " + solutionFile.SolutionUniqueName);
             ExportSolutionResponse exportResponse = (ExportSolutionResponse)serviceProxy.Execute(exportRequest);
 
             // Handles the response
@@ -241,7 +246,7 @@ namespace CrmSolution
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportSuccessful;
             solutionFile.Update();
-            solutionFile.ProcessSolutionZipFile();
+            solutionFile.ProcessSolutionZipFile(this.SolutionPackagerPath);
         }
     }
 }

@@ -31,8 +31,9 @@ namespace CrmSolution
                             ConfigurationManager.AppSettings["RepositoryUrl"],
                             ConfigurationManager.AppSettings["BranchName"],
                             ConfigurationManager.AppSettings["OrgServiceUrl"],
-                            ConfigurationManager.AppSettings["UserName"],
-                            ConfigurationManager.AppSettings["Password"]);
+                            ConfigurationManager.AppSettings["DynamicsUserName"],
+                            ConfigurationManager.AppSettings["DynamicsPassword"],
+                            ConfigurationManager.AppSettings["SolutionPackagerPath"]);
 
             int timeOut = Convert.ToInt32(ConfigurationManager.AppSettings["SleepTimeoutInMillis"]);
             while (true)
@@ -49,12 +50,19 @@ namespace CrmSolution
                         continue;
                     }
 
-                    string solutionFilePath = ConfigurationManager.AppSettings["RepositoryLocalDirectory"] + "solutions.txt";
-                    foreach (var solutionFile in solutionFiles)
+                    if (!Directory.Exists(ConfigurationManager.AppSettings["RepositoryLocalDirectory"]))
                     {
-                        if (solutionFile.CheckInSolution)
+                        Console.WriteLine("Repository local directory doesnt exists " + ConfigurationManager.AppSettings["RepositoryLocalDirectory"]);
+                    }
+                    else
+                    {
+                        string solutionFilePath = ConfigurationManager.AppSettings["RepositoryLocalDirectory"] + "solutions.txt";
+                        foreach (var solutionFile in solutionFiles)
                         {
-                            TryPushToRepository(committerName, committerEmail, authorEmail, solutionFile, solutionFilePath, hashSet);
+                            if (solutionFile.CheckInSolution)
+                            {
+                                TryPushToRepository(committerName, committerEmail, authorEmail, solutionFile, solutionFilePath, hashSet);
+                            }
                         }
                     }
                 }
@@ -79,7 +87,7 @@ namespace CrmSolution
         private static GitDeploy.GitRepositoryManager GetRepositoryManager(string committerName, string committerEmail, string authorEmail, SolutionFileInfo solutionFile)
         {
             return new GitDeploy.GitRepositoryManager(
-                                                    ConfigurationManager.AppSettings["UserName"],
+                                                    ConfigurationManager.AppSettings["GitUserName"],
                                                     ConfigurationManager.AppSettings["GitPassword"],
                                                     ConfigurationManager.AppSettings["RepositoryUrl"],
                                                     ConfigurationManager.AppSettings["RemoteName"],

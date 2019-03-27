@@ -57,6 +57,9 @@ namespace CrmSolution
                     else
                     {
                         string solutionFilePath = ConfigurationManager.AppSettings["RepositoryLocalDirectory"] + "solutions.txt";
+
+                        //todo: enable solutions file clear from crm portal
+                        PopulateHashset(solutionFilePath, new HashSet<string>());
                         foreach (var solutionFile in solutionFiles)
                         {
                             if (solutionFile.CheckInSolution)

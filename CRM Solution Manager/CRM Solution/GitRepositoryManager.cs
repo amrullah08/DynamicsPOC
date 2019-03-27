@@ -194,6 +194,9 @@ namespace GitDeploy
 
                     this.AddWebResourcesToRepository(webResources, repo);
 
+                    //todo: add extracted solution files to repository
+                    this.AddExtractedSolutionToRepository(solutionFileInfo, repo);
+
                     repo.Index.Add(solutionFilePath.Replace(this.localFolder.FullName, string.Empty));
 
                     var offset = DateTimeOffset.Now;
@@ -428,6 +431,45 @@ namespace GitDeploy
 
                 File.Copy(webResources + "\\" + webResournceName, commitFileLoc, true);
                 repo.Index.Add(commitFileLoc.Replace(this.localFolder.FullName, string.Empty));
+            }
+        }
+
+
+        /// <summary>
+        /// Method adds extracted solution resources to repository
+        /// </summary>
+        /// <param name="solutionFileInfo">Solution file information</param>
+        /// <param name="repo">repository to be committed</param>
+        private void AddExtractedSolutionToRepository(SolutionFileInfo solutionFileInfo, Repository repo)
+        {
+            this.CopyDirectory(this.localFolder.FullName + solutionFileInfo.SolutionUniqueName, solutionFileInfo.SolutionExtractionPath, repo);
+        }
+
+        /// <summary>
+        /// method copies one directory to another
+        /// </summary>
+        /// <param name="source">source directory</param>
+        /// <param name="destination">destination directory</param>
+        /// <param name="repo">repository</param>
+        public void CopyDirectory(string source, string destination, Repository repo)
+        {
+            String[] Files;
+
+            if (destination[destination.Length - 1] != Path.DirectorySeparatorChar)
+                destination += Path.DirectorySeparatorChar;
+            if (!Directory.Exists(destination)) Directory.CreateDirectory(destination);
+            Files = Directory.GetFileSystemEntries(source);
+            foreach (string Element in Files)
+            {
+                // Sub directories
+                if (Directory.Exists(Element))
+                    CopyDirectory(Element, destination + Path.GetFileName(Element), repo);
+                // Files in directory
+                else
+                {
+                    File.Copy(Element, destination + Path.GetFileName(Element), true);
+                    repo.Index.Add((destination + Path.GetFileName(Element)).Replace(this.localFolder.FullName, string.Empty));
+                }
             }
         }
     }

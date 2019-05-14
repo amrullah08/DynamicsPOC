@@ -365,7 +365,15 @@ namespace GitDeploy
 
             cloneOptions.BranchName = branchName;
 
-            Repository.Clone(url, workingDirectory, cloneOptions);
+            try
+            {
+                Repository.Clone(url, workingDirectory, cloneOptions);
+            }
+            catch
+            {
+                Console.WriteLine("One possibility for the exception could be check for branch or incorrect branch" + branchName);
+                throw;
+            }
         }
 
         /// <summary>

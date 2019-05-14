@@ -50,11 +50,11 @@ namespace CrmSolution
                         continue;
                     }
 
-                    if (!Directory.Exists(ConfigurationManager.AppSettings["RepositoryLocalDirectory"]))
-                    {
-                        Console.WriteLine("Repository local directory doesnt exists " + ConfigurationManager.AppSettings["RepositoryLocalDirectory"]);
-                    }
-                    else
+                    //if (!Directory.Exists(ConfigurationManager.AppSettings["RepositoryLocalDirectory"]))
+                    //{
+                    //    Console.WriteLine("Repository local directory doesnt exists " + ConfigurationManager.AppSettings["RepositoryLocalDirectory"]);
+                    //}
+                    //else
                     {
                         string solutionFilePath = ConfigurationManager.AppSettings["RepositoryLocalDirectory"] + "solutions.txt";
 
@@ -113,20 +113,27 @@ namespace CrmSolution
         /// <param name="hashSet">hash set to store release solution</param>
         private static void PopulateHashset(string solutionFilePath, HashSet<string> hashSet)
         {
-            if (File.Exists(solutionFilePath))
+            try
             {
-                string[] lines = File.ReadAllLines(solutionFilePath);
-                foreach (var line in lines)
+                if (File.Exists(solutionFilePath))
                 {
-                    if (!string.IsNullOrEmpty(line))
+                    string[] lines = File.ReadAllLines(solutionFilePath);
+                    foreach (var line in lines)
                     {
-                        hashSet.Add(line);
+                        if (!string.IsNullOrEmpty(line))
+                        {
+                            hashSet.Add(line);
+                        }
                     }
                 }
+                else
+                {
+                    File.Create(solutionFilePath);
+                }
             }
-            else
+            catch(Exception ex)
             {
-                File.Create(solutionFilePath);
+                Console.WriteLine(ex);
             }
         }
 

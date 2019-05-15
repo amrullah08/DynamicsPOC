@@ -50,15 +50,15 @@ namespace CrmSolution
                         continue;
                     }
 
-                    //if (!Directory.Exists(ConfigurationManager.AppSettings["RepositoryLocalDirectory"]))
-                    //{
-                    //    Console.WriteLine("Repository local directory doesnt exists " + ConfigurationManager.AppSettings["RepositoryLocalDirectory"]);
-                    //}
-                    //else
+                    ////if (!Directory.Exists(ConfigurationManager.AppSettings["RepositoryLocalDirectory"]))
+                    ////{
+                    ////    Console.WriteLine("Repository local directory doesnt exists " + ConfigurationManager.AppSettings["RepositoryLocalDirectory"]);
+                    ////}
+                    ////else
                     {
-                        string solutionFilePath = ConfigurationManager.AppSettings["RepositoryLocalDirectory"] + "solutions.txt";
+                        string solutionFilePath = RepositoryConfigurationConstants.LocalDirectory + "solutions.txt";
 
-                        //todo: enable solutions file clear from crm portal
+                        // todo: enable solutions file clear from crm portal
                         PopulateHashset(solutionFilePath, new HashSet<string>());
                         foreach (var solutionFile in solutionFiles)
                         {
@@ -96,10 +96,10 @@ namespace CrmSolution
                                                     ConfigurationManager.AppSettings["RemoteName"],
                                                     solutionFile.BranchName ?? ConfigurationManager.AppSettings["BranchName"],
                                                     Convert.ToBoolean(ConfigurationManager.AppSettings["CloneRepositoryAlways"]),
-                                                    ConfigurationManager.AppSettings["RepositoryLocalDirectory"],
-                                                    ConfigurationManager.AppSettings["RepositoryJsDirectory"],
-                                                    ConfigurationManager.AppSettings["RepositoryHtmlDirectory"],
-                                                    ConfigurationManager.AppSettings["RepositoryImagesDirectory"],
+                                                    RepositoryConfigurationConstants.LocalDirectory,
+                                                    RepositoryConfigurationConstants.JsDirectory,
+                                                    RepositoryConfigurationConstants.HtmlDirectory,
+                                                    RepositoryConfigurationConstants.ImagesDirectory,
                                                     solutionFile.OwnerName ?? committerName, 
                                                     authorEmail, 
                                                     committerName, 
@@ -131,7 +131,7 @@ namespace CrmSolution
                     File.Create(solutionFilePath);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }

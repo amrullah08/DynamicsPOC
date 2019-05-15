@@ -194,7 +194,7 @@ namespace GitDeploy
 
                     this.AddWebResourcesToRepository(webResources, repo);
 
-                    //todo: add extracted solution files to repository
+                    // todo: add extracted solution files to repository
                     this.AddExtractedSolutionToRepository(solutionFileInfo, repo);
 
                     repo.Index.Add(solutionFilePath.Replace(this.localFolder.FullName, string.Empty));
@@ -377,6 +377,43 @@ namespace GitDeploy
         }
 
         /// <summary>
+        /// method copies one directory to another
+        /// </summary>
+        /// <param name="source">source directory</param>
+        /// <param name="destination">destination directory</param>
+        /// <param name="repo">repository instance</param>
+        public void CopyDirectory(string source, string destination, Repository repo)
+        {
+            string[] files;
+
+            if (destination[destination.Length - 1] != Path.DirectorySeparatorChar)
+            {
+                destination += Path.DirectorySeparatorChar;
+            }
+
+            if (!Directory.Exists(destination))
+            {
+                Directory.CreateDirectory(destination);
+            }
+
+            files = Directory.GetFileSystemEntries(source);
+            foreach (string element in files)
+            {
+                // Sub directories
+                if (Directory.Exists(element))
+                {
+                    this.CopyDirectory(element, destination + Path.GetFileName(element), repo);
+                }
+                else
+                {
+                    // Files in directory
+                    File.Copy(element, destination + Path.GetFileName(element), true);
+                    repo.Index.Add((destination + Path.GetFileName(element)).Replace(this.localFolder.FullName, string.Empty));
+                }
+            }
+        }
+
+        /// <summary>
         /// Method empties folder
         /// </summary>
         /// <param name="directory">Directory to be emptied</param>
@@ -441,8 +478,7 @@ namespace GitDeploy
                 repo.Index.Add(commitFileLoc.Replace(this.localFolder.FullName, string.Empty));
             }
         }
-
-
+        
         /// <summary>
         /// Method adds extracted solution resources to repository
         /// </summary>
@@ -451,34 +487,6 @@ namespace GitDeploy
         private void AddExtractedSolutionToRepository(SolutionFileInfo solutionFileInfo, Repository repo)
         {
             this.CopyDirectory(this.localFolder.FullName + solutionFileInfo.SolutionUniqueName, solutionFileInfo.SolutionExtractionPath, repo);
-        }
-
-        /// <summary>
-        /// method copies one directory to another
-        /// </summary>
-        /// <param name="source">source directory</param>
-        /// <param name="destination">destination directory</param>
-        /// <param name="repo">repository</param>
-        public void CopyDirectory(string source, string destination, Repository repo)
-        {
-            String[] Files;
-
-            if (destination[destination.Length - 1] != Path.DirectorySeparatorChar)
-                destination += Path.DirectorySeparatorChar;
-            if (!Directory.Exists(destination)) Directory.CreateDirectory(destination);
-            Files = Directory.GetFileSystemEntries(source);
-            foreach (string Element in Files)
-            {
-                // Sub directories
-                if (Directory.Exists(Element))
-                    CopyDirectory(Element, destination + Path.GetFileName(Element), repo);
-                // Files in directory
-                else
-                {
-                    File.Copy(Element, destination + Path.GetFileName(Element), true);
-                    repo.Index.Add((destination + Path.GetFileName(Element)).Replace(this.localFolder.FullName, string.Empty));
-                }
-            }
         }
     }
 }

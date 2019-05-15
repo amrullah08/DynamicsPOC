@@ -98,7 +98,7 @@ namespace CrmSolution
         public Entity Solution { get; set; }
 
         /// <summary>
-        /// Gets or sets Git repo url
+        /// Gets or sets repo url
         /// </summary>
         public string GitRepoUrl { get; set; }
 
@@ -181,6 +181,7 @@ namespace CrmSolution
         /// <summary>
         /// Method extracts solution zip file using solution packager
         /// </summary>
+        /// <param name="solutionPackagerPath"> solution packager path</param>
         public void ProcessSolutionZipFile(string solutionPackagerPath)
         {
             if (!File.Exists(solutionPackagerPath))

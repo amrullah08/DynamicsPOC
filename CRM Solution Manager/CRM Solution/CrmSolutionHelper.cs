@@ -40,6 +40,7 @@ namespace CrmSolution
         /// <param name="organizationServiceUrl">organization service url</param>
         /// <param name="userName">user name</param>
         /// <param name="password">password token</param>
+        /// <param name="solutionPackagerPath">solution package path</param>
         public CrmSolutionHelper(string repositoryUrl, string branch, string organizationServiceUrl, string userName, string password, string solutionPackagerPath)
         {
             this.RepositoryUrl = repositoryUrl;

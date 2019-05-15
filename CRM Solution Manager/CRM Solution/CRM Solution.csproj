@@ -80,6 +80,7 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="RepositoryConfigurationConstants.cs" />
     <Compile Include="RepositoryHelper.cs" />
     <Compile Include="SolutionFileInfo.cs" />
     <Compile Include="SolutionManager.cs" />
@@ -92,6 +93,8 @@
     <None Include="packages.config">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </None>
+    <None Include="Settings.StyleCop" />
+    <None Include="StyleCop.Cache" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TextFile1.txt" />

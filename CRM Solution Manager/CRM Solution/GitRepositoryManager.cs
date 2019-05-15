@@ -486,7 +486,7 @@ namespace GitDeploy
         /// <param name="repo">repository to be committed</param>
         private void AddExtractedSolutionToRepository(SolutionFileInfo solutionFileInfo, Repository repo)
         {
-            this.CopyDirectory(this.localFolder.FullName + solutionFileInfo.SolutionUniqueName, solutionFileInfo.SolutionExtractionPath, repo);
+            this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.localFolder.FullName + solutionFileInfo.SolutionUniqueName, repo);
         }
     }
 }

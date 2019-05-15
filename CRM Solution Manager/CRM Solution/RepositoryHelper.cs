@@ -128,7 +128,7 @@ namespace CrmSolution
                 }
                 else
                 {
-                    File.Create(solutionFilePath);
+                    File.Create(solutionFilePath).Dispose();
                 }
             }
             catch (Exception ex)

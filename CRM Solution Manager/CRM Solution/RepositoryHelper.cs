@@ -71,7 +71,7 @@ namespace CrmSolution
                 }
                 catch (Exception ex)
                 {
-                    Console.Write(ex.Message);
+                    Console.Write(ex);
                     System.Threading.Thread.Sleep(timeOut);
                 }
 
@@ -165,6 +165,8 @@ namespace CrmSolution
                                                 string solutionFilePath, 
                                                 HashSet<string> hashSet)
         {
+            RepositoryConfigurationConstants.ResetLocalDirectory();
+
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushingToStatus;
             solutionFile.Update();
 

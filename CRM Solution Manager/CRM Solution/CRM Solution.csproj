@@ -89,6 +89,15 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="CoreTools\CrmSvcUtil.exe.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="CoreTools\LicenseTerms.docx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="CoreTools\SolutionPackager.exe.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="DevOps_1_0_0_0.zip" />
     <None Include="packages.config">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
@@ -97,6 +106,48 @@
     <None Include="StyleCop.Cache" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="CoreTools\CrmSvcUtil.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CoreTools\CrmSvcUtil.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CoreTools\Microsoft.Crm.Sdk.Proxy.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CoreTools\Microsoft.IdentityModel.Clients.ActiveDirectory.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CoreTools\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CoreTools\Microsoft.Rest.ClientRuntime.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CoreTools\Microsoft.Xrm.Sdk.Deployment.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CoreTools\Microsoft.Xrm.Sdk.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CoreTools\Microsoft.Xrm.Tooling.Connector.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CoreTools\Microsoft.Xrm.Tooling.CrmConnectControl.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CoreTools\Microsoft.Xrm.Tooling.Ui.Styles.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CoreTools\Newtonsoft.Json.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CoreTools\Other Redistributable.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CoreTools\SolutionPackager.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TextFile1.txt" />
   </ItemGroup>
   <ItemGroup />

@@ -131,6 +131,7 @@ namespace CrmSolution
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex);
                     querySampleSolutionResults.Entities[i][Constants.SourceControlQueueAttributeNameForStatus] = "Error +" + ex.Message;
                     serviceProxy.Update(querySampleSolutionResults.Entities[i]);
                 }

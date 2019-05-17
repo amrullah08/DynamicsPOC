@@ -36,7 +36,8 @@ namespace CrmSolution
                             ConfigurationManager.AppSettings["SolutionPackagerPath"]);
 
             int timeOut = Convert.ToInt32(ConfigurationManager.AppSettings["SleepTimeoutInMillis"]);
-            while (true)
+            
+            // while (true)
             {
                 HashSet<string> hashSet = new HashSet<string>();
 
@@ -47,7 +48,8 @@ namespace CrmSolution
                     if (!crmSolutionHelper.CanPush)
                     {
                         System.Threading.Thread.Sleep(timeOut);
-                        continue;
+
+                        // continue;
                     }
 
                     ////if (!Directory.Exists(ConfigurationManager.AppSettings["RepositoryLocalDirectory"]))

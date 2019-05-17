@@ -188,7 +188,7 @@ namespace CrmSolution
         {
             try
             {
-                var tempSolutionPackagerPath = Path.Combine((Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)), ConfigurationManager.AppSettings["SolutionPackagerRelativePath"]);
+                var tempSolutionPackagerPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), ConfigurationManager.AppSettings["SolutionPackagerRelativePath"]);
                 Console.WriteLine("Solution Packager Path " + tempSolutionPackagerPath);
 
                 if (File.Exists(tempSolutionPackagerPath))
@@ -196,11 +196,12 @@ namespace CrmSolution
                     solutionPackagerPath = tempSolutionPackagerPath;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
                 throw;
             }
+
             if (!File.Exists(solutionPackagerPath))
             {
                 Console.WriteLine("SolutionPackager.exe doesnot exists in the specified location : " + solutionPackagerPath);

@@ -83,7 +83,7 @@ namespace GitDeploy
         /// <summary>
         /// Every time repository will be cloned
         /// </summary>
-        private bool cloneAlways;
+        private readonly bool cloneAlways;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GitRepositoryManager" /> class.
@@ -202,8 +202,10 @@ namespace GitDeploy
                     var offset = DateTimeOffset.Now;
                     Signature author = new Signature(this.authorName, this.authorEmail, offset);
                     Signature committer = new Signature(this.committerName, this.committerEmail, offset);
-                    CommitOptions commitOptions = new CommitOptions();
-                    commitOptions.AllowEmptyCommit = false;
+                    CommitOptions commitOptions = new CommitOptions
+                    {
+                        AllowEmptyCommit = false
+                    };
 
                     var commit = repo.Commit(solutionFileInfo.Message, author, committer);
                     string commitIds = solutionFileInfo.Solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForCommitIds);

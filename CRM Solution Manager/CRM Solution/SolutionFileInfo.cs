@@ -9,7 +9,9 @@ namespace CrmSolution
 {
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.IO;
+    using System.Reflection;
     using CliWrap;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Client;
@@ -184,7 +186,11 @@ namespace CrmSolution
         /// <param name="solutionPackagerPath"> solution packager path</param>
         public void ProcessSolutionZipFile(string solutionPackagerPath)
         {
-            if (!File.Exists(solutionPackagerPath))
+            var tempSolutionPackagerPath = Path.Combine((Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)), ConfigurationManager.AppSettings["SolutionPackagerRelativePath"]);
+            if(File.Exists(solutionPackagerPath)){
+                solutionPackagerPath = tempSolutionPackagerPath;
+            }
+            else if (!File.Exists(solutionPackagerPath))
             {
                 Console.WriteLine("SolutionPackager.exe doesnot exists in the specified location : " + solutionPackagerPath);
                 return;

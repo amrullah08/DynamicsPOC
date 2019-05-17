@@ -113,7 +113,6 @@ namespace CrmSolution
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-                LocalDirectory = ConfigurationManager.AppSettings["RepositoryLocalDirectory"];
             }
         }
 

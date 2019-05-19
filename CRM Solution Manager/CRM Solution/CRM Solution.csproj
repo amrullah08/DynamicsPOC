@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="Constants.cs" />
     <Compile Include="CopySettings.cs" />
+    <Compile Include="CrmConstants.cs" />
     <Compile Include="CrmSolutionHelper.cs" />
     <Compile Include="GitRepositoryManager.cs">
       <ExcludeFromStyleCop>False</ExcludeFromStyleCop>

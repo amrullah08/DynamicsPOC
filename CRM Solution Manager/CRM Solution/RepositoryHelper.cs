@@ -28,14 +28,14 @@ namespace CrmSolution
         public static void TryUpdateToRepository(string solutionUniqueName, string committerName, string committerEmail, string authorEmail)
         {
             ICrmSolutionHelper crmSolutionHelper = new CrmSolutionHelper(
-                            ConfigurationManager.AppSettings["RepositoryUrl"],
-                            ConfigurationManager.AppSettings["BranchName"],
-                            ConfigurationManager.AppSettings["OrgServiceUrl"],
-                            ConfigurationManager.AppSettings["DynamicsUserName"],
-                            ConfigurationManager.AppSettings["DynamicsPassword"],
-                            ConfigurationManager.AppSettings["SolutionPackagerPath"]);
+                            RepositoryConfigurationConstants.RepositoryUrl,
+                            RepositoryConfigurationConstants.BranchName,
+                            CrmConstants.OrgServiceUrl,
+                            CrmConstants.DynamicsUserName,
+                            CrmConstants.DynamicsPassword,
+                            CrmConstants.SolutionPackagerPath);
 
-            int timeOut = Convert.ToInt32(ConfigurationManager.AppSettings["SleepTimeoutInMillis"]);
+            int timeOut = Convert.ToInt32(CrmConstants.SleepTimeoutInMillis);
             
             // while (true)
             {
@@ -92,12 +92,12 @@ namespace CrmSolution
         private static GitDeploy.GitRepositoryManager GetRepositoryManager(string committerName, string committerEmail, string authorEmail, SolutionFileInfo solutionFile)
         {
             return new GitDeploy.GitRepositoryManager(
-                                                    ConfigurationManager.AppSettings["GitUserName"],
-                                                    ConfigurationManager.AppSettings["GitPassword"],
-                                                    ConfigurationManager.AppSettings["RepositoryUrl"],
-                                                    ConfigurationManager.AppSettings["RemoteName"],
-                                                    solutionFile.BranchName ?? ConfigurationManager.AppSettings["BranchName"],
-                                                    Convert.ToBoolean(ConfigurationManager.AppSettings["CloneRepositoryAlways"]),
+                                                    RepositoryConfigurationConstants.GitUserName,
+                                                    RepositoryConfigurationConstants.GitUserPassword,
+                                                    RepositoryConfigurationConstants.RepositoryUrl,
+                                                    RepositoryConfigurationConstants.RepositoryRemoteName,
+                                                    solutionFile.BranchName ?? RepositoryConfigurationConstants.BranchName,
+                                                    Convert.ToBoolean(RepositoryConfigurationConstants.CloneRepositoryAlways),
                                                     RepositoryConfigurationConstants.LocalDirectory,
                                                     RepositoryConfigurationConstants.JsDirectory,
                                                     RepositoryConfigurationConstants.HtmlDirectory,

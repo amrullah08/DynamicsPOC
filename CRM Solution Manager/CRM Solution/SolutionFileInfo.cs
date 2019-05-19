@@ -188,7 +188,7 @@ namespace CrmSolution
         {
             try
             {
-                var tempSolutionPackagerPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), ConfigurationManager.AppSettings["SolutionPackagerRelativePath"]);
+                var tempSolutionPackagerPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), CrmConstants.SolutionPackagerRelativePath);
                 Console.WriteLine("Solution Packager Path " + tempSolutionPackagerPath);
 
                 if (File.Exists(tempSolutionPackagerPath))

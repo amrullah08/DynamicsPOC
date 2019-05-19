@@ -290,7 +290,7 @@ namespace GitDeploy
             string remoteName = this.remoteName, branchName = this.branchName;
             bool cloneAlways = this.cloneAlways;
             string url = this.repoUrl;
-            CredentialsHandler crednt = (curl, usernameFromUrl, types) => this.credentials;
+            Credentials crednt(string curl, string usernameFromUrl, SupportedCredentialTypes types) => this.credentials;
 
             string workingDirectory = this.localFolder.FullName;
             if (Directory.Exists(workingDirectory))

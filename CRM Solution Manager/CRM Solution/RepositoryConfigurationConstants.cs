@@ -65,6 +65,72 @@ namespace CrmSolution
         }
 
         /// <summary>
+        /// Gets repository url
+        /// </summary>
+        public static string RepositoryUrl
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["RepositoryUrl"];
+            }
+        }
+
+        /// <summary>
+        /// Gets repository url
+        /// </summary>
+        public static string CloneRepositoryAlways
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["CloneRepositoryAlways"];
+            }
+        }
+
+        /// <summary>
+        /// Gets repository url
+        /// </summary>
+        public static string GitUserName
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["GitUserName"];
+            }
+        }
+
+        /// <summary>
+        /// Gets repository url
+        /// </summary>
+        public static string GitUserPassword
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["GitPassword"];
+            }
+        }
+
+        /// <summary>
+        /// Gets repository remote name
+        /// </summary>
+        public static string RepositoryRemoteName
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["RemoteName"];
+            }
+        }
+
+        /// <summary>
+        /// Gets Repository branch name
+        /// </summary>
+        public static string BranchName
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["BranchName"];
+            }
+        }
+
+        /// <summary>
         /// method resets local directory
         /// </summary>
         public static void ResetLocalDirectory()
@@ -72,8 +138,7 @@ namespace CrmSolution
             // LocalDirectory = @"\\?\" + Path.GetTempFileName().Replace(".","") + "devopsTmp\\";
             LocalDirectory = Path.GetTempFileName().Replace(".", string.Empty) + "devopsTmp\\";
             CrmSolutionHelper.CreateEmptyFolder(LocalDirectory);
-            
-                SubstTempDirectory();
+            SubstTempDirectory();
         }
 
         /// <summary>
@@ -88,9 +153,11 @@ namespace CrmSolution
                     DeleteSubstTempDirectory();
                 }
 
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.FileName = "subst";
-                startInfo.Arguments = SubstDrive + ": '" + LocalDirectory + "'";
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = "subst",
+                    Arguments = SubstDrive + ": '" + LocalDirectory + "'"
+                };
                 Process.Start(startInfo);
 
                 Process process = new Process();
@@ -123,9 +190,11 @@ namespace CrmSolution
         {
             try
             {
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.FileName = "subst";
-                startInfo.Arguments = SubstDrive + ": '" + LocalDirectory + "'";
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = "subst",
+                    Arguments = SubstDrive + ": '" + LocalDirectory + "'"
+                };
                 Process.Start(startInfo);
 
                 Process process = new Process();

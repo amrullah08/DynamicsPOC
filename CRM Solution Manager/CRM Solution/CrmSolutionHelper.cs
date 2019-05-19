@@ -30,7 +30,7 @@ namespace CrmSolution
         /// <summary>
         /// Organization service uri
         /// </summary>
-        private Uri serviceUri;
+        private readonly Uri serviceUri;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CrmSolutionHelper" /> class.
@@ -228,7 +228,6 @@ namespace CrmSolution
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportStatus;
             solutionFile.Update();
 
-            string tempFolder = Path.GetTempFileName();
             ExportSolutionRequest exportRequest = new ExportSolutionRequest
             {
                 Managed = false,

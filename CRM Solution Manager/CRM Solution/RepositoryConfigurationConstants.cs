@@ -32,6 +32,18 @@ namespace CrmSolution
         }
 
         /// <summary>
+        /// Gets repository release directory
+        /// </summary>
+        public static string SolutionFolder
+        {
+            get
+            {
+                return Path.Combine(LocalDirectory, ConfigurationManager.AppSettings["RepositorySolutionFolder"]);
+            }
+        }
+
+
+        /// <summary>
         /// Gets repository script directory
         /// </summary>
         public static string JsDirectory

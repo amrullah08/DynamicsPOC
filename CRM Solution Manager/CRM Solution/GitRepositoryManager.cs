@@ -81,6 +81,11 @@ namespace GitDeploy
         private readonly DirectoryInfo webResourcesHtmllocalFolder;
 
         /// <summary>
+        /// solution local folder
+        /// </summary>
+        private readonly DirectoryInfo solutionlocalFolder;
+
+        /// <summary>
         /// Every time repository will be cloned
         /// </summary>
         private readonly bool cloneAlways;
@@ -98,6 +103,7 @@ namespace GitDeploy
         /// <param name="javascriptLocalFolder">The full path to java script local folder.</param>
         /// <param name="htmlLocalFolder">The full path to html local folder.</param>
         /// <param name="imagesLocalFolder">The full path to images local folder.</param>
+        /// <param name="solutionLocalFolder">The full path to solution local folder.</param>
         /// <param name="authorname">author name</param>
         /// <param name="authoremail">author email</param>
         /// <param name="committername">committer name</param>
@@ -113,6 +119,7 @@ namespace GitDeploy
             string javascriptLocalFolder,
             string htmlLocalFolder,
             string imagesLocalFolder,
+            string solutionLocalFolder,
             string authorname,
             string authoremail,
             string committername,
@@ -123,6 +130,7 @@ namespace GitDeploy
             this.webResourcesJsFolder = new DirectoryInfo(javascriptLocalFolder);
             this.webResourcesHtmllocalFolder = new DirectoryInfo(htmlLocalFolder);
             this.webResourcesImageslocalFolder = new DirectoryInfo(imagesLocalFolder);
+            this.solutionlocalFolder = new DirectoryInfo(solutionLocalFolder);
 
             this.credentials = new UsernamePasswordCredentials
             {
@@ -159,8 +167,8 @@ namespace GitDeploy
         {
             try
             {
-                Console.WriteLine("Committing solutions");
-                string file = this.localFolder + solutionFileInfo.SolutionFileZipName;
+                Console.WriteLine("Committing solutions");                
+                string file = this.solutionlocalFolder + solutionFileInfo.SolutionFileZipName;                
                 File.Copy(solutionFileInfo.SolutionFilePath, file, true);
                 string webResources = solutionFileInfo.SolutionExtractionPath + "\\WebResources";
 
@@ -168,7 +176,7 @@ namespace GitDeploy
                 {
                     if (string.IsNullOrEmpty(file))
                     {
-                        var files = this.localFolder.GetFiles("*.zip").Select(f => f.FullName);
+                        var files = this.solutionlocalFolder.GetFiles("*.zip").Select(f => f.FullName);
 
                         {
                             foreach (var f in files)
@@ -298,7 +306,7 @@ namespace GitDeploy
                 if (!cloneAlways)
                 {
                     try
-                    {
+                    {                        
                         using (var repo = new Repository(workingDirectory))
                         {
                             repo.Reset(ResetMode.Hard);
@@ -488,7 +496,7 @@ namespace GitDeploy
         /// <param name="repo">repository to be committed</param>
         private void AddExtractedSolutionToRepository(SolutionFileInfo solutionFileInfo, Repository repo)
         {
-            this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.localFolder.FullName + solutionFileInfo.SolutionUniqueName, repo);
+            this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.solutionlocalFolder.FullName + solutionFileInfo.SolutionUniqueName, repo);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace CrmSolution
     /// <summary>
     /// Repository helper
     /// </summary>
-    internal class RepositoryHelper
+    public class RepositoryHelper
     {
         /// <summary>
         /// Method tries to update repository
@@ -102,6 +102,7 @@ namespace CrmSolution
                                                     RepositoryConfigurationConstants.JsDirectory,
                                                     RepositoryConfigurationConstants.HtmlDirectory,
                                                     RepositoryConfigurationConstants.ImagesDirectory,
+                                                    RepositoryConfigurationConstants.SolutionFolder,
                                                     solutionFile.OwnerName ?? committerName, 
                                                     authorEmail, 
                                                     committerName, 

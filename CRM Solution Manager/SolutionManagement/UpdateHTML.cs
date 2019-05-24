@@ -23,9 +23,38 @@ namespace SolutionManagement
         /// <param name="tracingService">Tracing Service to trace error</param>
         public static void UpdateHTMLWebResource(IOrganizationService service, Entity sourceControlQueue, ITracingService tracingService)
         {
-            string commitId = sourceControlQueue.Attributes["syed_commitids"].ToString();
-            Entity webResource = RetrieveSolutions.RetrieveHTML(service, tracingService);
-            RetrieveSolutions.UpdateHTMLContent(service, webResource, commitId, tracingService);
+            if (sourceControlQueue.Attributes.Contains("syed_commitids"))
+            {
+                string commitId = sourceControlQueue.Attributes["syed_commitids"].ToString();
+                Entity webResource = RetrieveSolutions.RetrieveHTML(service, tracingService);
+                RetrieveSolutions.UpdateHTMLContent(service, webResource, commitId, tracingService);
+            }
+        }
+
+        /// <summary>
+        /// To update comma separated solution list in Dynamic Source Control entity.
+        /// </summary>
+        /// <param name="service">Organization service</param>
+        /// <param name="sourceControlQueue">Dynamic Source Control entity GUID</param>
+        /// <param name="tracingService">Tracing Service to trace error</param>
+        public static void DeleteSolutionDetail(IOrganizationService service, Entity sourceControlQueue, ITracingService tracingService)
+        {
+            if (sourceControlQueue.Attributes.Contains("syed_mergesolutions"))
+            {
+                bool mergeSolutions = (bool)sourceControlQueue.Attributes["syed_mergesolutions"];
+                if (mergeSolutions == false)
+                {
+                    EntityCollection associatedRecordList = RetrieveSolutions.AddListToSolution(service, sourceControlQueue.Id, tracingService);
+                    if (associatedRecordList.Entities.Count > 0)
+                    {
+                        foreach (Entity item in associatedRecordList.Entities)
+                        {
+                            Guid solutionID = new Guid(item.Attributes["syed_solutiondetailid"].ToString());
+                            service.Delete("syed_solutiondetail", solutionID);
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -39,21 +68,21 @@ namespace SolutionManagement
             IOrganizationServiceFactory factory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
             IOrganizationService service = factory.CreateOrganizationService(context.UserId);
 
-            Entity sourceControlQueue = null;
+            Entity postSourceControlQueue = null;
 
             if (context.InputParameters != null)
             {
                 if (context.MessageName.ToLower() == "update")
                 {
-                    // Get Target Entity
-                    if (context.InputParameters.Contains("Target") && context.InputParameters["Target"] is Entity)
+                    if (context.PostEntityImages != null && context.PostEntityImages.Contains("PostImage"))
                     {
-                        sourceControlQueue = (Entity)context.InputParameters["Target"];
+                        postSourceControlQueue = (Entity)context.PostEntityImages["PostImage"];
                     }
 
-                    if (sourceControlQueue.LogicalName == "syed_sourcecontrolqueue")
+                    if (postSourceControlQueue.LogicalName == "syed_sourcecontrolqueue")
                     {
-                        UpdateHTMLWebResource(service, sourceControlQueue, tracingService);
+                        DeleteSolutionDetail(service, postSourceControlQueue, tracingService);
+                        UpdateHTMLWebResource(service, postSourceControlQueue, tracingService);
                     }
                 }
             }

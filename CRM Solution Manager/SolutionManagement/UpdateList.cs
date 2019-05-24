@@ -43,7 +43,7 @@ namespace SolutionManagement
             IOrganizationServiceFactory factory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
             IOrganizationService service = factory.CreateOrganizationService(context.UserId);
 
-            Entity sourceControlQueue = null;
+            Entity solutionDetail = null;
 
             if (context.InputParameters != null)
             {
@@ -51,13 +51,13 @@ namespace SolutionManagement
                 {
                     if (context.PostEntityImages != null && context.PostEntityImages.Contains("PostImage"))
                     {
-                        sourceControlQueue = (Entity)context.PostEntityImages["PostImage"];
+                        solutionDetail = (Entity)context.PostEntityImages["PostImage"];
 
-                        if (sourceControlQueue != null)
+                        if (solutionDetail != null)
                         {
-                            if (sourceControlQueue.LogicalName == "syed_solutiondetail")
+                            if (solutionDetail.LogicalName == "syed_solutiondetail")
                             {
-                                UpdateListToSourceControl(service, sourceControlQueue, tracingService);
+                                UpdateListToSourceControl(service, solutionDetail, tracingService);
                             }
                         }
                     }
@@ -67,13 +67,13 @@ namespace SolutionManagement
                 {
                     if (context.PreEntityImages != null && context.PreEntityImages.Contains("PreImage"))
                     {
-                        sourceControlQueue = (Entity)context.PreEntityImages["PreImage"];
+                        solutionDetail = (Entity)context.PreEntityImages["PreImage"];
 
-                        if (sourceControlQueue != null)
+                        if (solutionDetail != null)
                         {
-                            if (sourceControlQueue.LogicalName == "syed_solutiondetail")
+                            if (solutionDetail.LogicalName == "syed_solutiondetail")
                             {
-                                UpdateListToSourceControl(service, sourceControlQueue, tracingService);
+                                UpdateListToSourceControl(service, solutionDetail, tracingService);
                             }
                         }
                     }

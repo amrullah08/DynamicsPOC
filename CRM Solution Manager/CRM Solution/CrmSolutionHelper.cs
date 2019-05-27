@@ -52,7 +52,7 @@ namespace CrmSolution
             this.clientCredentials.UserName.Password = password;
             this.InitializeOrganizationService();
         }
-        
+
         /// <summary>
         /// Gets or sets Repository url
         /// </summary>
@@ -115,6 +115,7 @@ namespace CrmSolution
                     {
                         try
                         {
+                            this.ExportListOfSolutionsToBeMerged(serviceProxy, info);
                             this.ExportSolution(serviceProxy, info);
                             solutionFileInfos.Add(info);
                             if (info.CheckInSolution)
@@ -248,6 +249,40 @@ namespace CrmSolution
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportSuccessful;
             solutionFile.Update();
             solutionFile.ProcessSolutionZipFile(this.SolutionPackagerPath);
+        }
+
+        private void ExportListOfSolutionsToBeMerged(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
+        {
+            try
+            {
+                if (solutionFile.SolutionsToBeMerged.Count > 0)
+                {
+                    foreach (string solutionNAme in solutionFile.SolutionsToBeMerged)
+                    {
+                        ExportSolutionRequest exportRequest = new ExportSolutionRequest
+                        {
+                            Managed = false,
+                            SolutionName = solutionNAme
+                        };
+
+                        Console.WriteLine("Downloading Solution " + solutionNAme);
+                        ExportSolutionResponse exportResponse = (ExportSolutionResponse)serviceProxy.Execute(exportRequest);
+
+                        // Handles the response
+                        byte[] downloadedSolutionFile = exportResponse.ExportSolutionFile;
+                        solutionFile.SolutionFilePath = Path.GetTempFileName();
+                        File.WriteAllBytes(solutionFile.SolutionFilePath, downloadedSolutionFile);
+
+                        string solutionExport = string.Format("Solution Successfully Exported to {0}", solutionNAme);
+                        Console.WriteLine(solutionExport);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
         }
     }
 }

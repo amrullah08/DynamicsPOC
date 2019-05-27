@@ -265,7 +265,7 @@ namespace CrmSolution
                             SolutionName = solutionNAme
                         };
 
-                        Console.WriteLine("Downloading Solution " + solutionNAme);
+                        Console.WriteLine("Downloading Solution To be Merged: " + solutionNAme);
                         ExportSolutionResponse exportResponse = (ExportSolutionResponse)serviceProxy.Execute(exportRequest);
 
                         // Handles the response

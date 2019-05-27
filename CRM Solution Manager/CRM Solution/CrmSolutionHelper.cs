@@ -111,12 +111,12 @@ namespace CrmSolution
                 try
                 {
                     var infos = SolutionFileInfo.GetSolutionFileInfo(querySampleSolutionResults.Entities[i], serviceProxy);
+                    this.ExportListOfSolutionsToBeMerged(serviceProxy, infos[0]);
                     foreach (var info in infos)
                     {
                         try
                         {
-                            this.ExportListOfSolutionsToBeMerged(serviceProxy, info);
-                            this.ExportSolution(serviceProxy, info);
+                            this.ExportMasterSolution(serviceProxy, info);
                             solutionFileInfos.Add(info);
                             if (info.CheckInSolution)
                             {
@@ -212,7 +212,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <param name="solutionFile">solution file info</param>
-        private void ExportSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
+        private void ExportMasterSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
         {
             if (solutionFile.SolutionsToBeMerged.Count > 0)
             {
@@ -229,23 +229,9 @@ namespace CrmSolution
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportStatus;
             solutionFile.Update();
 
-            ExportSolutionRequest exportRequest = new ExportSolutionRequest
-            {
-                Managed = false,
-                SolutionName = solutionFile.SolutionUniqueName
-            };
-
-            Console.WriteLine("Downloading Solution " + solutionFile.SolutionUniqueName);
-            ExportSolutionResponse exportResponse = (ExportSolutionResponse)serviceProxy.Execute(exportRequest);
-
-            // Handles the response
-            byte[] downloadedSolutionFile = exportResponse.ExportSolutionFile;
-            solutionFile.SolutionFilePath = Path.GetTempFileName();
-            File.WriteAllBytes(solutionFile.SolutionFilePath, downloadedSolutionFile);
-
-            string solutionExport = string.Format("Solution Successfully Exported to {0}", solutionFile.SolutionUniqueName);
-            Console.WriteLine(solutionExport);
-
+            
+            this.ExportSolution(serviceProxy, solutionFile, solutionFile.SolutionUniqueName, "Downloading Master Solution: ");
+            
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportSuccessful;
             solutionFile.Update();
             solutionFile.ProcessSolutionZipFile(this.SolutionPackagerPath);
@@ -259,22 +245,7 @@ namespace CrmSolution
                 {
                     foreach (string solutionNAme in solutionFile.SolutionsToBeMerged)
                     {
-                        ExportSolutionRequest exportRequest = new ExportSolutionRequest
-                        {
-                            Managed = false,
-                            SolutionName = solutionNAme
-                        };
-
-                        Console.WriteLine("Downloading Solution To be Merged: " + solutionNAme);
-                        ExportSolutionResponse exportResponse = (ExportSolutionResponse)serviceProxy.Execute(exportRequest);
-
-                        // Handles the response
-                        byte[] downloadedSolutionFile = exportResponse.ExportSolutionFile;
-                        solutionFile.SolutionFilePath = Path.GetTempFileName();
-                        File.WriteAllBytes(solutionFile.SolutionFilePath, downloadedSolutionFile);
-
-                        string solutionExport = string.Format("Solution Successfully Exported to {0}", solutionNAme);
-                        Console.WriteLine(solutionExport);
+                        ExportSolution(serviceProxy, solutionFile, solutionNAme, "Downloading solutions to be merged: ");
                     }
                 }
             }
@@ -282,7 +253,33 @@ namespace CrmSolution
             {
                 Console.WriteLine(ex.Message);
             }
+        }
 
+        private void ExportSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile, string solutionNAme, string message)
+        {
+            try
+            {
+                ExportSolutionRequest exportRequest = new ExportSolutionRequest
+                {
+                    Managed = false,
+                    SolutionName = solutionNAme
+                };
+
+                Console.WriteLine(message + solutionNAme);
+                ExportSolutionResponse exportResponse = (ExportSolutionResponse)serviceProxy.Execute(exportRequest);
+
+                // Handles the response
+                byte[] downloadedSolutionFile = exportResponse.ExportSolutionFile;
+                solutionFile.SolutionFilePath = Path.GetTempFileName();
+                File.WriteAllBytes(solutionFile.SolutionFilePath, downloadedSolutionFile);
+
+                string solutionExport = string.Format("Solution Successfully Exported to {0}", solutionNAme);
+                Console.WriteLine(solutionExport);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 }

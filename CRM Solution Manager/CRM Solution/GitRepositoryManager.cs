@@ -205,7 +205,7 @@ namespace GitDeploy
                     // todo: add extracted solution files to repository
                     this.AddExtractedSolutionToRepository(solutionFileInfo, repo);
 
-                    ////repo.Index.Add(solutionFilePath.Replace(this.localFolder.FullName, string.Empty));
+                    repo.Index.Add(solutionFilePath.Replace(this.localFolder.FullName, string.Empty));
 
                     var offset = DateTimeOffset.Now;
                     Signature author = new Signature(this.authorName, this.authorEmail, offset);

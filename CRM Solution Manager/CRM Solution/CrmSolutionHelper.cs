@@ -110,7 +110,7 @@ namespace CrmSolution
             {
                 try
                 {
-                    var infos = SolutionFileInfo.GetSolutionFileInfo(querySampleSolutionResults.Entities[i], serviceProxy);
+                    var infos = SolutionFileInfo.GetSolutionFileInfo(querySampleSolutionResults.Entities[i], serviceProxy);                    
                     this.ExportListOfSolutionsToBeMerged(serviceProxy, infos[0]);
                     foreach (var info in infos)
                     {
@@ -208,7 +208,7 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Method exports solution
+        /// Method merges solution components into Master solution and exports it alongwith unzip file
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <param name="solutionFile">solution file info</param>
@@ -237,10 +237,13 @@ namespace CrmSolution
             solutionFile.ProcessSolutionZipFile(this.SolutionPackagerPath);
         }
 
+        /// <summary>
+        /// Method exports each of solution to be merged
+        /// </summary>
+        /// <param name="serviceProxy">organization service proxy</param>
+        /// <param name="solutionFile">solution file info</param>
         private void ExportListOfSolutionsToBeMerged(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
-        {
-            try
-            {
+        {   
                 if (solutionFile.SolutionsToBeMerged.Count > 0)
                 {
                     foreach (string solutionNAme in solutionFile.SolutionsToBeMerged)
@@ -248,24 +251,26 @@ namespace CrmSolution
                         ExportSolution(serviceProxy, solutionFile, solutionNAme, "Downloading solutions to be merged: ");
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
         }
 
-        private void ExportSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile, string solutionNAme, string message)
+        /// <summary>
+        /// Method exports solution
+        /// </summary>
+        /// <param name="serviceProxy">organization service proxy</param>
+        /// <param name="solutionFile">solution file info</param>
+        /// <param name="solutionName">solution name</param>
+        /// <param name="message">message to be printed on console</param>
+        private void ExportSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile, string solutionName, string message)
         {
             try
             {
                 ExportSolutionRequest exportRequest = new ExportSolutionRequest
                 {
                     Managed = false,
-                    SolutionName = solutionNAme
+                    SolutionName = solutionName
                 };
 
-                Console.WriteLine(message + solutionNAme);
+                Console.WriteLine(message + solutionName);
                 ExportSolutionResponse exportResponse = (ExportSolutionResponse)serviceProxy.Execute(exportRequest);
 
                 // Handles the response
@@ -273,12 +278,13 @@ namespace CrmSolution
                 solutionFile.SolutionFilePath = Path.GetTempFileName();
                 File.WriteAllBytes(solutionFile.SolutionFilePath, downloadedSolutionFile);
 
-                string solutionExport = string.Format("Solution Successfully Exported to {0}", solutionNAme);
+                string solutionExport = string.Format("Solution Successfully Exported to {0}", solutionName);
                 Console.WriteLine(solutionExport);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                throw ex;
             }
         }
     }

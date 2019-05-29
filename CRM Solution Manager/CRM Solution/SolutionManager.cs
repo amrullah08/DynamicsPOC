@@ -22,7 +22,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
     /// Class merges components of solution to specified solution
     /// </summary>
     internal class SolutionManager
-    {
+    {        
         /// <summary>
         /// organization service
         /// </summary>
@@ -149,10 +149,10 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
         /// <param name="settings">copy settings</param>
         private void CopyComponents(CopySettings settings)
         {
-            var components = this.RetrieveComponentsFromSolutions(settings.SourceSolutions.Select(s => s.Id).ToList(), settings.ComponentsTypes);
+            var components = this.RetrieveComponentsFromSolutions(settings.SourceSolutions.Select(s => s.Id).ToList(), settings.ComponentsTypes);            
 
             foreach (var target in settings.TargetSolutions)
-            {                
+            {
                 foreach (var component in components)
                 {
                     var request = new AddSolutionComponentRequest
@@ -171,19 +171,19 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                             var retrievedEntity = (RetrieveEntityResponse)service.Execute(entityReq);
                             Console.WriteLine("Component Name: " + retrievedEntity.EntityMetadata.LogicalName);
                             Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                            Console.WriteLine("Component Id: " + component.Id);
-                            Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);                            
-                            Console.WriteLine("Target Solution: " + target.Attributes["friendlyname"]);                            
+                            Console.WriteLine("Component Id: " + component.Id);                            
+                            Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
+                            Console.WriteLine("Target Solution: " + target.Attributes["friendlyname"]);
                             break;
 
                         case Constants.WebResources:
                             var webresource = new RetrieveRequest();
                             webresource.Target = new EntityReference("webresource", component.GetAttributeValue<Guid>("objectid"));
-                            webresource.ColumnSet = new ColumnSet(true);                            
+                            webresource.ColumnSet = new ColumnSet(true);
                             var retrievedWebresource = (RetrieveResponse)service.Execute(webresource);
                             Console.WriteLine("Component Name: " + (retrievedWebresource.Entity.Contains("name") ? retrievedWebresource.Entity.Attributes["name"] : string.Empty));
                             Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                            Console.WriteLine("Component Id: " + component.Id);                            
+                            Console.WriteLine("Component Id: " + component.Id);
                             Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
                             Console.WriteLine("Target Solution: " + target.Attributes["friendlyname"]);
                             break;
@@ -207,7 +207,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                             Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
                             Console.WriteLine("Component Id: " + component.Id);
                             Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                            Console.WriteLine("Target Solution: " + target.Attributes["friendlyname"]);                            
+                            Console.WriteLine("Target Solution: " + target.Attributes["friendlyname"]);
                             break;
 
                         case Constants.DisplayString:
@@ -451,8 +451,9 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                             break;
 
                         default:
+                            Console.WriteLine("Unable to copy component type: " + component.FormattedValues["componenttype"] + " and objectID: " + component.Attributes["objectid"].ToString());
                             break;
-                    }                    
+                    }
 
                     request.DoNotIncludeSubcomponents =
                         component.GetAttributeValue<OptionSetValue>("rootcomponentbehavior")?.Value == 1 ||
@@ -460,7 +461,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
 
                     this.service.Execute(request);
                 }
-            }
+            }            
         }
 
         /// <summary>

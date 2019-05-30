@@ -10,89 +10,86 @@ namespace SolutionManagement
     using System;
     using System.Collections;
     using Microsoft.Xrm.Sdk;
-    
+    using SolutionConstants;
+
     /// <summary>
     /// Class that contains execute functions in CRM
     /// </summary>
     public class ExecuteOperations
     {
         /// <summary>
-        /// To Create Records in Master Solution
+        /// Method creates Master Solution Record
         /// </summary>
         /// <param name="service">Organization service</param>
-        /// <param name="masterSolution">Master Solution</param>
-        public static void CreateRecords(IOrganizationService service, Entity masterSolution)
+        /// <param name="solution">CRM Solution</param>
+        public static void CreateMasterSolution(IOrganizationService service, Solution solution)
         {
-            Entity masterSolutionUpdate = new Entity("syed_mastersolutions");
-            masterSolutionUpdate["syed_name"] = masterSolution.Attributes["friendlyname"].ToString();
-            masterSolutionUpdate["syed_friendlyname"] = masterSolution.Attributes["friendlyname"].ToString();
-            masterSolutionUpdate["syed_publisher"] = ((EntityReference)masterSolution.Attributes["publisherid"]).Name;
-            masterSolutionUpdate["syed_listofsolutions"] = masterSolution.Attributes["uniquename"].ToString();
-            masterSolutionUpdate["syed_solutionid"] = masterSolution.Id.ToString();
-            masterSolutionUpdate["syed_solutioninstalledon"] = masterSolution.Attributes["installedon"];
-            masterSolutionUpdate["syed_version"] = masterSolution.Attributes["version"].ToString();
-            masterSolutionUpdate["syed_ismanaged"] = masterSolution.Attributes["ismanaged"];
+            syed_mastersolutions masterSolutionUpdate = new syed_mastersolutions();
+            masterSolutionUpdate.syed_name = solution.FriendlyName;
+            masterSolutionUpdate.syed_FriendlyName = solution.FriendlyName;
+            masterSolutionUpdate.syed_Publisher = solution.PublisherId.Name;
+            masterSolutionUpdate.syed_ListofSolutions = solution.UniqueName.ToString();
+            masterSolutionUpdate.syed_SolutionId = solution.Id.ToString();
+            masterSolutionUpdate.syed_SolutionInstalledOn = solution.InstalledOn;
+            masterSolutionUpdate.syed_Version = solution.Version;
+            masterSolutionUpdate.syed_IsManaged = solution.IsManaged;
             service.Create(masterSolutionUpdate);
         }
 
         /// <summary>
-        /// To Update comma separated List of solutions unique name to Dynamic Source Control Entity.
+        /// Method to get comma separated values obtained by converting list of solutions to comma separated list 
+        /// and these indicates list of solutions to be merged.
         /// </summary>
         /// <param name="service">Organization service</param>
-        /// <param name="sourceControlId">Guid of Dynamic Source Control</param>
+        /// <param name="associatedRecordList">Merge Solution Records</param>
         /// <param name="tracingService">Tracing Service to trace error</param>
-        public static void AddSolutionToList(IOrganizationService service, Guid sourceControlId, ITracingService tracingService)
+        /// <returns>returns comma separated list of solutions to be merged</returns>
+        public static string GetCommaSeparatedListofSolution(IOrganizationService service, EntityCollection associatedRecordList, ITracingService tracingService)
         {
-            EntityCollection associatedRecordList = RetrieveSolutions.AddListToSolution(service, sourceControlId, tracingService);
-            Entity sourceControlQueue = new Entity("syed_sourcecontrolqueue");
             string uniqueName = string.Empty;
             ArrayList uniqueArray = new ArrayList();
 
             if (associatedRecordList.Entities.Count > 0)
             {
-                foreach (Entity item in associatedRecordList.Entities)
+                foreach (syed_mergesolutions mergesolutions in associatedRecordList.Entities)
                 {
-                    if (item.Attributes.Contains("syed_listofsolutions") && item.Attributes["syed_listofsolutions"] != null)
+                    if (mergesolutions.syed_UniqueName != null)
                     {
-                        uniqueArray.Add(item.Attributes["syed_listofsolutions"].ToString());
+                        uniqueArray.Add(mergesolutions.syed_UniqueName.ToString());
                     }
                 }
             }
 
             uniqueName = string.Join(",", uniqueArray.ToArray());
-            sourceControlQueue["syed_sourcecontrolqueueid"] = sourceControlId;
-            sourceControlQueue["syed_sourcensolutions"] = uniqueName;
-            service.Update(sourceControlQueue);
+            return uniqueName;
         }
 
         /// <summary>
-        /// To Update comma separated Master solutions unique name to Dynamic Source Control Entity.
+        /// Method to get comma separated values obtained by converting list of master to comma separated list, 
+        /// and these indicates list of master to be merged.
         /// </summary>
         /// <param name="service">Organization service</param>
-        /// <param name="sourceControlId">Guid of Dynamic Source Control</param>
+        /// <param name="associatedRecordList">Solution Details Records</param>
         /// <param name="tracingService">Tracing Service to trace error</param>
-        public static void AddSolutionToMaster(IOrganizationService service, Guid sourceControlId, ITracingService tracingService)
+        /// <returns>returns comma separated master solutions to be merged</returns>
+        public static string GetCommaSeparatedListofMaster(IOrganizationService service, EntityCollection associatedRecordList, ITracingService tracingService)
         {
-            EntityCollection associatedRecordList = RetrieveSolutions.AddListToMaster(service, sourceControlId, tracingService);
-            Entity sourceControlQueue = new Entity("syed_sourcecontrolqueue");
             string uniqueName = string.Empty;
             ArrayList uniqueArray = new ArrayList();
 
             if (associatedRecordList.Entities.Count > 0)
             {
-                foreach (Entity item in associatedRecordList.Entities)
+                foreach (syed_solutiondetail solutiondetail in associatedRecordList.Entities)
                 {
-                    if (item.Attributes.Contains("syed_listofsolutions") && item.Attributes["syed_listofsolutions"] != null)
+                    if (solutiondetail.syed_ListofSolutions != null)
                     {
-                        uniqueArray.Add(item.Attributes["syed_listofsolutions"].ToString());
+                        uniqueArray.Add(solutiondetail.syed_ListofSolutions.ToString());
                     }
                 }
             }
 
             uniqueName = string.Join(",", uniqueArray.ToArray());
-            sourceControlQueue["syed_sourcecontrolqueueid"] = sourceControlId;
-            sourceControlQueue["syed_solutionname"] = uniqueName;
-            service.Update(sourceControlQueue);
+            return uniqueName;
         }
     }
 }

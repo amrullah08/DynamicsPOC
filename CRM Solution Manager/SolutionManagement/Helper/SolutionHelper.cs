@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="RetrieveSolutions.cs" company="Microsoft">
+// <copyright file="SolutionHelper.cs" company="Microsoft">
 //     Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 // <author>Jaiyanthi</author>
@@ -12,11 +12,12 @@ namespace SolutionManagement
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Messages;
     using Microsoft.Xrm.Sdk.Query;
+    using SolutionConstants;
 
     /// <summary>
     /// Class that contains retrieve functions from CRM
     /// </summary>
-    public class RetrieveSolutions
+    public class SolutionHelper
     {
         /// <summary>
         /// To retrieve CRM solutions.
@@ -24,7 +25,7 @@ namespace SolutionManagement
         /// <param name="service">Organization service</param>
         /// <param name="tracingService">Tracing Service to trace error</param>
         /// <returns>returns CRM solutions as entity collection</returns>
-        public static EntityCollection CRMSolutions(IOrganizationService service, ITracingService tracingService)
+        public static EntityCollection FetchCrmSolutions(IOrganizationService service, ITracingService tracingService)
         {
             try
             {
@@ -85,7 +86,7 @@ namespace SolutionManagement
         /// <param name="service">Organization service</param>
         /// <param name="tracingService">Tracing Service to trace error</param>
         /// <returns>returns Master solutions as entity collection</returns>
-        public static EntityCollection RetrieveMasterSolution(IOrganizationService service, ITracingService tracingService)
+        public static EntityCollection RetrieveMasterSolutions(IOrganizationService service, ITracingService tracingService)
         {
             try
             {
@@ -140,33 +141,30 @@ namespace SolutionManagement
         }
 
         /// <summary>
-        /// To retrieve Solutions Details entity.
+        /// Method retrieves the list of Solution Details to be merged.
         /// </summary>
         /// <param name="service">Organization service</param>
         /// <param name="sourceControlId">Dynamic Source Control GUID</param>
         /// <param name="tracingService">Tracing Service to trace error</param>
         /// <returns>returns solutions detail as entity collection</returns>
-        public static EntityCollection AddListToSolution(IOrganizationService service, Guid sourceControlId, ITracingService tracingService)
+        public static EntityCollection RetrieveSolutionDetailsToBeMergedByListOfSolutionId(IOrganizationService service, Guid sourceControlId, ITracingService tracingService)
         {
             try
             {
                 string fetchXML = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
-                                              <entity name='syed_solutiondetail'>
-                                                <attribute name='syed_solutiondetailid' />
-                                                <attribute name='syed_name' />
-                                                <attribute name='createdon' />
-                                                <attribute name='syed_order' />
-                                                <attribute name='syed_solutionid' />
-                                                <attribute name='syed_ismaster' />
-                                                <attribute name='syed_listofsolutions' />
-                                                <order attribute='syed_order' descending='false' />
-                                                <filter type='and'>
-                                                  <condition attribute='syed_listofsolutionid' operator='eq' uiname='Finished' uitype='syed_sourcecontrolqueue' value='" + sourceControlId + @"' />
-                                                  <condition attribute='syed_ismaster' operator='eq' value='433710000' />
-                                                </filter>
-                                              </entity>
-                                            </fetch>";
-
+                                  <entity name='syed_mergesolutions'>
+                                    <attribute name='syed_mergesolutionsid' />
+                                    <attribute name='syed_name' />
+                                    <attribute name='createdon' />
+                                    <attribute name='syed_order' />
+                                    <attribute name='syed_listofsolution' />
+                                    <attribute name='syed_uniquename' />
+                                    <order attribute='syed_order' descending='false' />
+                                    <filter type='and'>
+                                      <condition attribute='syed_listofsolution' operator='eq' uitype='syed_sourcecontrolqueue' value='" + sourceControlId + @"' />
+                                    </filter>
+                                  </entity>
+                                </fetch>";
                 EntityCollection associatedRecordList = service.RetrieveMultiple(new FetchExpression(fetchXML));
                 return associatedRecordList;
             }
@@ -178,13 +176,13 @@ namespace SolutionManagement
         }
 
         /// <summary>
-        /// To retrieve Solutions Details entity.
+        /// Method retrieves Master Solutions.
         /// </summary>
         /// <param name="service">Organization service</param>
         /// <param name="sourceControlId">Dynamic Source Control GUID</param>
         /// <param name="tracingService">Tracing Service to trace error</param>
         /// <returns>returns Solution Details as entity collection</returns>
-        public static EntityCollection AddListToMaster(IOrganizationService service, Guid sourceControlId, ITracingService tracingService)
+        public static EntityCollection RetrieveMasterSolutionDetailsByListOfSolutionId(IOrganizationService service, Guid sourceControlId, ITracingService tracingService)
         {
             try
             {
@@ -199,12 +197,10 @@ namespace SolutionManagement
                                         <attribute name='syed_listofsolutions' />
                                         <order attribute='syed_order' descending='false' />
                                         <filter type='and'>
-                                          <condition attribute='syed_listofsolutionid' operator='eq' uiname='Finished' uitype='syed_sourcecontrolqueue'  value='" + sourceControlId + @"' />
-                                          <condition attribute='syed_ismaster' operator='eq' value='433710001' />
+                                          <condition attribute='syed_listofsolutionid' operator='eq'  uitype='syed_sourcecontrolqueue'  value='" + sourceControlId + @"' />
                                         </filter>
                                       </entity>
                                     </fetch>";
-
                 EntityCollection associatedRecordList = service.RetrieveMultiple(new FetchExpression(fetchXML));
                 return associatedRecordList;
             }
@@ -225,12 +221,14 @@ namespace SolutionManagement
         {
             try
             {
+                WebResource webresourceToUpdate = new WebResource();
                 RetrieveMultipleResponse resp = new RetrieveMultipleResponse();
                 RetrieveMultipleRequest retrieveWebResources = new RetrieveMultipleRequest();
+
                 Entity webresource = new Entity();
                 QueryExpression query = new QueryExpression()
                 {
-                    EntityName = "webresource",
+                    EntityName = webresourceToUpdate.LogicalName,
                     ColumnSet = new ColumnSet(true),
                     Criteria = new FilterExpression
                     {
@@ -239,7 +237,7 @@ namespace SolutionManagement
                     {
                     new ConditionExpression
                         {
-                            AttributeName = "name",
+                            AttributeName = WebResource.PrimaryNameAttribute,
                             Operator = ConditionOperator.Equal,
                             Values = { "syed_/HTML/SourceControlQueue" }
                         }
@@ -271,11 +269,11 @@ namespace SolutionManagement
             {
                 string htmlTo = commitId;
                 byte[] byt = System.Text.Encoding.UTF8.GetBytes(htmlTo);
-                Entity webresourceToUpdate = new Entity(webResource.LogicalName);
-                webresourceToUpdate["webresourceid"] = webResource.Id;
-                webresourceToUpdate["content"] = Convert.ToBase64String(byt);
+                WebResource webresourceToUpdate = new WebResource();
+                webresourceToUpdate.WebResourceId = webResource.Id;
+                webresourceToUpdate.Content = Convert.ToBase64String(byt);
                 service.Update(webresourceToUpdate);
-                PublishHTML(service, webResource.Id, tracingService);
+                PublishWebResource(service, webResource.Id, tracingService);
             }
             catch (Exception ex)
             {
@@ -290,7 +288,7 @@ namespace SolutionManagement
         /// <param name="service">Organization service</param>
         /// <param name="webResourceID"> Guid of WebResource to Publish</param>
         /// <param name="tracingService">Tracing Service to trace error</param>
-        public static void PublishHTML(IOrganizationService service, Guid webResourceID, ITracingService tracingService)
+        public static void PublishWebResource(IOrganizationService service, Guid webResourceID, ITracingService tracingService)
         {
             try
             {

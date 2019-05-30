@@ -61,16 +61,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constants\CRMConstant.cs" />
+    <Compile Include="Constants\DevOpsBusinessBase.cs" />
+    <Compile Include="Constants\Entities.cs" />
+    <Compile Include="Constants\OptionSets.cs" />
     <Compile Include="ExecuteOperations.cs" />
-    <Compile Include="RetrieveSolutions.cs" />
+    <Compile Include="Helper\IPluginHelper.cs" />
+    <Compile Include="Helper\SolutionHelper.cs" />
+    <Compile Include="Helper\SolutionManagementHelper.cs" />
+    <Compile Include="Helper\SolutionSortHelper.cs" />
+    <Compile Include="Helper\DynamicSourceControlOperationsHelper.cs" />
     <Compile Include="SolutionManagement.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UpdateHTML.cs" />
-    <Compile Include="UpdateList.cs" />
+    <Compile Include="DynamicSourceControlOperations.cs" />
+    <Compile Include="SolutionSort.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Syed.snk" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="SolutionManagement.cs" company="Microsoft">
+// <copyright file="DynamicSourceControlOperations.cs" company="Microsoft">
 //     Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 // <author>Jaiyanthi</author>
@@ -12,24 +12,23 @@ namespace SolutionManagement
     using SolutionConstants;
 
     /// <summary>
-    /// Class that assist in Solution Management
+    /// Class that assist in updating HTML WebResource
     /// </summary>
-    public class SolutionManagement : IPlugin
+    public class DynamicSourceControlOperations : IPlugin
     {
         /// <summary>
-        /// Plugin Solution Management.
+        /// Plugin for updating HTML WebResource.
         /// </summary>
         /// <param name="serviceProvider">serviceProvider to connect CRM</param>
         public void Execute(IServiceProvider serviceProvider)
         {
-            // Obtain the execution context from the service provider.
             var crmContext = (IPluginExecutionContext)serviceProvider.GetService(typeof(IPluginExecutionContext));
             IOrganizationServiceFactory serviceFactory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
             var crmService = serviceFactory.CreateOrganizationService(crmContext.UserId);
             var crmInitiatingUserService = serviceFactory.CreateOrganizationService(crmContext.InitiatingUserId);
             var crmTracingService = (ITracingService)serviceProvider.GetService(typeof(ITracingService));
-            IPluginHelper solutionHelper = new SolutionManagementHelper(crmService, crmInitiatingUserService, crmContext, crmTracingService);
-            solutionHelper.Plugin();
+            IPluginHelper pluginHelper = new DynamicSourceControlOperationsHelper(crmService, crmInitiatingUserService, crmContext, crmTracingService);
+            pluginHelper.Plugin();
         }
     }
 }

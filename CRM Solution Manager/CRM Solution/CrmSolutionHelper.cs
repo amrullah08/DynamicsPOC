@@ -16,6 +16,7 @@ namespace CrmSolution
     using Microsoft.Xrm.Sdk.Client;
     using Microsoft.Xrm.Sdk.Query;
     using MsCrmTools.SolutionComponentsMover.AppCode;
+    using SolutionConstants;
 
     /// <summary>
     /// Class that assist management of source control queues
@@ -110,7 +111,7 @@ namespace CrmSolution
             {
                 try
                 {
-                    var infos = SolutionFileInfo.GetSolutionFileInfo(querySampleSolutionResults.Entities[i], serviceProxy);                    
+                    var infos = SolutionFileInfo.GetSolutionFileInfo(querySampleSolutionResults.Entities[i], serviceProxy);
                     this.ExportListOfSolutionsToBeMerged(serviceProxy, infos[0]);
                     foreach (var info in infos)
                     {
@@ -160,6 +161,36 @@ namespace CrmSolution
             Console.WriteLine("Fetching Solutions to be copied to Repository ");
             EntityCollection querySampleSolutionResults = serviceProxy.RetrieveMultiple(querySampleSolution);
             return querySampleSolutionResults;
+        }
+
+        public static EntityCollection RetrieveMasterSolutionDetailsByListOfSolutionId(OrganizationServiceProxy service, Guid sourceControlId)
+        {
+            try
+            {
+                string fetchXML = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+                                      <entity name='syed_solutiondetail'>
+                                        <attribute name='syed_solutiondetailid' />
+                                        <attribute name='syed_name' />
+                                        <attribute name='createdon' />
+                                        <attribute name='syed_order' />
+                                        <attribute name='syed_solutionid' />
+                                        <attribute name='syed_exportas' />
+                                        <attribute name='syed_ismaster' />
+                                        <attribute name='syed_listofsolutions' />
+                                        <order attribute='syed_order' descending='false' />
+                                        <filter type='and'>
+                                          <condition attribute='syed_listofsolutionid' operator='eq'  uitype='syed_sourcecontrolqueue'  value='" + sourceControlId + @"' />
+                                        </filter>
+                                      </entity>
+                                    </fetch>";
+
+                EntityCollection associatedRecordList = service.RetrieveMultiple(new FetchExpression(fetchXML));
+                return associatedRecordList;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidPluginExecutionException(ex.Message.ToString(), ex);
+            }
         }
 
         /// <summary>
@@ -229,9 +260,8 @@ namespace CrmSolution
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportStatus;
             solutionFile.Update();
 
-            
             this.ExportSolution(serviceProxy, solutionFile, solutionFile.SolutionUniqueName, "Downloading Master Solution: ");
-            
+
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportSuccessful;
             solutionFile.Update();
             solutionFile.ProcessSolutionZipFile(this.SolutionPackagerPath);
@@ -243,14 +273,14 @@ namespace CrmSolution
         /// <param name="serviceProxy">organization service proxy</param>
         /// <param name="solutionFile">solution file info</param>
         private void ExportListOfSolutionsToBeMerged(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
-        {   
-                if (solutionFile.SolutionsToBeMerged.Count > 0)
+        {
+            if (solutionFile.SolutionsToBeMerged.Count > 0)
+            {
+                foreach (string solutionNAme in solutionFile.SolutionsToBeMerged)
                 {
-                    foreach (string solutionNAme in solutionFile.SolutionsToBeMerged)
-                    {
-                        ExportSolution(serviceProxy, solutionFile, solutionNAme, "Downloading solutions to be merged: ");
-                    }
+                    ExportSolution(serviceProxy, solutionFile, solutionNAme, "Downloading solutions to be merged: ");
                 }
+            }
         }
 
         /// <summary>
@@ -266,7 +296,7 @@ namespace CrmSolution
             {
                 ExportSolutionRequest exportRequest = new ExportSolutionRequest
                 {
-                    Managed = false,
+                    Managed = solutionFile.ExportAsManaged,
                     SolutionName = solutionName
                 };
 

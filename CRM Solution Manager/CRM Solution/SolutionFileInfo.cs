@@ -15,6 +15,7 @@ namespace CrmSolution
     using CliWrap;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Client;
+    using SolutionConstants;
 
     /// <summary>
     /// solution file info
@@ -36,23 +37,32 @@ namespace CrmSolution
         /// <param name="solution">solution entity</param>
         /// <param name="organizationServiceProxy">Organization proxy</param>
         /// <param name="uniqueSolutionName">unique solution name</param>
-        public SolutionFileInfo(Entity solution, OrganizationServiceProxy organizationServiceProxy, string uniqueSolutionName)
+        public SolutionFileInfo(Entity solution, OrganizationServiceProxy organizationServiceProxy, string uniqueSolutionName, bool ExportAs)
         {
             this.OrganizationServiceProxy = organizationServiceProxy;
             this.SolutionsToBeMerged = new List<string>();
             this.SolutionUniqueName = uniqueSolutionName;
-            
+
             // solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSolutionName);
             this.Message = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForComment);
             this.OwnerName = solution.GetAttributeValue<EntityReference>(Constants.SourceControlQueueAttributeNameForOwnerId).Name;
             this.IncludeInRelease = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForIncludeInRelease);
             this.CheckInSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForCheckinSolution);
             this.MergeSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForMergeSolution);
+            this.ExportAsManaged = ExportAs;
             var solutions = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSourceSolutions);
+
 
             if (this.CheckInSolution)
             {
-                this.SolutionExtractionPath = Path.GetTempPath() + this.SolutionUniqueName;
+                if (!ExportAsManaged)
+                {
+                    this.SolutionExtractionPath = Path.GetTempPath() + this.SolutionUniqueName + "_managed";
+                }
+                else
+                {
+                    this.SolutionExtractionPath = Path.GetTempPath() + this.SolutionUniqueName;
+                }
                 this.BranchName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForBranch);
                 CrmSolutionHelper.CreateEmptyFolder(this.SolutionExtractionPath);
             }
@@ -64,7 +74,7 @@ namespace CrmSolution
                     this.SolutionsToBeMerged.Add(s);
                 }
             }
-            
+
             this.Solution = solution;
         }
 
@@ -88,6 +98,11 @@ namespace CrmSolution
                 if (string.IsNullOrEmpty(this.SolutionUniqueName))
                 {
                     return null;
+                }
+
+                else if (!this.ExportAsManaged)
+                {
+                    return this.SolutionUniqueName + "_managed_.zip";
                 }
 
                 return this.SolutionUniqueName + "_.zip";
@@ -130,6 +145,11 @@ namespace CrmSolution
         public bool IncludeInRelease { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether solution needs to be exported as managed or not
+        /// </summary>
+        public bool ExportAsManaged { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether solution needs to be checked in
         /// </summary>
         public bool CheckInSolution { get; set; }
@@ -163,13 +183,23 @@ namespace CrmSolution
         public static List<SolutionFileInfo> GetSolutionFileInfo(Entity solution, OrganizationServiceProxy organizationServiceProxy)
         {
             List<SolutionFileInfo> solutionFileInfos = new List<SolutionFileInfo>();
-            foreach (var s in solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSolutionName).Split(new string[] { "," }, System.StringSplitOptions.RemoveEmptyEntries))
+            EntityCollection retrievedMasterSolution = CrmSolutionHelper.RetrieveMasterSolutionDetailsByListOfSolutionId(organizationServiceProxy, solution.Id);
+            if (retrievedMasterSolution.Entities.Count > 0)
             {
-                var solutionFile = new SolutionFileInfo(solution, organizationServiceProxy, s);
-                solutionFileInfos.Add(solutionFile);
+                foreach (Entity solutiondetail in retrievedMasterSolution.Entities)
+                {
+                    var solutionFile = new SolutionFileInfo(solution, organizationServiceProxy, solutiondetail.GetAttributeValue<string>("syed_listofsolutions"), solutiondetail.GetAttributeValue<bool>("solutiondetail.GetAttributeValue"));
+                    solutionFileInfos.Add(solutionFile);
+                }
             }
-
             return solutionFileInfos;
+            //foreach (var s in solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSolutionName).Split(new string[] { "," }, System.StringSplitOptions.RemoveEmptyEntries))
+            //{
+            //    var solutionFile = new SolutionFileInfo(solution, organizationServiceProxy, s);
+            //    solutionFileInfos.Add(solutionFile);
+            //}
+
+            //return solutionFileInfos;
         }
 
         /// <summary>

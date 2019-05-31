@@ -167,8 +167,8 @@ namespace GitDeploy
         {
             try
             {
-                Console.WriteLine("Committing solutions");                
-                string file = this.solutionlocalFolder + solutionFileInfo.SolutionFileZipName;                
+                Console.WriteLine("Committing solutions");
+                string file = this.solutionlocalFolder + solutionFileInfo.SolutionFileZipName;
                 File.Copy(solutionFileInfo.SolutionFilePath, file, true);
                 string webResources = solutionFileInfo.SolutionExtractionPath + "\\WebResources";
 
@@ -306,7 +306,7 @@ namespace GitDeploy
                 if (!cloneAlways)
                 {
                     try
-                    {                        
+                    {
                         using (var repo = new Repository(workingDirectory))
                         {
                             repo.Reset(ResetMode.Hard);
@@ -488,7 +488,7 @@ namespace GitDeploy
                 repo.Index.Add(commitFileLoc.Replace(this.localFolder.FullName, string.Empty));
             }
         }
-        
+
         /// <summary>
         /// Method adds extracted solution resources to repository
         /// </summary>
@@ -496,7 +496,14 @@ namespace GitDeploy
         /// <param name="repo">repository to be committed</param>
         private void AddExtractedSolutionToRepository(SolutionFileInfo solutionFileInfo, Repository repo)
         {
-            this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.solutionlocalFolder.FullName + solutionFileInfo.SolutionUniqueName, repo);
+            if (!solutionFileInfo.ExportAsManaged)
+            {
+                this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.solutionlocalFolder.FullName + solutionFileInfo.SolutionUniqueName + "_managed", repo);
+            }
+            else
+            {
+                this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.solutionlocalFolder.FullName + solutionFileInfo.SolutionUniqueName, repo);
+            }
         }
     }
 }

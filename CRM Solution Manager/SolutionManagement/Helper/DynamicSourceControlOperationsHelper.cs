@@ -26,23 +26,7 @@ namespace SolutionManagement
         public DynamicSourceControlOperationsHelper(IOrganizationService crmService, IOrganizationService crmInitiatingUserService, IPluginExecutionContext crmContext, ITracingService crmTracingService) : base(crmService, crmInitiatingUserService, crmContext, crmTracingService)
         {
         }
-
-        /// <summary>
-        /// To update CRM HTML Web Resource.
-        /// </summary>
-        /// <param name="service">Organization service</param>
-        /// <param name="sourceControlQueue">Dynamic Source Control entity</param>
-        /// <param name="tracingService">Tracing Service to trace error</param>
-        public static void UpdateHTMLWebResource(IOrganizationService service, syed_sourcecontrolqueue sourceControlQueue, ITracingService tracingService)
-        {
-            if (sourceControlQueue.syed_CommitIds != null)
-            {
-                string commitId = sourceControlQueue.syed_CommitIds.ToString();
-                Entity webResource = SolutionHelper.RetrieveHTML(service, tracingService);
-                SolutionHelper.UpdateHTMLContent(service, webResource, commitId, tracingService);
-            }
-        }
-
+        
         /// <summary>
         /// To delete Merge Solution records.
         /// </summary>
@@ -86,7 +70,6 @@ namespace SolutionManagement
                     if (postSourceControlQueue.LogicalName == syed_sourcecontrolqueue.EntityLogicalName)
                     {
                         DeleteSolutionDetail(this.CrmService, postSourceControlQueue, this.CrmTracingService);
-                        UpdateHTMLWebResource(this.CrmService, postSourceControlQueue, this.CrmTracingService);
                     }
                 }
             }

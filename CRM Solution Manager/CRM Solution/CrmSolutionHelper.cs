@@ -52,7 +52,7 @@ namespace CrmSolution
             this.clientCredentials.UserName.Password = password;
             this.InitializeOrganizationService();
         }
-        
+
         /// <summary>
         /// Gets or sets Repository url
         /// </summary>
@@ -110,12 +110,13 @@ namespace CrmSolution
             {
                 try
                 {
-                    var infos = SolutionFileInfo.GetSolutionFileInfo(querySampleSolutionResults.Entities[i], serviceProxy);
+                    var infos = SolutionFileInfo.GetSolutionFileInfo(querySampleSolutionResults.Entities[i], serviceProxy);                    
+                    this.ExportListOfSolutionsToBeMerged(serviceProxy, infos[0]);
                     foreach (var info in infos)
                     {
                         try
                         {
-                            this.ExportSolution(serviceProxy, info);
+                            this.ExportMasterSolution(serviceProxy, info);
                             solutionFileInfos.Add(info);
                             if (info.CheckInSolution)
                             {
@@ -207,11 +208,11 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Method exports solution
+        /// Method merges solution components into Master solution and exports it alongwith unzip file
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <param name="solutionFile">solution file info</param>
-        private void ExportSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
+        private void ExportMasterSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
         {
             if (solutionFile.SolutionsToBeMerged.Count > 0)
             {
@@ -228,26 +229,63 @@ namespace CrmSolution
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportStatus;
             solutionFile.Update();
 
-            ExportSolutionRequest exportRequest = new ExportSolutionRequest
-            {
-                Managed = false,
-                SolutionName = solutionFile.SolutionUniqueName
-            };
-
-            Console.WriteLine("Downloading Solution " + solutionFile.SolutionUniqueName);
-            ExportSolutionResponse exportResponse = (ExportSolutionResponse)serviceProxy.Execute(exportRequest);
-
-            // Handles the response
-            byte[] downloadedSolutionFile = exportResponse.ExportSolutionFile;
-            solutionFile.SolutionFilePath = Path.GetTempFileName();
-            File.WriteAllBytes(solutionFile.SolutionFilePath, downloadedSolutionFile);
-
-            string solutionExport = string.Format("Solution Successfully Exported to {0}", solutionFile.SolutionUniqueName);
-            Console.WriteLine(solutionExport);
-
+            
+            this.ExportSolution(serviceProxy, solutionFile, solutionFile.SolutionUniqueName, "Downloading Master Solution: ");
+            
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportSuccessful;
             solutionFile.Update();
             solutionFile.ProcessSolutionZipFile(this.SolutionPackagerPath);
+        }
+
+        /// <summary>
+        /// Method exports each of solution to be merged
+        /// </summary>
+        /// <param name="serviceProxy">organization service proxy</param>
+        /// <param name="solutionFile">solution file info</param>
+        private void ExportListOfSolutionsToBeMerged(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
+        {   
+                if (solutionFile.SolutionsToBeMerged.Count > 0)
+                {
+                    foreach (string solutionNAme in solutionFile.SolutionsToBeMerged)
+                    {
+                        ExportSolution(serviceProxy, solutionFile, solutionNAme, "Downloading solutions to be merged: ");
+                    }
+                }
+        }
+
+        /// <summary>
+        /// Method exports solution
+        /// </summary>
+        /// <param name="serviceProxy">organization service proxy</param>
+        /// <param name="solutionFile">solution file info</param>
+        /// <param name="solutionName">solution name</param>
+        /// <param name="message">message to be printed on console</param>
+        private void ExportSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile, string solutionName, string message)
+        {
+            try
+            {
+                ExportSolutionRequest exportRequest = new ExportSolutionRequest
+                {
+                    Managed = false,
+                    SolutionName = solutionName
+                };
+
+                Console.WriteLine(message + solutionName);
+                ExportSolutionResponse exportResponse = (ExportSolutionResponse)serviceProxy.Execute(exportRequest);
+
+                // Handles the response
+                byte[] downloadedSolutionFile = exportResponse.ExportSolutionFile;
+                solutionFile.SolutionFilePath = Path.GetTempFileName();
+                File.WriteAllBytes(solutionFile.SolutionFilePath, downloadedSolutionFile);
+
+                string solutionExport = string.Format("Solution Successfully Exported to {0}", solutionName);
+                Console.WriteLine(solutionExport);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw ex;
+            }
         }
     }
 }

@@ -58,6 +58,7 @@ namespace CrmSolution
                     ////}
                     ////else
                     {
+                        RepositoryConfigurationConstants.ResetLocalDirectory();
                         string solutionFilePath = RepositoryConfigurationConstants.LocalDirectory + "solutions.txt";
 
                         // todo: enable solutions file clear from crm portal
@@ -168,7 +169,7 @@ namespace CrmSolution
                                                 string solutionFilePath, 
                                                 HashSet<string> hashSet)
         {
-            RepositoryConfigurationConstants.ResetLocalDirectory();
+            //RepositoryConfigurationConstants.ResetLocalDirectory();
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushingToStatus;
             solutionFile.Update();

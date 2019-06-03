@@ -16,7 +16,6 @@ namespace CrmSolution
     using Microsoft.Xrm.Sdk.Client;
     using Microsoft.Xrm.Sdk.Query;
     using MsCrmTools.SolutionComponentsMover.AppCode;
-    using SolutionConstants;
 
     /// <summary>
     /// Class that assist management of source control queues
@@ -163,6 +162,11 @@ namespace CrmSolution
             return querySampleSolutionResults;
         }
 
+        /// <summary>
+        /// Method fetches MasterSolutionDetails records
+        /// </summary>
+        /// <param name="serviceProxy">organization service proxy</param>
+        /// <returns>returns entity collection</returns>
         public static EntityCollection RetrieveMasterSolutionDetailsByListOfSolutionId(OrganizationServiceProxy service, Guid sourceControlId)
         {
             try

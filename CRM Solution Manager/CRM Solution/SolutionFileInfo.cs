@@ -15,7 +15,6 @@ namespace CrmSolution
     using CliWrap;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Client;
-    using SolutionConstants;
 
     /// <summary>
     /// solution file info
@@ -37,11 +36,11 @@ namespace CrmSolution
         /// <param name="solution">solution entity</param>
         /// <param name="organizationServiceProxy">Organization proxy</param>
         /// <param name="uniqueSolutionName">unique solution name</param>
-        public SolutionFileInfo(Entity solution, OrganizationServiceProxy organizationServiceProxy, string uniqueSolutionName, bool ExportAs)
+        public SolutionFileInfo(Entity solution, OrganizationServiceProxy organizationServiceProxy, Entity solutionDetail)
         {
             this.OrganizationServiceProxy = organizationServiceProxy;
             this.SolutionsToBeMerged = new List<string>();
-            this.SolutionUniqueName = uniqueSolutionName;
+            this.SolutionUniqueName = solutionDetail.GetAttributeValue<string>("syed_listofsolutions");
 
             // solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSolutionName);
             this.Message = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForComment);
@@ -49,7 +48,7 @@ namespace CrmSolution
             this.IncludeInRelease = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForIncludeInRelease);
             this.CheckInSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForCheckinSolution);
             this.MergeSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForMergeSolution);
-            this.ExportAsManaged = ExportAs;
+            this.ExportAsManaged = solutionDetail.GetAttributeValue<bool>("syed_exportas");
             var solutions = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSourceSolutions);
 
 
@@ -188,7 +187,7 @@ namespace CrmSolution
             {
                 foreach (Entity solutiondetail in retrievedMasterSolution.Entities)
                 {
-                    var solutionFile = new SolutionFileInfo(solution, organizationServiceProxy, solutiondetail.GetAttributeValue<string>("syed_listofsolutions"), solutiondetail.GetAttributeValue<bool>("solutiondetail.GetAttributeValue"));
+                    var solutionFile = new SolutionFileInfo(solution, organizationServiceProxy, solutiondetail);
                     solutionFileInfos.Add(solutionFile);
                 }
             }

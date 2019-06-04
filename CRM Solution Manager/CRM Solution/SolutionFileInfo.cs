@@ -49,28 +49,22 @@ namespace CrmSolution
             this.CheckInSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForCheckinSolution);
             this.MergeSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForMergeSolution);
             this.ExportAsManaged = solutionDetail.GetAttributeValue<bool>("syed_exportas");
-            var solutions = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSourceSolutions);
+            EntityCollection retrieveSolutionsToBeMerged = CrmSolutionHelper.RetrieveSolutionsToBeMergedByListOfSolutionId(organizationServiceProxy, solution.Id);
 
+            
 
             if (this.CheckInSolution)
-            {
-                if (!ExportAsManaged)
-                {
-                    this.SolutionExtractionPath = Path.GetTempPath() + this.SolutionUniqueName + "_managed";
-                }
-                else
-                {
-                    this.SolutionExtractionPath = Path.GetTempPath() + this.SolutionUniqueName;
-                }
+            {                
+                this.SolutionExtractionPath = Path.GetTempPath() + this.SolutionUniqueName;                
                 this.BranchName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForBranch);
                 CrmSolutionHelper.CreateEmptyFolder(this.SolutionExtractionPath);
             }
 
-            if (!string.IsNullOrEmpty(solutions) && this.MergeSolution)
+            if (retrieveSolutionsToBeMerged.Entities.Count > 0 && this.MergeSolution)
             {
-                foreach (var s in solutions.Split(new string[] { "," }, System.StringSplitOptions.RemoveEmptyEntries))
+                foreach (Entity solutionsToBeMerged in retrieveSolutionsToBeMerged.Entities)
                 {
-                    this.SolutionsToBeMerged.Add(s);
+                    this.SolutionsToBeMerged.Add(solutionsToBeMerged.GetAttributeValue<string>("syed_uniquename"));
                 }
             }
 
@@ -78,9 +72,14 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Gets or sets where solution is downloaded
+        /// Gets or sets where unmanaged solution is downloaded
         /// </summary>
         public string SolutionFilePath { get; set; }
+
+        /// <summary>
+        /// Gets or sets where managed solution is downloaded
+        /// </summary>
+        public string SolutionFilePathManaged { get; set; }
 
         /// <summary>
         /// Gets or sets Unique solution name
@@ -99,7 +98,7 @@ namespace CrmSolution
                     return null;
                 }
 
-                else if (!this.ExportAsManaged)
+                else if (this.ExportAsManaged)
                 {
                     return this.SolutionUniqueName + "_managed_.zip";
                 }

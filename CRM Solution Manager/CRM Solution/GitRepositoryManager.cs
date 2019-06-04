@@ -172,7 +172,7 @@ namespace GitDeploy
                 File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
 
                 string fileManaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_managed_.zip";
-                File.Copy(solutionFileInfo.SolutionFilePath, fileManaged, true);
+                File.Copy(solutionFileInfo.SolutionFilePathManaged, fileManaged, true);
 
                 string webResources = solutionFileInfo.SolutionExtractionPath + "\\WebResources";
 

@@ -193,7 +193,7 @@ namespace CrmSolution
             }
             catch (Exception ex)
             {
-                throw new InvalidPluginExecutionException(ex.Message.ToString(), ex);
+                throw new Exception(ex.Message.ToString(), ex);
             }
         }
 
@@ -224,7 +224,7 @@ namespace CrmSolution
             }
             catch (Exception ex)
             {
-                throw new InvalidPluginExecutionException(ex.Message.ToString(), ex);
+                throw new Exception(ex.Message.ToString(), ex);
             }
         }
 

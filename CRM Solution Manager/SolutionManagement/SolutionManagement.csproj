@@ -69,7 +69,6 @@
     <Compile Include="Helper\IPluginHelper.cs" />
     <Compile Include="Helper\SolutionHelper.cs" />
     <Compile Include="Helper\SolutionManagementHelper.cs" />
-    <Compile Include="Helper\SolutionSortHelper.cs" />
     <Compile Include="Helper\DynamicSourceControlOperationsHelper.cs" />
     <Compile Include="SolutionManagement.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

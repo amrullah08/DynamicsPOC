@@ -75,9 +75,9 @@ namespace CrmSolution
         public const string SourceControlQueueAttributeNameForBranch = "syed_branch";
 
         /// <summary>
-        /// solution column name
+        /// remote name column name
         /// </summary>
-        public const string SourceControlQueueAttributeNameForSolutionName = "syed_solutionname";
+        public const string SourceControlQueueAttributeNameForRemote = "syed_remotename";
 
         /// <summary>
         /// comment column name
@@ -109,10 +109,6 @@ namespace CrmSolution
         /// </summary>
         public const string SourceControlQueueAttributeNameForMergeSolution = "syed_mergesolutions";
 
-        /// <summary>
-        ///  source solution column name
-        /// </summary>
-        public const string SourceControlQueueAttributeNameForSourceSolutions = "syed_sourcensolutions";
 
         /// <summary>
         /// Gets the component types
@@ -178,9 +174,9 @@ namespace CrmSolution
         public const int MailMergeTemplate = 39;
         public const int ContractTemplate = 37;
         public const int EmailTemplate = 36;
-        public const int RoutingRule= 150;
+        public const int RoutingRule = 150;
         public const int SLA = 152;
         public const int ConvertRule = 154;
-        
+
     }
 }

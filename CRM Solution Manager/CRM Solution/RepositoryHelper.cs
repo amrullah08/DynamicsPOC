@@ -58,6 +58,7 @@ namespace CrmSolution
                     ////}
                     ////else
                     {
+                        RepositoryConfigurationConstants.ResetLocalDirectory();
                         string solutionFilePath = RepositoryConfigurationConstants.LocalDirectory + "solutions.txt";
 
                         // todo: enable solutions file clear from crm portal
@@ -94,8 +95,8 @@ namespace CrmSolution
             return new GitDeploy.GitRepositoryManager(
                                                     RepositoryConfigurationConstants.GitUserName,
                                                     RepositoryConfigurationConstants.GitUserPassword,
-                                                    RepositoryConfigurationConstants.RepositoryUrl,
-                                                    RepositoryConfigurationConstants.RepositoryRemoteName,
+                                                    solutionFile.GitRepoUrl ?? RepositoryConfigurationConstants.RepositoryUrl,
+                                                    solutionFile.RemoteName ?? RepositoryConfigurationConstants.RepositoryRemoteName,
                                                     solutionFile.BranchName ?? RepositoryConfigurationConstants.BranchName,
                                                     Convert.ToBoolean(RepositoryConfigurationConstants.CloneRepositoryAlways),
                                                     RepositoryConfigurationConstants.LocalDirectory,
@@ -168,7 +169,7 @@ namespace CrmSolution
                                                 string solutionFilePath, 
                                                 HashSet<string> hashSet)
         {
-            RepositoryConfigurationConstants.ResetLocalDirectory();
+            //RepositoryConfigurationConstants.ResetLocalDirectory();
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushingToStatus;
             solutionFile.Update();

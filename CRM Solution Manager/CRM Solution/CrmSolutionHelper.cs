@@ -52,7 +52,7 @@ namespace CrmSolution
             this.clientCredentials.UserName.Password = password;
             this.InitializeOrganizationService();
         }
-        
+
         /// <summary>
         /// Gets or sets Repository url
         /// </summary>
@@ -111,11 +111,12 @@ namespace CrmSolution
                 try
                 {
                     var infos = SolutionFileInfo.GetSolutionFileInfo(querySampleSolutionResults.Entities[i], serviceProxy);
+                    this.ExportListOfSolutionsToBeMerged(serviceProxy, infos[0]);
                     foreach (var info in infos)
                     {
                         try
                         {
-                            this.ExportSolution(serviceProxy, info);
+                            this.ExportMasterSolution(serviceProxy, info);
                             solutionFileInfos.Add(info);
                             if (info.CheckInSolution)
                             {
@@ -159,6 +160,72 @@ namespace CrmSolution
             Console.WriteLine("Fetching Solutions to be copied to Repository ");
             EntityCollection querySampleSolutionResults = serviceProxy.RetrieveMultiple(querySampleSolution);
             return querySampleSolutionResults;
+        }
+
+        /// <summary>
+        /// Method fetches MasterSolutionDetails records
+        /// </summary>
+        /// <param name="serviceProxy">organization service proxy</param>
+        /// <returns>returns entity collection</returns>
+        public static EntityCollection RetrieveMasterSolutionDetailsByListOfSolutionId(OrganizationServiceProxy service, Guid sourceControlId)
+        {
+            try
+            {
+                string fetchXML = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+                                      <entity name='syed_solutiondetail'>
+                                        <attribute name='syed_solutiondetailid' />
+                                        <attribute name='syed_name' />
+                                        <attribute name='createdon' />
+                                        <attribute name='syed_order' />
+                                        <attribute name='syed_solutionid' />
+                                        <attribute name='syed_exportas' />
+                                        <attribute name='syed_ismaster' />
+                                        <attribute name='syed_listofsolutions' />
+                                        <order attribute='syed_order' descending='false' />
+                                        <filter type='and'>
+                                          <condition attribute='syed_listofsolutionid' operator='eq'  uitype='syed_sourcecontrolqueue'  value='" + sourceControlId + @"' />
+                                        </filter>
+                                      </entity>
+                                    </fetch>";
+
+                EntityCollection associatedRecordList = service.RetrieveMultiple(new FetchExpression(fetchXML));
+                return associatedRecordList;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message.ToString(), ex);
+            }
+        }
+
+        /// <summary>
+        /// Method fetches MergeSolution records
+        /// </summary>
+        /// <param name="serviceProxy">organization service proxy</param>
+        /// <returns>returns entity collection</returns>
+        public static EntityCollection RetrieveSolutionsToBeMergedByListOfSolutionId(OrganizationServiceProxy service, Guid sourceControlId)
+        {
+            try
+            {
+                string fetchXML = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+                                        <entity name='syed_mergesolutions'>
+                                        <attribute name='syed_mergesolutionsid' />
+                                        <attribute name='syed_name' />
+                                        <attribute name='syed_uniquename' />
+                                        <attribute name='syed_order' />
+                                        <order attribute='syed_order' descending='false' />
+                                        <filter type='and'>
+                                            <condition attribute='syed_listofsolution' operator='eq' uitype='syed_sourcecontrolqueue' value='" + sourceControlId + @"' />
+                                        </filter>
+                                        </entity>
+                                    </fetch>";
+
+                EntityCollection associatedRecordList = service.RetrieveMultiple(new FetchExpression(fetchXML));
+                return associatedRecordList;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message.ToString(), ex);
+            }
         }
 
         /// <summary>
@@ -207,11 +274,11 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Method exports solution
+        /// Method merges solution components into Master solution and exports it alongwith unzip file
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <param name="solutionFile">solution file info</param>
-        private void ExportSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
+        private void ExportMasterSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
         {
             if (solutionFile.SolutionsToBeMerged.Count > 0)
             {
@@ -228,26 +295,71 @@ namespace CrmSolution
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportStatus;
             solutionFile.Update();
 
-            ExportSolutionRequest exportRequest = new ExportSolutionRequest
-            {
-                Managed = false,
-                SolutionName = solutionFile.SolutionUniqueName
-            };
-
-            Console.WriteLine("Downloading Solution " + solutionFile.SolutionUniqueName);
-            ExportSolutionResponse exportResponse = (ExportSolutionResponse)serviceProxy.Execute(exportRequest);
-
-            // Handles the response
-            byte[] downloadedSolutionFile = exportResponse.ExportSolutionFile;
-            solutionFile.SolutionFilePath = Path.GetTempFileName();
-            File.WriteAllBytes(solutionFile.SolutionFilePath, downloadedSolutionFile);
-
-            string solutionExport = string.Format("Solution Successfully Exported to {0}", solutionFile.SolutionUniqueName);
-            Console.WriteLine(solutionExport);
+            this.ExportSolution(serviceProxy, solutionFile, solutionFile.SolutionUniqueName, "Downloading Unmanaged Master Solution: ", false);
+            this.ExportSolution(serviceProxy, solutionFile, solutionFile.SolutionUniqueName, "Downloading Managed Master Solution: ", true);
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportSuccessful;
             solutionFile.Update();
             solutionFile.ProcessSolutionZipFile(this.SolutionPackagerPath);
+        }
+
+        /// <summary>
+        /// Method exports each of solution to be merged
+        /// </summary>
+        /// <param name="serviceProxy">organization service proxy</param>
+        /// <param name="solutionFile">solution file info</param>
+        private void ExportListOfSolutionsToBeMerged(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
+        {
+            if (solutionFile.SolutionsToBeMerged.Count > 0)
+            {
+                foreach (string solutionNAme in solutionFile.SolutionsToBeMerged)
+                {
+                    ExportSolution(serviceProxy, solutionFile, solutionNAme, "Downloading solutions to be merged: ", false);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Method exports solution
+        /// </summary>
+        /// <param name="serviceProxy">organization service proxy</param>
+        /// <param name="solutionFile">solution file info</param>
+        /// <param name="solutionName">solution name</param>
+        /// <param name="message">message to be printed on console</param>
+        private void ExportSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile, string solutionName, string message, bool IsManaged)
+        {
+            try
+            {
+                ExportSolutionRequest exportRequest = new ExportSolutionRequest
+                {
+                    Managed = IsManaged,
+                    SolutionName = solutionName
+                };
+
+                Console.WriteLine(message + solutionName);
+                ExportSolutionResponse exportResponse = (ExportSolutionResponse)serviceProxy.Execute(exportRequest);
+
+                // Handles the response
+                byte[] downloadedSolutionFile = exportResponse.ExportSolutionFile;
+                if(IsManaged)
+                {
+                    solutionFile.SolutionFilePathManaged = Path.GetTempFileName();
+                    File.WriteAllBytes(solutionFile.SolutionFilePathManaged, downloadedSolutionFile);
+                }
+                else
+                {
+                    solutionFile.SolutionFilePath = Path.GetTempFileName();
+                    File.WriteAllBytes(solutionFile.SolutionFilePath, downloadedSolutionFile);
+                }
+
+                string solutionExport = string.Format("Solution Successfully Exported to {0}", solutionName);
+                Console.WriteLine(solutionExport);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw ex;
+            }
         }
     }
 }

@@ -75,9 +75,9 @@ namespace CrmSolution
         public const string SourceControlQueueAttributeNameForBranch = "syed_branch";
 
         /// <summary>
-        /// solution column name
+        /// remote name column name
         /// </summary>
-        public const string SourceControlQueueAttributeNameForSolutionName = "syed_solutionname";
+        public const string SourceControlQueueAttributeNameForRemote = "syed_remotename";
 
         /// <summary>
         /// comment column name
@@ -109,10 +109,6 @@ namespace CrmSolution
         /// </summary>
         public const string SourceControlQueueAttributeNameForMergeSolution = "syed_mergesolutions";
 
-        /// <summary>
-        ///  source solution column name
-        /// </summary>
-        public const string SourceControlQueueAttributeNameForSourceSolutions = "syed_sourcensolutions";
 
         /// <summary>
         /// Gets the component types
@@ -121,38 +117,66 @@ namespace CrmSolution
         {
             get => new List<int>
             {
-                1, // entities
-                    2, // Attribut
-                    10, // Relationship
-                    14, // Key
-                    22, // Display string
+                Entity, // entities
+                    Attribute, // Attribut
+                    Relationship, // Relationship
+                    EntityKey, // Key
+                    DisplayString, // Display string
                     24, // Form
-                    26, // View
-                    59, // Chart
-                    60, // System Form
-                    65, // Hierarchical rules
-
-                    62, // sitempas
-                    50, // ribbon
-                    9, // Global optionsets
-                    91, // plugin assemblies
-                    92, // Sdk message processing steps
-                    95, // service endpoints
-                    31, // Reports
-                    20, // Roles
-                    70, // field security profile
-                    63, // connection roles
-                    61, // web resources
-                    29, // work flows
-                    38, // kb article templates
-                    39, // mail merge templates
-                    37, // contract templates
-                    36, // email templates
-                    60, // Dashboards
-                    150, // routing rules
-                    152, // slas
-                    154 // convert rules
+                    SavedQuery, // View
+                    SavedQueryVisualization, // Chart
+                    SystemForm, // System Form
+                    HierarchyRule, // Hierarchical rules
+                    SiteMap, // sitempas
+                    RibbonCustomization, // ribbon
+                    OptionSet, // Global optionsets
+                    PluginAssembly, // plugin assemblies
+                    SDKMessageProcessingStep, // Sdk message processing steps
+                    ServiceEndpoint, // service endpoints
+                    Report, // Reports
+                    Role, // Roles
+                    FieldSecurityProfile, // field security profile
+                    ConnectionRole, // connection roles
+                    WebResources, // web resources
+                    Workflow, // work flows
+                    KBArticleTemplate, // kb article templates
+                    MailMergeTemplate, // mail merge templates
+                    ContractTemplate, // contract templates
+                    EmailTemplate, // email templates                    
+                    RoutingRule, // routing rules
+                    SLA, // slas
+                    ConvertRule // convert rules
                 };
         }
+
+        public const int Entity = 1;
+        public const int WebResources = 61;
+        public const int Attribute = 2;
+        public const int Relationship = 10;
+        public const int EntityKey = 14;
+        public const int DisplayString = 22;
+        public const int SavedQuery = 26;
+        public const int SavedQueryVisualization = 59;
+        public const int SystemForm = 60;
+        public const int HierarchyRule = 65;
+        public const int SiteMap = 62;
+        public const int RibbonCustomization = 50;
+        public const int OptionSet = 9;
+        public const int PluginAssembly = 91;
+        public const int SDKMessageProcessingStep = 92;
+        public const int ServiceEndpoint = 95;
+        public const int Report = 31;
+        public const int Role = 20;
+        public const int FieldSecurityProfile = 70;
+        public const int ConnectionRole = 63;
+        public const int Workflow = 29;
+        public const int KBArticleTemplate = 38;
+        public const int MailMergeTemplate = 39;
+        public const int ContractTemplate = 37;
+        public const int EmailTemplate = 36;
+        public const int RoutingRule = 150;
+        public const int SLA = 152;
+        public const int ConvertRule = 154;
+
     }
 }

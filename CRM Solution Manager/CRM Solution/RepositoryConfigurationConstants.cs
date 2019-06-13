@@ -32,7 +32,7 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Gets repository release directory
+        /// Gets repository release directory containing CRM Solutions
         /// </summary>
         public static string SolutionFolder
         {

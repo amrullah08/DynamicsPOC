@@ -168,28 +168,38 @@ namespace GitDeploy
         {
             try
             {
-                Console.WriteLine("Committing Powershell Scripts");
-                string multilpleSolutionsImportPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), CrmConstants.MultilpleSolutionsImport);
-                string multilpleSolutionsImportPSPathVirtual = this.localFolder + CrmConstants.MultilpleSolutionsImport;
-                File.Copy(multilpleSolutionsImportPSPath, multilpleSolutionsImportPSPathVirtual, true);
-
-                string solutionToBeImportedPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), CrmConstants.SolutionToBeImported);
-                string solutionToBeImportedPSPathVirtual = this.localFolder + CrmConstants.SolutionToBeImported;
-                File.Copy(solutionToBeImportedPSPath, solutionToBeImportedPSPathVirtual, true);
-
-                Console.WriteLine("Committing solutions");
-                string fileUnmanaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_.zip";
-                File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
-
-                string fileManaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_managed_.zip";
-                File.Copy(solutionFileInfo.SolutionFilePathManaged, fileManaged, true);
-
+                Console.WriteLine("Committing solutions");                
+                string file = this.solutionlocalFolder + solutionFileInfo.SolutionFileZipName;                
+                File.Copy(solutionFileInfo.SolutionFilePath, file, true);
                 string webResources = solutionFileInfo.SolutionExtractionPath + "\\WebResources";
 
                 using (var repo = new Repository(this.localFolder.FullName))
                 {
-                    AddRepositoryIndexes(fileUnmanaged, repo);
-                    AddRepositoryIndexes(fileManaged, repo);
+                    if (string.IsNullOrEmpty(file))
+                    {
+                        var files = this.solutionlocalFolder.GetFiles("*.zip").Select(f => f.FullName);
+
+                        {
+                            foreach (var f in files)
+                            {
+                                if (string.IsNullOrEmpty(file))
+                                {
+                                    repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
+                                }
+                                else
+                                {
+                                    if (f.EndsWith(file))
+                                    {
+                                        repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        repo.Index.Add(file.Replace(this.localFolder.FullName, string.Empty));
+                    }
 
                     this.AddWebResourcesToRepository(webResources, repo);
 

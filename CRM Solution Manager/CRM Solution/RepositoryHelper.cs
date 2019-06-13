@@ -60,7 +60,7 @@ namespace CrmSolution
                     {
                         RepositoryConfigurationConstants.ResetLocalDirectory();
                         string solutionFilePath = RepositoryConfigurationConstants.LocalDirectory + "solutions.txt";
-
+                                                                        
                         // todo: enable solutions file clear from crm portal
                         PopulateHashset(solutionFilePath, new HashSet<string>());
                         foreach (var solutionFile in solutionFiles)
@@ -178,7 +178,12 @@ namespace CrmSolution
 
             gitRepositoryManager.UpdateRepository();
 
-            PopulateHashset(solutionFilePath, hashSet);
+            if (File.Exists(solutionFilePath) && solutionFile.SolutionsTxt)
+            {
+                File.WriteAllText(solutionFilePath, String.Empty);
+            }
+
+            PopulateHashset(solutionFilePath, hashSet);                      
 
             if (!hashSet.Contains(solutionFile.SolutionFileZipName) && solutionFile.IncludeInRelease)
             {

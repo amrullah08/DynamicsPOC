@@ -10,6 +10,7 @@ namespace GitDeploy
     using System;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Xml;
     using CrmSolution;
     using LibGit2Sharp;
@@ -167,6 +168,15 @@ namespace GitDeploy
         {
             try
             {
+                Console.WriteLine("Committing Powershell Scripts");
+                string multilpleSolutionsImportPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), CrmConstants.MultilpleSolutionsImport);
+                string multilpleSolutionsImportPSPathVirtual = this.localFolder + CrmConstants.MultilpleSolutionsImport;
+                File.Copy(multilpleSolutionsImportPSPath, multilpleSolutionsImportPSPathVirtual, true);
+
+                string solutionToBeImportedPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), CrmConstants.SolutionToBeImported);
+                string solutionToBeImportedPSPathVirtual = this.localFolder + CrmConstants.SolutionToBeImported;
+                File.Copy(solutionToBeImportedPSPath, solutionToBeImportedPSPathVirtual, true);
+
                 Console.WriteLine("Committing solutions");
                 string fileUnmanaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_.zip";
                 File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
@@ -187,6 +197,8 @@ namespace GitDeploy
                     this.AddExtractedSolutionToRepository(solutionFileInfo, repo);
 
                     repo.Index.Add(solutionFilePath.Replace(this.localFolder.FullName, string.Empty));
+                    repo.Index.Add(multilpleSolutionsImportPSPathVirtual.Replace(this.localFolder.FullName, string.Empty));
+                    repo.Index.Add(solutionToBeImportedPSPathVirtual.Replace(this.localFolder.FullName, string.Empty));
 
                     var offset = DateTimeOffset.Now;
                     Signature author = new Signature(this.authorName, this.authorEmail, offset);

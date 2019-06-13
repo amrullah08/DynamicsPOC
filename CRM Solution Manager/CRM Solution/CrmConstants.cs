@@ -59,6 +59,28 @@ namespace CrmSolution
         }
 
         /// <summary>
+        /// Gets solution packager path
+        /// </summary>
+        public static string MultilpleSolutionsImport
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["MultilpleSolutionsImport"];
+            }
+        }
+
+        /// <summary>
+        /// Gets solution packager path
+        /// </summary>
+        public static string SolutionToBeImported
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["SolutionToBeImported"];
+            }
+        }
+
+        /// <summary>
         /// Gets solution packager relative path
         /// </summary>
         public static string SolutionPackagerRelativePath

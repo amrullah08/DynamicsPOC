@@ -49,6 +49,7 @@ namespace CrmSolution
             this.CheckInSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForCheckinSolution);
             this.MergeSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForMergeSolution);
             this.ExportAsManaged = solutionDetail.GetAttributeValue<bool>("syed_exportas");
+            this.SolutionsTxt = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForOverwriteSolutionsTxt);
             this.RemoteName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRemote);
             this.GitRepoUrl = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryUrl);
             EntityCollection retrieveSolutionsToBeMerged = CrmSolutionHelper.RetrieveSolutionsToBeMergedByListOfSolutionId(organizationServiceProxy, solution.Id);
@@ -120,6 +121,11 @@ namespace CrmSolution
         public string GitRepoUrl { get; set; }
 
         /// <summary>
+        /// Gets or sets value indicating whether Overwrite solutions.txt needs to be overwritten or not
+        /// </summary>
+        public bool SolutionsTxt { get; set; }
+
+        /// <summary>
         /// Gets or sets remote name
         /// </summary>
         public string RemoteName { get; set; }
@@ -140,7 +146,7 @@ namespace CrmSolution
         public string OwnerName { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether solution needs to be included in Release
+        /// Gets or sets a value indicating whether solution needs to be included in Release or not
         /// </summary>
         public bool IncludeInRelease { get; set; }
 

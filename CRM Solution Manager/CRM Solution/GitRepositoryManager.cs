@@ -167,38 +167,19 @@ namespace GitDeploy
         {
             try
             {
-                Console.WriteLine("Committing solutions");                
-                string file = this.solutionlocalFolder + solutionFileInfo.SolutionFileZipName;                
-                File.Copy(solutionFileInfo.SolutionFilePath, file, true);
+                Console.WriteLine("Committing solutions");
+                string fileUnmanaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_.zip";
+                File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
+
+                string fileManaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_managed_.zip";
+                File.Copy(solutionFileInfo.SolutionFilePathManaged, fileManaged, true);
+
                 string webResources = solutionFileInfo.SolutionExtractionPath + "\\WebResources";
 
                 using (var repo = new Repository(this.localFolder.FullName))
                 {
-                    if (string.IsNullOrEmpty(file))
-                    {
-                        var files = this.solutionlocalFolder.GetFiles("*.zip").Select(f => f.FullName);
-
-                        {
-                            foreach (var f in files)
-                            {
-                                if (string.IsNullOrEmpty(file))
-                                {
-                                    repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
-                                }
-                                else
-                                {
-                                    if (f.EndsWith(file))
-                                    {
-                                        repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        repo.Index.Add(file.Replace(this.localFolder.FullName, string.Empty));
-                    }
+                    AddRepositoryIndexes(fileUnmanaged, repo);
+                    AddRepositoryIndexes(fileManaged, repo);
 
                     this.AddWebResourcesToRepository(webResources, repo);
 
@@ -288,6 +269,42 @@ namespace GitDeploy
         }
 
         /// <summary>
+        /// Adds indexes for repository
+        /// </summary>
+        /// <param name="file">Export solution location</param>
+        /// <param name="repo">Repository</param>
+        private void AddRepositoryIndexes(string file, Repository repo)
+        {
+            if (string.IsNullOrEmpty(file))
+            {
+                var files = this.solutionlocalFolder.GetFiles("*.zip").Select(f => f.FullName);
+
+                {
+                    foreach (var f in files)
+                    {
+                        if (string.IsNullOrEmpty(file))
+                        {
+                            repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
+                        }
+                        else
+                        {
+                            if (f.EndsWith(file))
+                            {
+                                repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                repo.Index.Add(file.Replace(this.localFolder.FullName, string.Empty));
+            }
+        }
+            
+
+
+        /// <summary>
         /// Method updates repository
         /// </summary>
         public void UpdateRepository()
@@ -306,7 +323,7 @@ namespace GitDeploy
                 if (!cloneAlways)
                 {
                     try
-                    {                        
+                    {
                         using (var repo = new Repository(workingDirectory))
                         {
                             repo.Reset(ResetMode.Hard);
@@ -488,7 +505,7 @@ namespace GitDeploy
                 repo.Index.Add(commitFileLoc.Replace(this.localFolder.FullName, string.Empty));
             }
         }
-        
+
         /// <summary>
         /// Method adds extracted solution resources to repository
         /// </summary>
@@ -496,7 +513,7 @@ namespace GitDeploy
         /// <param name="repo">repository to be committed</param>
         private void AddExtractedSolutionToRepository(SolutionFileInfo solutionFileInfo, Repository repo)
         {
-            this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.solutionlocalFolder.FullName + solutionFileInfo.SolutionUniqueName, repo);
+            this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.solutionlocalFolder.FullName + solutionFileInfo.SolutionUniqueName, repo);            
         }
     }
 }

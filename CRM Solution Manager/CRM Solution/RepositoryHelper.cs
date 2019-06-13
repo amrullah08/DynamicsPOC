@@ -95,8 +95,8 @@ namespace CrmSolution
             return new GitDeploy.GitRepositoryManager(
                                                     RepositoryConfigurationConstants.GitUserName,
                                                     RepositoryConfigurationConstants.GitUserPassword,
-                                                    RepositoryConfigurationConstants.RepositoryUrl,
-                                                    RepositoryConfigurationConstants.RepositoryRemoteName,
+                                                    solutionFile.GitRepoUrl ?? RepositoryConfigurationConstants.RepositoryUrl,
+                                                    solutionFile.RemoteName ?? RepositoryConfigurationConstants.RepositoryRemoteName,
                                                     solutionFile.BranchName ?? RepositoryConfigurationConstants.BranchName,
                                                     Convert.ToBoolean(RepositoryConfigurationConstants.CloneRepositoryAlways),
                                                     RepositoryConfigurationConstants.LocalDirectory,

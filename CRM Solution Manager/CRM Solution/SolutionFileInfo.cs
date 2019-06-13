@@ -48,13 +48,17 @@ namespace CrmSolution
             this.IncludeInRelease = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForIncludeInRelease);
             this.CheckInSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForCheckinSolution);
             this.MergeSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForMergeSolution);
-            var solutions = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSourceSolutions);
+            this.ExportAsManaged = solutionDetail.GetAttributeValue<bool>("syed_exportas");
+            this.SolutionsTxt = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForOverwriteSolutionsTxt);
+            this.RemoteName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRemote);
+            this.GitRepoUrl = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryUrl);
+            EntityCollection retrieveSolutionsToBeMerged = CrmSolutionHelper.RetrieveSolutionsToBeMergedByListOfSolutionId(organizationServiceProxy, solution.Id);
 
-            
+
 
             if (this.CheckInSolution)
-            {                
-                this.SolutionExtractionPath = Path.GetTempPath() + this.SolutionUniqueName;                
+            {
+                this.SolutionExtractionPath = Path.GetTempPath() + this.SolutionUniqueName;
                 this.BranchName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForBranch);
                 CrmSolutionHelper.CreateEmptyFolder(this.SolutionExtractionPath);
             }

@@ -168,38 +168,28 @@ namespace GitDeploy
         {
             try
             {
-                Console.WriteLine("Committing solutions");                
-                string file = this.solutionlocalFolder + solutionFileInfo.SolutionFileZipName;                
-                File.Copy(solutionFileInfo.SolutionFilePath, file, true);
+                Console.WriteLine("Committing Powershell Scripts");
+                string multilpleSolutionsImportPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), CrmConstants.MultilpleSolutionsImport);
+                string multilpleSolutionsImportPSPathVirtual = this.localFolder + CrmConstants.MultilpleSolutionsImport;
+                File.Copy(multilpleSolutionsImportPSPath, multilpleSolutionsImportPSPathVirtual, true);
+
+                string solutionToBeImportedPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), CrmConstants.SolutionToBeImported);
+                string solutionToBeImportedPSPathVirtual = this.localFolder + CrmConstants.SolutionToBeImported;
+                File.Copy(solutionToBeImportedPSPath, solutionToBeImportedPSPathVirtual, true);
+
+                Console.WriteLine("Committing solutions");
+                string fileUnmanaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_.zip";
+                File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
+
+                string fileManaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_managed_.zip";
+                File.Copy(solutionFileInfo.SolutionFilePathManaged, fileManaged, true);
+
                 string webResources = solutionFileInfo.SolutionExtractionPath + "\\WebResources";
 
                 using (var repo = new Repository(this.localFolder.FullName))
                 {
-                    if (string.IsNullOrEmpty(file))
-                    {
-                        var files = this.solutionlocalFolder.GetFiles("*.zip").Select(f => f.FullName);
-
-                        {
-                            foreach (var f in files)
-                            {
-                                if (string.IsNullOrEmpty(file))
-                                {
-                                    repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
-                                }
-                                else
-                                {
-                                    if (f.EndsWith(file))
-                                    {
-                                        repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        repo.Index.Add(file.Replace(this.localFolder.FullName, string.Empty));
-                    }
+                    AddRepositoryIndexes(fileUnmanaged, repo);
+                    AddRepositoryIndexes(fileManaged, repo);
 
                     this.AddWebResourcesToRepository(webResources, repo);
 
@@ -323,7 +313,7 @@ namespace GitDeploy
                 repo.Index.Add(file.Replace(this.localFolder.FullName, string.Empty));
             }
         }
-            
+
 
 
         /// <summary>
@@ -535,7 +525,7 @@ namespace GitDeploy
         /// <param name="repo">repository to be committed</param>
         private void AddExtractedSolutionToRepository(SolutionFileInfo solutionFileInfo, Repository repo)
         {
-            this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.solutionlocalFolder.FullName + solutionFileInfo.SolutionUniqueName, repo);            
+            this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.solutionlocalFolder.FullName + solutionFileInfo.SolutionUniqueName, repo);
         }
     }
 }

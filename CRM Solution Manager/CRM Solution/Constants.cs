@@ -68,7 +68,7 @@ namespace CrmSolution
         /// Overwrite Solutions.txt column name
         /// </summary>
         public const string SourceControlQueueAttributeNameForOverwriteSolutionsTxt = "syed_overwritesolutionstxt";
-        
+
         /// <summary>
         /// repository location column name
         /// </summary>

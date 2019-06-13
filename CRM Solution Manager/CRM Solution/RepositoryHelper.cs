@@ -36,7 +36,7 @@ namespace CrmSolution
                             CrmConstants.SolutionPackagerPath);
 
             int timeOut = Convert.ToInt32(CrmConstants.SleepTimeoutInMillis);
-            
+
             // while (true)
             {
                 HashSet<string> hashSet = new HashSet<string>();
@@ -60,7 +60,7 @@ namespace CrmSolution
                     {
                         RepositoryConfigurationConstants.ResetLocalDirectory();
                         string solutionFilePath = RepositoryConfigurationConstants.LocalDirectory + "solutions.txt";
-                                                                        
+
                         // todo: enable solutions file clear from crm portal
                         PopulateHashset(solutionFilePath, new HashSet<string>());
                         foreach (var solutionFile in solutionFiles)
@@ -104,9 +104,9 @@ namespace CrmSolution
                                                     RepositoryConfigurationConstants.HtmlDirectory,
                                                     RepositoryConfigurationConstants.ImagesDirectory,
                                                     RepositoryConfigurationConstants.SolutionFolder,
-                                                    solutionFile.OwnerName ?? committerName, 
-                                                    authorEmail, 
-                                                    committerName, 
+                                                    solutionFile.OwnerName ?? committerName,
+                                                    authorEmail,
+                                                    committerName,
                                                     committerEmail);
         }
 
@@ -162,11 +162,11 @@ namespace CrmSolution
         /// <param name="solutionFilePath">path of file that contains list of solution to be released</param>
         /// <param name="hashSet">hash set to store release solution</param>
         private static void TryPushToRepository(
-                                                string committerName, 
-                                                string committerEmail, 
+                                                string committerName,
+                                                string committerEmail,
                                                 string authorEmail,
-                                                SolutionFileInfo solutionFile, 
-                                                string solutionFilePath, 
+                                                SolutionFileInfo solutionFile,
+                                                string solutionFilePath,
                                                 HashSet<string> hashSet)
         {
             //RepositoryConfigurationConstants.ResetLocalDirectory();
@@ -183,7 +183,7 @@ namespace CrmSolution
                 File.WriteAllText(solutionFilePath, String.Empty);
             }
 
-            PopulateHashset(solutionFilePath, hashSet);                      
+            PopulateHashset(solutionFilePath, hashSet);
 
             if (!hashSet.Contains(solutionFile.SolutionFileZipName) && solutionFile.IncludeInRelease)
             {

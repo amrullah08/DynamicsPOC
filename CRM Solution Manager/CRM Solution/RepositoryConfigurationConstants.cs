@@ -42,7 +42,6 @@ namespace CrmSolution
             }
         }
 
-
         /// <summary>
         /// Gets repository script directory
         /// </summary>

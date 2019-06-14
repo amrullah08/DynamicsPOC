@@ -59,7 +59,7 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Gets solution packager path
+        /// Gets MultilpleSolutionsImport PS path
         /// </summary>
         public static string MultilpleSolutionsImport
         {
@@ -70,7 +70,7 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Gets solution packager path
+        /// Gets SolutionToBeImported PS path
         /// </summary>
         public static string SolutionToBeImported
         {

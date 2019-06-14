@@ -90,8 +90,7 @@ namespace CrmSolution
                 return ConfigurationManager.AppSettings["SolutionPackagerRelativePath"];
             }
         }
-
-
+        
         /// <summary>
         /// Gets sleep timeout in millis
         /// </summary>

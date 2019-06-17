@@ -293,7 +293,7 @@ namespace CrmSolution
                 this.ExportSolution(serviceProxy, solutionFile, solutionFile.SolutionUniqueName, "Downloading Master Solution: ", solutionFile.ExportAsManaged);
                 solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportSuccessful;
                 solutionFile.Update();
-                this.GetDeploymentInstance(serviceProxy, solutionFile);
+                this.ImportSolutionToTargetInstance(serviceProxy, solutionFile);
             }
             else
             {
@@ -332,7 +332,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <param name="solutionFile">solution file info</param>        
-        private void GetDeploymentInstance(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
+        private void ImportSolutionToTargetInstance(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
         {
             Entity sourceControl = solutionFile.Solution;
             EntityCollection deploymentInstance = FetchDeplopymentInstance(serviceProxy, sourceControl.Id);
@@ -345,7 +345,7 @@ namespace CrmSolution
                     clientCredentials.UserName.UserName = instance.Attributes["syed_name"].ToString();
                     clientCredentials.UserName.Password = instance.Attributes["syed_password"].ToString();
                     OrganizationServiceProxy client = new OrganizationServiceProxy(new Uri(instance.Attributes["syed_instanceurl"].ToString()), null, clientCredentials, null);
-                    ImportSolution(client, solutionFile.SolutionFilePath ?? solutionFile.SolutionFilePathManaged);
+                    ImportSolution(client, solutionFile.SolutionFilePath ?? solutionFile.SolutionFilePathManaged, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
                 }
             }
         }
@@ -355,8 +355,10 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <param name="solutionImportPath">solution import path</param>
-        public static void ImportSolution(OrganizationServiceProxy serviceProxy, string solutionImportPath)
+        public static void ImportSolution(OrganizationServiceProxy serviceProxy, string solutionImportPath, Uri uri)
         {
+            Console.WriteLine("Started importing solution to Organization " + uri);
+
             byte[] fileBytes = File.ReadAllBytes(solutionImportPath);
 
             ImportSolutionRequest impSolReq = new ImportSolutionRequest()
@@ -373,43 +375,44 @@ namespace CrmSolution
             };
             ExecuteAsyncResponse importRequestResponse = (ExecuteAsyncResponse)serviceProxy.Execute(importRequest);
 
-            Console.WriteLine("Started importing solution");
-
             // put in sleep for every 30 seconds to check the status of import using asyncoperation entity
             string solutionImportResult = null;
             while (solutionImportResult == null)
             {
-                System.Threading.Thread.Sleep(30000);
-                Console.WriteLine("still importing......");
                 Guid asyncJobId = importRequestResponse.AsyncJobId;
                 Entity job = (Entity)serviceProxy.Retrieve("asyncoperation", asyncJobId, new ColumnSet(new System.String[] { "asyncoperationid", "statuscode", "message" }));
                 int jobStatusCode = ((OptionSetValue)job["statuscode"]).Value;
                 switch (jobStatusCode)
                 {
-                    // Success
+                    //Success
                     case 30:
                         solutionImportResult = "success";
-                        Console.WriteLine("Solution imported successfully");
+                        Console.WriteLine("Solution imported successfully to the Organization " + uri);
                         break;
                     //Pausing  
                     case 21:
+                        Console.WriteLine(string.Format("Solution Import Pausing: {0}{1}", jobStatusCode, job["message"]));
                         break;
-                    //Canceling
+                    //Cancelling
                     case 22:
+                        Console.WriteLine(string.Format("Solution Import Cancelling: {0}{1}", jobStatusCode, job["message"]));
                         break;
                     //Failed
                     case 31:
+                        Console.WriteLine(string.Format("Solution Import Failed: {0}{1}", jobStatusCode, job["message"]));
                         break;
-                    //Canceled
+                    //Cancelled
                     case 32:
-                        throw new Exception(string.Format("Solution Import Failed: {0}{1}", jobStatusCode, job["message"]));
+                        throw new Exception(string.Format("Solution Import Cancelled: {0}{1}", jobStatusCode, job["message"]));
                     default:
                         break;
                 }
             }
 
             if (solutionImportResult == "success")
+            {
                 PublishAllCustomizationChanges(serviceProxy);
+            }
         }
 
         /// <summary>
@@ -478,7 +481,7 @@ namespace CrmSolution
 
                 // Handles the response
                 byte[] downloadedSolutionFile = exportResponse.ExportSolutionFile;
-                if(IsManaged)
+                if (IsManaged)
                 {
                     solutionFile.SolutionFilePathManaged = Path.GetTempFileName();
                     File.WriteAllBytes(solutionFile.SolutionFilePathManaged, downloadedSolutionFile);

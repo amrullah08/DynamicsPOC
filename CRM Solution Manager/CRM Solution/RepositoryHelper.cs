@@ -36,7 +36,7 @@ namespace CrmSolution
                             CrmConstants.SolutionPackagerPath);
 
             int timeOut = Convert.ToInt32(CrmConstants.SleepTimeoutInMillis);
-            
+
             // while (true)
             {
                 HashSet<string> hashSet = new HashSet<string>();
@@ -104,9 +104,9 @@ namespace CrmSolution
                                                     RepositoryConfigurationConstants.HtmlDirectory,
                                                     RepositoryConfigurationConstants.ImagesDirectory,
                                                     RepositoryConfigurationConstants.SolutionFolder,
-                                                    solutionFile.OwnerName ?? committerName, 
-                                                    authorEmail, 
-                                                    committerName, 
+                                                    solutionFile.OwnerName ?? committerName,
+                                                    authorEmail,
+                                                    committerName,
                                                     committerEmail);
         }
 
@@ -162,11 +162,11 @@ namespace CrmSolution
         /// <param name="solutionFilePath">path of file that contains list of solution to be released</param>
         /// <param name="hashSet">hash set to store release solution</param>
         private static void TryPushToRepository(
-                                                string committerName, 
-                                                string committerEmail, 
+                                                string committerName,
+                                                string committerEmail,
                                                 string authorEmail,
-                                                SolutionFileInfo solutionFile, 
-                                                string solutionFilePath, 
+                                                SolutionFileInfo solutionFile,
+                                                string solutionFilePath,
                                                 HashSet<string> hashSet)
         {
             //RepositoryConfigurationConstants.ResetLocalDirectory();
@@ -177,6 +177,11 @@ namespace CrmSolution
             GitDeploy.GitRepositoryManager gitRepositoryManager = GetRepositoryManager(committerName, committerEmail, authorEmail, solutionFile);
 
             gitRepositoryManager.UpdateRepository();
+
+            if (File.Exists(solutionFilePath) && solutionFile.SolutionsTxt)
+            {
+                File.WriteAllText(solutionFilePath, String.Empty);
+            }
 
             PopulateHashset(solutionFilePath, hashSet);
 

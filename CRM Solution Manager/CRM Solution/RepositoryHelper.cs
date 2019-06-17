@@ -27,6 +27,7 @@ namespace CrmSolution
         /// <param name="authorEmail">author email</param>
         public static void TryUpdateToRepository(string solutionUniqueName, string committerName, string committerEmail, string authorEmail)
         {
+            string solutionFilePath = string.Empty;
             ICrmSolutionHelper crmSolutionHelper = new CrmSolutionHelper(
                             RepositoryConfigurationConstants.RepositoryUrl,
                             RepositoryConfigurationConstants.BranchName,
@@ -36,7 +37,7 @@ namespace CrmSolution
                             CrmConstants.SolutionPackagerPath);
 
             int timeOut = Convert.ToInt32(CrmConstants.SleepTimeoutInMillis);
-            
+
             // while (true)
             {
                 HashSet<string> hashSet = new HashSet<string>();
@@ -52,26 +53,34 @@ namespace CrmSolution
                         // continue;
                     }
 
+                    for (int i = 0; i < solutionFiles.Count; i++)
+                    {
+                        bool checkIn = solutionFiles[i].CheckInSolution;
+                        if (checkIn)
+                        {
+                            RepositoryConfigurationConstants.ResetLocalDirectory();
+                            solutionFilePath = RepositoryConfigurationConstants.LocalDirectory + "solutions.txt";
+
+                            // todo: enable solutions file clear from crm portal
+                            PopulateHashset(solutionFilePath, new HashSet<string>());
+                            return;
+                        }
+                    }
+
                     ////if (!Directory.Exists(ConfigurationManager.AppSettings["RepositoryLocalDirectory"]))
                     ////{
                     ////    Console.WriteLine("Repository local directory doesnt exists " + ConfigurationManager.AppSettings["RepositoryLocalDirectory"]);
                     ////}
                     ////else
+                    foreach (var solutionFile in solutionFiles)
                     {
-                        RepositoryConfigurationConstants.ResetLocalDirectory();
-                        string solutionFilePath = RepositoryConfigurationConstants.LocalDirectory + "solutions.txt";
-
-                        // todo: enable solutions file clear from crm portal
-                        PopulateHashset(solutionFilePath, new HashSet<string>());
-                        foreach (var solutionFile in solutionFiles)
+                        if (solutionFile.CheckInSolution)
                         {
-                            if (solutionFile.CheckInSolution)
-                            {
-                                TryPushToRepository(committerName, committerEmail, authorEmail, solutionFile, solutionFilePath, hashSet);
-                            }
+                            TryPushToRepository(committerName, committerEmail, authorEmail, solutionFile, solutionFilePath, hashSet);
                         }
                     }
                 }
+
                 catch (Exception ex)
                 {
                     Console.Write(ex);
@@ -104,9 +113,9 @@ namespace CrmSolution
                                                     RepositoryConfigurationConstants.HtmlDirectory,
                                                     RepositoryConfigurationConstants.ImagesDirectory,
                                                     RepositoryConfigurationConstants.SolutionFolder,
-                                                    solutionFile.OwnerName ?? committerName, 
-                                                    authorEmail, 
-                                                    committerName, 
+                                                    solutionFile.OwnerName ?? committerName,
+                                                    authorEmail,
+                                                    committerName,
                                                     committerEmail);
         }
 
@@ -162,11 +171,11 @@ namespace CrmSolution
         /// <param name="solutionFilePath">path of file that contains list of solution to be released</param>
         /// <param name="hashSet">hash set to store release solution</param>
         private static void TryPushToRepository(
-                                                string committerName, 
-                                                string committerEmail, 
+                                                string committerName,
+                                                string committerEmail,
                                                 string authorEmail,
-                                                SolutionFileInfo solutionFile, 
-                                                string solutionFilePath, 
+                                                SolutionFileInfo solutionFile,
+                                                string solutionFilePath,
                                                 HashSet<string> hashSet)
         {
             //RepositoryConfigurationConstants.ResetLocalDirectory();

@@ -286,16 +286,14 @@ namespace CrmSolution
                 this.MergeSolutions(solutionFile, serviceProxy);
             }
 
-            if (!solutionFile.CheckInSolution)
-            {
-                solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportStatus;
-                solutionFile.Update();
-                this.ExportSolution(serviceProxy, solutionFile, solutionFile.SolutionUniqueName, "Downloading Master Solution: ", solutionFile.ExportAsManaged);
-                solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportSuccessful;
-                solutionFile.Update();
-                this.ImportSolutionToTargetInstance(serviceProxy, solutionFile);
-            }
-            else
+            solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportStatus;
+            solutionFile.Update();
+            this.ExportSolution(serviceProxy, solutionFile, solutionFile.SolutionUniqueName, "Downloading Master Solution: ", solutionFile.ExportAsManaged);
+            solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportSuccessful;
+            solutionFile.Update();
+            this.ImportSolutionToTargetInstance(serviceProxy, solutionFile);
+
+            if (solutionFile.CheckInSolution)
             {
                 solutionFile.Solution[Constants.SourceControlQueueAttributeNameForRepositoryUrl] = this.RepositoryUrl;
                 solutionFile.Solution[Constants.SourceControlQueueAttributeNameForBranch] = this.Branch;
@@ -345,7 +343,7 @@ namespace CrmSolution
                     clientCredentials.UserName.UserName = instance.Attributes["syed_name"].ToString();
                     clientCredentials.UserName.Password = instance.Attributes["syed_password"].ToString();
                     OrganizationServiceProxy client = new OrganizationServiceProxy(new Uri(instance.Attributes["syed_instanceurl"].ToString()), null, clientCredentials, null);
-                    ImportSolution(client, solutionFile.SolutionFilePath ?? solutionFile.SolutionFilePathManaged, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
+                    ImportSolution(client, solutionFile.SolutionFilePathManaged ?? solutionFile.SolutionFilePath, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
                 }
             }
         }
@@ -391,14 +389,17 @@ namespace CrmSolution
                         break;
                     //Pausing  
                     case 21:
+                        solutionImportResult = "pausing";
                         Console.WriteLine(string.Format("Solution Import Pausing: {0}{1}", jobStatusCode, job["message"]));
                         break;
                     //Cancelling
                     case 22:
+                        solutionImportResult = "cancelling";
                         Console.WriteLine(string.Format("Solution Import Cancelling: {0}{1}", jobStatusCode, job["message"]));
                         break;
                     //Failed
                     case 31:
+                        solutionImportResult = "failed";
                         Console.WriteLine(string.Format("Solution Import Failed: {0}{1}", jobStatusCode, job["message"]));
                         break;
                     //Cancelled

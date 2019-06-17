@@ -14,24 +14,6 @@ namespace SolutionConstants
 	
 	[System.Runtime.Serialization.DataContractAttribute()]
 	[System.CodeDom.Compiler.GeneratedCodeAttribute("CrmSvcUtil", "9.0.0.9479")]
-	public enum ComponentState
-	{
-		
-		[System.Runtime.Serialization.EnumMemberAttribute()]
-		Deleted = 2,
-		
-		[System.Runtime.Serialization.EnumMemberAttribute()]
-		DeletedUnpublished = 3,
-		
-		[System.Runtime.Serialization.EnumMemberAttribute()]
-		Published = 0,
-		
-		[System.Runtime.Serialization.EnumMemberAttribute()]
-		Unpublished = 1,
-	}
-	
-	[System.Runtime.Serialization.DataContractAttribute()]
-	[System.CodeDom.Compiler.GeneratedCodeAttribute("CrmSvcUtil", "9.0.0.9479")]
 	public enum Solution_SolutionType
 	{
 		
@@ -103,47 +85,5 @@ namespace SolutionConstants
 		
 		[System.Runtime.Serialization.EnumMemberAttribute()]
 		Inactive = 2,
-	}
-	
-	[System.Runtime.Serialization.DataContractAttribute()]
-	[System.CodeDom.Compiler.GeneratedCodeAttribute("CrmSvcUtil", "9.0.0.9479")]
-	public enum WebResource_WebResourceType
-	{
-		
-		[System.Runtime.Serialization.EnumMemberAttribute()]
-		Data_XML = 4,
-		
-		[System.Runtime.Serialization.EnumMemberAttribute()]
-		GIFformat = 7,
-		
-		[System.Runtime.Serialization.EnumMemberAttribute()]
-		ICOformat = 10,
-		
-		[System.Runtime.Serialization.EnumMemberAttribute()]
-		JPGformat = 6,
-		
-		[System.Runtime.Serialization.EnumMemberAttribute()]
-		PNGformat = 5,
-		
-		[System.Runtime.Serialization.EnumMemberAttribute()]
-		Script_JScript = 3,
-		
-		[System.Runtime.Serialization.EnumMemberAttribute()]
-		Silverlight_XAP = 8,
-		
-		[System.Runtime.Serialization.EnumMemberAttribute()]
-		String_RESX = 12,
-		
-		[System.Runtime.Serialization.EnumMemberAttribute()]
-		StyleSheet_CSS = 2,
-		
-		[System.Runtime.Serialization.EnumMemberAttribute()]
-		StyleSheet_XSL = 9,
-		
-		[System.Runtime.Serialization.EnumMemberAttribute()]
-		Vectorformat_SVG = 11,
-		
-		[System.Runtime.Serialization.EnumMemberAttribute()]
-		Webpage_HTML = 1,
 	}
 }

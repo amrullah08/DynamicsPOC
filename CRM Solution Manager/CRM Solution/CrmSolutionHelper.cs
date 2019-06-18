@@ -341,11 +341,24 @@ namespace CrmSolution
                 {
                     ClientCredentials clientCredentials = new ClientCredentials();
                     clientCredentials.UserName.UserName = instance.Attributes["syed_name"].ToString();
-                    clientCredentials.UserName.Password = instance.Attributes["syed_password"].ToString();
+                    clientCredentials.UserName.Password = DecryptString(instance.Attributes["syed_password"].ToString());
                     OrganizationServiceProxy client = new OrganizationServiceProxy(new Uri(instance.Attributes["syed_instanceurl"].ToString()), null, clientCredentials, null);
                     ImportSolution(client, solutionFile.SolutionFilePathManaged ?? solutionFile.SolutionFilePath, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
                 }
             }
+        }
+
+        /// <summary>
+        /// Methods decrypts the password
+        /// </summary>
+        /// <param name="encryptString">encrypt string</param>
+        /// <returns></returns>
+        private string DecryptString(string encryptString)
+        {
+            byte[] b = Convert.FromBase64String(encryptString);
+            string decrypted = System.Text.ASCIIEncoding.ASCII.GetString(b);
+
+            return decrypted;
         }
 
         /// <summary>
@@ -373,7 +386,6 @@ namespace CrmSolution
             };
             ExecuteAsyncResponse importRequestResponse = (ExecuteAsyncResponse)serviceProxy.Execute(importRequest);
 
-            // put in sleep for every 30 seconds to check the status of import using asyncoperation entity
             string solutionImportResult = null;
             while (solutionImportResult == null)
             {

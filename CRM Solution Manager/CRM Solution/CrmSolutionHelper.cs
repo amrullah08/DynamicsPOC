@@ -14,6 +14,7 @@ namespace CrmSolution
     using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Client;
+    using Microsoft.Xrm.Sdk.Messages;
     using Microsoft.Xrm.Sdk.Query;
     using MsCrmTools.SolutionComponentsMover.AppCode;
 
@@ -285,22 +286,27 @@ namespace CrmSolution
                 this.MergeSolutions(solutionFile, serviceProxy);
             }
 
-            if (!solutionFile.CheckInSolution)
-            {
-                return;
-            }
-
-            solutionFile.Solution[Constants.SourceControlQueueAttributeNameForRepositoryUrl] = this.RepositoryUrl;
-            solutionFile.Solution[Constants.SourceControlQueueAttributeNameForBranch] = this.Branch;
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportStatus;
             solutionFile.Update();
-
-            this.ExportSolution(serviceProxy, solutionFile, solutionFile.SolutionUniqueName, "Downloading Unmanaged Master Solution: ", false);
-            this.ExportSolution(serviceProxy, solutionFile, solutionFile.SolutionUniqueName, "Downloading Managed Master Solution: ", true);
-
+            this.ExportSolution(serviceProxy, solutionFile, solutionFile.SolutionUniqueName, "Downloading Master Solution: ", solutionFile.ExportAsManaged);
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportSuccessful;
             solutionFile.Update();
-            solutionFile.ProcessSolutionZipFile(this.SolutionPackagerPath);
+            this.ImportSolutionToTargetInstance(serviceProxy, solutionFile);
+
+            if (solutionFile.CheckInSolution)
+            {
+                solutionFile.Solution[Constants.SourceControlQueueAttributeNameForRepositoryUrl] = this.RepositoryUrl;
+                solutionFile.Solution[Constants.SourceControlQueueAttributeNameForBranch] = this.Branch;
+                solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportStatus;
+                solutionFile.Update();
+
+                this.ExportSolution(serviceProxy, solutionFile, solutionFile.SolutionUniqueName, "Downloading Unmanaged Master Solution: ", false);
+                this.ExportSolution(serviceProxy, solutionFile, solutionFile.SolutionUniqueName, "Downloading Managed Master Solution: ", true);
+
+                solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportSuccessful;
+                solutionFile.Update();
+                solutionFile.ProcessSolutionZipFile(this.SolutionPackagerPath);
+            }
         }
 
         /// <summary>
@@ -316,6 +322,153 @@ namespace CrmSolution
                 {
                     ExportSolution(serviceProxy, solutionFile, solutionNAme, "Downloading solutions to be merged: ", false);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Method gets deployment instance record
+        /// </summary>
+        /// <param name="serviceProxy">organization service proxy</param>
+        /// <param name="solutionFile">solution file info</param>        
+        private void ImportSolutionToTargetInstance(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
+        {
+            Entity sourceControl = solutionFile.Solution;
+            EntityCollection deploymentInstance = FetchDeplopymentInstance(serviceProxy, sourceControl.Id);
+
+            if (deploymentInstance.Entities.Count > 0)
+            {
+                foreach (Entity instance in deploymentInstance.Entities)
+                {
+                    ClientCredentials clientCredentials = new ClientCredentials();
+                    clientCredentials.UserName.UserName = instance.Attributes["syed_name"].ToString();
+                    clientCredentials.UserName.Password = DecryptString(instance.Attributes["syed_password"].ToString());
+                    OrganizationServiceProxy client = new OrganizationServiceProxy(new Uri(instance.Attributes["syed_instanceurl"].ToString()), null, clientCredentials, null);
+                    ImportSolution(client, solutionFile.SolutionFilePathManaged ?? solutionFile.SolutionFilePath, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Methods decrypts the password
+        /// </summary>
+        /// <param name="encryptString">encrypt string</param>
+        /// <returns></returns>
+        private string DecryptString(string encryptString)
+        {
+            byte[] b = Convert.FromBase64String(encryptString);
+            string decrypted = System.Text.ASCIIEncoding.ASCII.GetString(b);
+
+            return decrypted;
+        }
+
+        /// <summary>
+        /// Method import master solution to deployment instance
+        /// </summary>
+        /// <param name="serviceProxy">organization service proxy</param>
+        /// <param name="solutionImportPath">solution import path</param>
+        public static void ImportSolution(OrganizationServiceProxy serviceProxy, string solutionImportPath, Uri uri)
+        {
+            Console.WriteLine("Started importing solution to Organization " + uri);
+
+            byte[] fileBytes = File.ReadAllBytes(solutionImportPath);
+
+            ImportSolutionRequest impSolReq = new ImportSolutionRequest()
+            {
+                CustomizationFile = fileBytes,
+                ImportJobId = Guid.NewGuid(),
+                OverwriteUnmanagedCustomizations = true,
+                SkipProductUpdateDependencies = true,
+                PublishWorkflows = false,
+            };
+            ExecuteAsyncRequest importRequest = new ExecuteAsyncRequest()
+            {
+                Request = impSolReq
+            };
+            ExecuteAsyncResponse importRequestResponse = (ExecuteAsyncResponse)serviceProxy.Execute(importRequest);
+
+            string solutionImportResult = null;
+            while (solutionImportResult == null)
+            {
+                Guid asyncJobId = importRequestResponse.AsyncJobId;
+                Entity job = (Entity)serviceProxy.Retrieve("asyncoperation", asyncJobId, new ColumnSet(new System.String[] { "asyncoperationid", "statuscode", "message" }));
+                int jobStatusCode = ((OptionSetValue)job["statuscode"]).Value;
+                switch (jobStatusCode)
+                {
+                    //Success
+                    case 30:
+                        solutionImportResult = "success";
+                        Console.WriteLine("Solution imported successfully to the Organization " + uri);
+                        break;
+                    //Pausing  
+                    case 21:
+                        solutionImportResult = "pausing";
+                        Console.WriteLine(string.Format("Solution Import Pausing: {0}{1}", jobStatusCode, job["message"]));
+                        break;
+                    //Cancelling
+                    case 22:
+                        solutionImportResult = "cancelling";
+                        Console.WriteLine(string.Format("Solution Import Cancelling: {0}{1}", jobStatusCode, job["message"]));
+                        break;
+                    //Failed
+                    case 31:
+                        solutionImportResult = "failed";
+                        Console.WriteLine(string.Format("Solution Import Failed: {0}{1}", jobStatusCode, job["message"]));
+                        break;
+                    //Cancelled
+                    case 32:
+                        throw new Exception(string.Format("Solution Import Cancelled: {0}{1}", jobStatusCode, job["message"]));
+                    default:
+                        break;
+                }
+            }
+
+            if (solutionImportResult == "success")
+            {
+                PublishAllCustomizationChanges(serviceProxy);
+            }
+        }
+
+        /// <summary>
+        /// Method publish all the customization
+        /// </summary>
+        /// <param name="serviceProxy">organization service proxy</param>
+        public static void PublishAllCustomizationChanges(OrganizationServiceProxy serviceProxy)
+        {
+            PublishAllXmlRequest publishAllXmlRequest = new PublishAllXmlRequest();
+            serviceProxy.Execute(publishAllXmlRequest);
+            Console.WriteLine("Successfully published solution components.");
+        }
+
+        /// <summary>
+        /// Method retrieves associated Deployment Instance for Dynamic Source Control.
+        /// </summary>
+        /// <param name="serviceProxy">service proxy</param>
+        /// <param name="sourceControlId">source control id</param>
+        /// <returns></returns>
+        public static EntityCollection FetchDeplopymentInstance(IOrganizationService serviceProxy, Guid sourceControlId)
+        {
+            try
+            {
+                string fetchSolutions = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+                                              <entity name='syed_deploymentinstance'>
+                                                <attribute name='syed_deploymentinstanceid' />
+                                                <attribute name='syed_name' />
+                                                <attribute name='createdon' />
+                                                <attribute name='syed_password' />
+                                                <attribute name='syed_instanceurl' />
+                                                <order attribute='syed_name' descending='false' />
+                                                <filter type='and'>
+                                                  <condition attribute='syed_dynamicssourcecontrol' operator='eq' uitype='syed_sourcecontrolqueue' value='" + sourceControlId + @"' />
+                                                </filter>
+                                              </entity>
+                                            </fetch>";
+
+                EntityCollection solutionlist = serviceProxy.RetrieveMultiple(new FetchExpression(fetchSolutions));
+                return solutionlist;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message.ToString(), ex);
             }
         }
 
@@ -341,7 +494,7 @@ namespace CrmSolution
 
                 // Handles the response
                 byte[] downloadedSolutionFile = exportResponse.ExportSolutionFile;
-                if(IsManaged)
+                if (IsManaged)
                 {
                     solutionFile.SolutionFilePathManaged = Path.GetTempFileName();
                     File.WriteAllBytes(solutionFile.SolutionFilePathManaged, downloadedSolutionFile);

@@ -65,6 +65,11 @@ namespace CrmSolution
         public const string SourceControlQueuemPushToRepositorySuccessStatus = "Successfully Pushed To Repository";
 
         /// <summary>
+        /// Overwrite Solutions.txt column name
+        /// </summary>
+        public const string SourceControlQueueAttributeNameForOverwriteSolutionsTxt = "syed_overwritesolutionstxt";
+
+        /// <summary>
         /// repository location column name
         /// </summary>
         public const string SourceControlQueueAttributeNameForRepositoryUrl = "syed_repositoryurl";

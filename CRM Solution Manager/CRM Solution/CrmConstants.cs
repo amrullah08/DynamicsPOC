@@ -59,6 +59,28 @@ namespace CrmSolution
         }
 
         /// <summary>
+        /// Gets MultilpleSolutionsImport PS path
+        /// </summary>
+        public static string MultilpleSolutionsImport
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["MultilpleSolutionsImport"];
+            }
+        }
+
+        /// <summary>
+        /// Gets SolutionToBeImported PS path
+        /// </summary>
+        public static string SolutionToBeImported
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["SolutionToBeImported"];
+            }
+        }
+
+        /// <summary>
         /// Gets solution packager relative path
         /// </summary>
         public static string SolutionPackagerRelativePath
@@ -68,6 +90,7 @@ namespace CrmSolution
                 return ConfigurationManager.AppSettings["SolutionPackagerRelativePath"];
             }
         }
+        
 
         /// <summary>
         /// Gets sleep timeout in millis

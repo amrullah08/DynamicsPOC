@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // <copyright file="RepositoryConfigurationConstants.cs" company="Microsoft">
 //     Copyright (c) Microsoft. All rights reserved.
 // </copyright>
@@ -41,7 +41,6 @@ namespace CrmSolution
                 return Path.Combine(LocalDirectory, ConfigurationManager.AppSettings["RepositorySolutionFolder"]);
             }
         }
-
 
         /// <summary>
         /// Gets repository script directory

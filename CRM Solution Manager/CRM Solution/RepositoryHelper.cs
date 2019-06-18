@@ -187,6 +187,11 @@ namespace CrmSolution
 
             gitRepositoryManager.UpdateRepository();
 
+            if (File.Exists(solutionFilePath) && solutionFile.SolutionsTxt)
+            {
+                File.WriteAllText(solutionFilePath, String.Empty);
+            }
+
             PopulateHashset(solutionFilePath, hashSet);
 
             if (!hashSet.Contains(solutionFile.SolutionFileZipName) && solutionFile.IncludeInRelease)

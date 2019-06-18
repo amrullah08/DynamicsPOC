@@ -27,6 +27,7 @@ namespace CrmSolution
         /// <param name="authorEmail">author email</param>
         public static void TryUpdateToRepository(string solutionUniqueName, string committerName, string committerEmail, string authorEmail)
         {
+            string solutionFilePath = string.Empty;
             ICrmSolutionHelper crmSolutionHelper = new CrmSolutionHelper(
                             RepositoryConfigurationConstants.RepositoryUrl,
                             RepositoryConfigurationConstants.BranchName,
@@ -52,26 +53,34 @@ namespace CrmSolution
                         // continue;
                     }
 
+                    for (int i = 0; i < solutionFiles.Count; i++)
+                    {
+                        bool checkIn = solutionFiles[i].CheckInSolution;
+                        if (checkIn)
+                        {
+                            RepositoryConfigurationConstants.ResetLocalDirectory();
+                            solutionFilePath = RepositoryConfigurationConstants.LocalDirectory + "solutions.txt";
+
+                            // todo: enable solutions file clear from crm portal
+                            PopulateHashset(solutionFilePath, new HashSet<string>());
+                            return;
+                        }
+                    }
+
                     ////if (!Directory.Exists(ConfigurationManager.AppSettings["RepositoryLocalDirectory"]))
                     ////{
                     ////    Console.WriteLine("Repository local directory doesnt exists " + ConfigurationManager.AppSettings["RepositoryLocalDirectory"]);
                     ////}
                     ////else
+                    foreach (var solutionFile in solutionFiles)
                     {
-                        RepositoryConfigurationConstants.ResetLocalDirectory();
-                        string solutionFilePath = RepositoryConfigurationConstants.LocalDirectory + "solutions.txt";
-
-                        // todo: enable solutions file clear from crm portal
-                        PopulateHashset(solutionFilePath, new HashSet<string>());
-                        foreach (var solutionFile in solutionFiles)
+                        if (solutionFile.CheckInSolution)
                         {
-                            if (solutionFile.CheckInSolution)
-                            {
-                                TryPushToRepository(committerName, committerEmail, authorEmail, solutionFile, solutionFilePath, hashSet);
-                            }
+                            TryPushToRepository(committerName, committerEmail, authorEmail, solutionFile, solutionFilePath, hashSet);
                         }
                     }
                 }
+
                 catch (Exception ex)
                 {
                     Console.Write(ex);

@@ -55,6 +55,16 @@ namespace CrmSolution
         public const string SourceControlQueuemMergingSuccessfulStatus = "Merge Successful";
 
         /// <summary>
+        /// Value for Import Successful status
+        /// </summary>
+        public const string SourceControlQueueImportSuccessfulStatus = "Import Successful";
+
+        /// <summary>
+        /// Value for Publish Successful status
+        /// </summary>
+        public const string SourceControlQueuePublishSuccessfulStatus = "Publish all Customizations successful";
+
+        /// <summary>
         /// Value for Pushing to repository status
         /// </summary>
         public const string SourceControlQueuemPushingToStatus = "Pushing to Repository";

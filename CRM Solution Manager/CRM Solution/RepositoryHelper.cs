@@ -31,6 +31,7 @@ namespace CrmSolution
             ICrmSolutionHelper crmSolutionHelper = new CrmSolutionHelper(
                             RepositoryConfigurationConstants.RepositoryUrl,
                             RepositoryConfigurationConstants.BranchName,
+                            RepositoryConfigurationConstants.RepositoryRemoteName,
                             CrmConstants.OrgServiceUrl,
                             CrmConstants.DynamicsUserName,
                             CrmConstants.DynamicsPassword,
@@ -187,7 +188,7 @@ namespace CrmSolution
 
             gitRepositoryManager.UpdateRepository();
 
-            if (File.Exists(solutionFilePath) && solutionFile.SolutionsTxt)
+            if (solutionFile.SolutionsTxt == 433710000 && File.Exists(solutionFilePath)) //433710000 value for Yes
             {
                 File.WriteAllText(solutionFilePath, String.Empty);
             }

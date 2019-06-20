@@ -38,14 +38,16 @@ namespace CrmSolution
         /// </summary>
         /// <param name="repositoryUrl">repository url</param>
         /// <param name="branch">repository branch</param>
+        /// <param name="remoteName">repository branch</param>
         /// <param name="organizationServiceUrl">organization service url</param>
         /// <param name="userName">user name</param>
         /// <param name="password">password token</param>
         /// <param name="solutionPackagerPath">solution package path</param>
-        public CrmSolutionHelper(string repositoryUrl, string branch, string organizationServiceUrl, string userName, string password, string solutionPackagerPath)
+        public CrmSolutionHelper(string repositoryUrl, string branch, string remoteName, string organizationServiceUrl, string userName, string password, string solutionPackagerPath)
         {
             this.RepositoryUrl = repositoryUrl;
             this.Branch = branch;
+            this.RemoteName = remoteName;
             this.SolutionPackagerPath = solutionPackagerPath;
             this.serviceUri = new Uri(organizationServiceUrl);
             this.clientCredentials = new ClientCredentials();
@@ -63,6 +65,11 @@ namespace CrmSolution
         /// Gets or sets Repository branch
         /// </summary>
         public string Branch { get; set; }
+
+        /// <summary>
+        /// Gets or sets Remote name
+        /// </summary>
+        public string RemoteName { get; set; }
 
         /// <summary>
         /// Gets or sets solution packager path
@@ -343,7 +350,7 @@ namespace CrmSolution
                     clientCredentials.UserName.UserName = instance.Attributes["syed_name"].ToString();
                     clientCredentials.UserName.Password = DecryptString(instance.Attributes["syed_password"].ToString());
                     OrganizationServiceProxy client = new OrganizationServiceProxy(new Uri(instance.Attributes["syed_instanceurl"].ToString()), null, clientCredentials, null);
-                    ImportSolution(client, solutionFile.SolutionFilePathManaged ?? solutionFile.SolutionFilePath, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
+                    ImportSolution(client, solutionFile, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
                 }
             }
         }
@@ -366,8 +373,9 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <param name="solutionImportPath">solution import path</param>
-        public static void ImportSolution(OrganizationServiceProxy serviceProxy, string solutionImportPath, Uri uri)
+        public static void ImportSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile, Uri uri)
         {
+            string solutionImportPath = solutionFile.SolutionFilePathManaged ?? solutionFile.SolutionFilePath;
             Console.WriteLine("Started importing solution to Organization " + uri);
 
             byte[] fileBytes = File.ReadAllBytes(solutionImportPath);
@@ -398,6 +406,8 @@ namespace CrmSolution
                     case 30:
                         solutionImportResult = "success";
                         Console.WriteLine("Solution imported successfully to the Organization " + uri);
+                        solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueImportSuccessfulStatus;
+                        solutionFile.Update();
                         break;
                     //Pausing  
                     case 21:
@@ -420,11 +430,13 @@ namespace CrmSolution
                     default:
                         break;
                 }
-            }
+            }            
 
             if (solutionImportResult == "success")
             {
                 PublishAllCustomizationChanges(serviceProxy);
+                solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuePublishSuccessfulStatus;
+                solutionFile.Update();
             }
         }
 

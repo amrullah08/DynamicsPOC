@@ -117,12 +117,14 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="DevOps_1_0_0_0.zip" />
+    <None Include="MultilpleSolutionsImport.ps1" />
     <None Include="packages.config">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </None>
-    <None Include="Properties\PublishProfiles\CRMSolution20190523100130 - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\SolutionMergerWebjobNew - Web Deploy.pubxml" />
     <None Include="Properties\webjob-publish-settings.json" />
     <None Include="Settings.StyleCop" />
+    <None Include="SolutionToBeImported.ps1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="CoreTools\CrmSvcUtil.exe">

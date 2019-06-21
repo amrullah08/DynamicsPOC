@@ -89,7 +89,7 @@ namespace GitDeploy
         /// <summary>
         /// Every time repository will be cloned
         /// </summary>
-        private readonly bool cloneAlways;
+        private bool cloneAlways;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GitRepositoryManager" /> class.
@@ -407,6 +407,7 @@ namespace GitDeploy
             try
             {
                 Repository.Clone(url, workingDirectory, cloneOptions);
+                this.cloneAlways = false;
             }
             catch
             {

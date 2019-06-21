@@ -302,8 +302,12 @@ namespace CrmSolution
 
             if (solutionFile.CheckInSolution)
             {
-                solutionFile.Solution[Constants.SourceControlQueueAttributeNameForRepositoryUrl] = this.RepositoryUrl;
-                solutionFile.Solution[Constants.SourceControlQueueAttributeNameForBranch] = this.Branch;
+                if(string.IsNullOrEmpty(solutionFile.GitRepoUrl))
+                    solutionFile.Solution[Constants.SourceControlQueueAttributeNameForRepositoryUrl] = this.RepositoryUrl;
+                if(string.IsNullOrEmpty(solutionFile.BranchName))
+                    solutionFile.Solution[Constants.SourceControlQueueAttributeNameForBranch] = this.Branch;
+                if (string.IsNullOrEmpty(solutionFile.RemoteName))
+                    solutionFile.Solution[Constants.SourceControlQueueAttributeNameForRemote] = this.RemoteName;
                 solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportStatus;
                 solutionFile.Update();
 

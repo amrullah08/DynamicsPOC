@@ -52,32 +52,21 @@ namespace CrmSolution
                         System.Threading.Thread.Sleep(timeOut);
 
                         // continue;
-                    }
+                    }  
+                    RepositoryConfigurationConstants.ResetLocalDirectory();
+                    solutionFilePath = RepositoryConfigurationConstants.LocalDirectory + "solutions.txt";
 
-                    for (int i = 0; i < solutionFiles.Count; i++)
-                    {
-                        bool checkIn = solutionFiles[i].CheckInSolution;
-                        if (checkIn)
-                        {
-                            RepositoryConfigurationConstants.ResetLocalDirectory();
-                            solutionFilePath = RepositoryConfigurationConstants.LocalDirectory + "solutions.txt";
+                    // todo: enable solutions file clear from crm portal
+                    PopulateHashset(solutionFilePath, new HashSet<string>());                    
+                    GitDeploy.GitRepositoryManager gitRepositoryManager = GetRepositoryManager(committerName, committerEmail, authorEmail, solutionFiles[0]);
+                    
+                       
 
-                            // todo: enable solutions file clear from crm portal
-                            PopulateHashset(solutionFilePath, new HashSet<string>());
-                            return;
-                        }
-                    }
-
-                    ////if (!Directory.Exists(ConfigurationManager.AppSettings["RepositoryLocalDirectory"]))
-                    ////{
-                    ////    Console.WriteLine("Repository local directory doesnt exists " + ConfigurationManager.AppSettings["RepositoryLocalDirectory"]);
-                    ////}
-                    ////else
                     foreach (var solutionFile in solutionFiles)
                     {
                         if (solutionFile.CheckInSolution)
                         {
-                            TryPushToRepository(committerName, committerEmail, authorEmail, solutionFile, solutionFilePath, hashSet);
+                            TryPushToRepository(committerName, committerEmail, authorEmail, solutionFile, solutionFilePath, hashSet, gitRepositoryManager);
                         }
                     }
                 }
@@ -177,28 +166,30 @@ namespace CrmSolution
                                                 string authorEmail,
                                                 SolutionFileInfo solutionFile,
                                                 string solutionFilePath,
-                                                HashSet<string> hashSet)
+                                                HashSet<string> hashSet,
+                                                GitDeploy.GitRepositoryManager gitRepositoryManager)
         {
             //RepositoryConfigurationConstants.ResetLocalDirectory();
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushingToStatus;
             solutionFile.Update();
 
-            GitDeploy.GitRepositoryManager gitRepositoryManager = GetRepositoryManager(committerName, committerEmail, authorEmail, solutionFile);
+            //GitDeploy.GitRepositoryManager gitRepositoryManager = GetRepositoryManager(committerName, committerEmail, authorEmail, solutionFile);
 
             gitRepositoryManager.UpdateRepository();
 
             if (solutionFile.SolutionsTxt == 433710000 && File.Exists(solutionFilePath)) //433710000 value for Yes
             {
                 File.WriteAllText(solutionFilePath, String.Empty);
+                hashSet.Clear();
             }
 
-            PopulateHashset(solutionFilePath, hashSet);
+            PopulateHashset(solutionFilePath, hashSet);                       
 
             if (!hashSet.Contains(solutionFile.SolutionFileZipName) && solutionFile.IncludeInRelease)
             {
                 hashSet.Add(solutionFile.SolutionFileZipName);
-            }
+            }            
 
             SaveHashSet(solutionFilePath, hashSet);
             gitRepositoryManager.CommitAllChanges(solutionFile, solutionFilePath);

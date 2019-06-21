@@ -146,19 +146,19 @@ namespace CrmSolution
 
                 switch (key)
                 {
-                    case "SolutionPackagerPath":
+                    case Constants.SolutionPackagerPath:
                         solutionPackagerPath = setting.GetAttributeValue<string>("syed_value");
                         break;
-                    case "MultilpleSolutionsImport":
+                    case Constants.MultilpleSolutionsImport:
                         multilpleSolutionsImport = setting.GetAttributeValue<string>("syed_value");
                         break;
-                    case "SolutionToBeImported":
+                    case Constants.SolutionToBeImported:
                         solutionToBeImported = setting.GetAttributeValue<string>("syed_value");
                         break;
-                    case "SolutionPackagerRelativePath":
+                    case Constants.SolutionPackagerRelativePath:
                         solutionPackagerRelativePath = setting.GetAttributeValue<string>("syed_value");
                         break;
-                    case "SleepTimeoutInMillis":
+                    case Constants.SleepTimeoutInMillis:
                         sleepTimeoutInMillis = setting.GetAttributeValue<string>("syed_value");
                         break;
                     default:

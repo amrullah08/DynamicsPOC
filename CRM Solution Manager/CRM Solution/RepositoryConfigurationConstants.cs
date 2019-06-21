@@ -8,6 +8,7 @@
 namespace CrmSolution
 {
     using System;
+    using System.Configuration;
     using System.Diagnostics;
     using System.IO;
     using Microsoft.Xrm.Sdk;
@@ -23,8 +24,6 @@ namespace CrmSolution
         private static string imagesDirectory;
         private static string repositoryUrl;
         private static string cloneRepositoryAlways;
-        private static string gitUserName;
-        private static string gitUserPassword;
         private static string repositoryRemoteName;
         private static string branchName;
         /// <summary>
@@ -39,6 +38,30 @@ namespace CrmSolution
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// Gets repository url
+        /// </summary>
+        public static string GitUserName
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["GitUserName"];
+            }
+            set { }
+        }
+
+        /// <summary>
+        /// Gets repository url
+        /// </summary>
+        public static string GitUserPassword
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["GitPassword"];
+            }
+            set { }
         }
 
         /// <summary>
@@ -114,30 +137,6 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Gets repository url
-        /// </summary>
-        public static string GitUserName
-        {
-            get
-            {
-                return gitUserName;
-            }
-            set { }
-        }
-
-        /// <summary>
-        /// Gets repository url
-        /// </summary>
-        public static string GitUserPassword
-        {
-            get
-            {
-                return gitUserPassword;
-            }
-            set { }
-        }
-
-        /// <summary>
         /// Gets repository remote name
         /// </summary>
         public static string RepositoryRemoteName
@@ -173,34 +172,28 @@ namespace CrmSolution
 
                 switch (key)
                 {
-                    case "RepositorySolutionFolder":
+                    case Constants.RepositorySolutionFolder:
                         solutionFolder = setting.GetAttributeValue<string>("syed_value");
                         break;
-                    case "RepositoryJsDirectory":
+                    case Constants.RepositoryJsDirectory:
                         jsDirectory = setting.GetAttributeValue<string>("syed_value");
                         break;
-                    case "RepositoryHtmlDirectory":
+                    case Constants.RepositoryHtmlDirectory:
                         htmlDirectory = setting.GetAttributeValue<string>("syed_value");
                         break;
-                    case "RepositoryImagesDirectory":
+                    case Constants.RepositoryImagesDirectory:
                         imagesDirectory = setting.GetAttributeValue<string>("syed_value");
                         break;
-                    case "RepositoryUrl":
+                    case Constants.RepositoryUrl:
                         repositoryUrl = setting.GetAttributeValue<string>("syed_value");
                         break;
-                    case "CloneRepositoryAlways":
+                    case Constants.CloneRepositoryAlways:
                         cloneRepositoryAlways = setting.GetAttributeValue<string>("syed_value");
                         break;
-                    case "GitUserName":
-                        gitUserName = setting.GetAttributeValue<string>("syed_value");
-                        break;
-                    case "GitPassword":
-                        gitUserPassword = setting.GetAttributeValue<string>("syed_value");
-                        break;
-                    case "RemoteName":
+                    case Constants.RemoteName:
                         repositoryRemoteName = setting.GetAttributeValue<string>("syed_value");
                         break;
-                    case "BranchName":
+                    case Constants.BranchName:
                         branchName = setting.GetAttributeValue<string>("syed_value");
                         break;
                     default:

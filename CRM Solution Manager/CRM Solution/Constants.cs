@@ -124,6 +124,70 @@ namespace CrmSolution
         /// </summary>
         public const string SourceControlQueueAttributeNameForMergeSolution = "syed_mergesolutions";
 
+        /// <summary>
+        ///  solution packager path
+        /// </summary>
+        public const string SolutionPackagerPath = "SolutionPackagerPath";
+
+        /// <summary>
+        ///  multilple solutions import
+        /// </summary>
+        public const string MultilpleSolutionsImport = "MultilpleSolutionsImport";
+
+        /// <summary>
+        ///  solution to be imported
+        /// </summary>
+        public const string SolutionToBeImported = "SolutionToBeImported";
+
+        /// <summary>
+        ///  solution packager relative path
+        /// </summary>
+        public const string SolutionPackagerRelativePath = "SolutionPackagerRelativePath";
+
+        /// <summary>
+        ///  sleep timeout in millis
+        /// </summary>
+        public const string SleepTimeoutInMillis = "SleepTimeoutInMillis";
+
+        /// <summary>
+        ///  repository solution folder
+        /// </summary>
+        public const string RepositorySolutionFolder = "RepositorySolutionFolder";
+
+        /// <summary>
+        ///  repository js directory
+        /// </summary>
+        public const string RepositoryJsDirectory = "RepositoryJsDirectory";
+
+        /// <summary>
+        ///  repository html directory
+        /// </summary>
+        public const string RepositoryHtmlDirectory = "RepositoryHtmlDirectory";
+
+        /// <summary>
+        ///  repository images directory
+        /// </summary>
+        public const string RepositoryImagesDirectory = "RepositoryImagesDirectory";
+
+        /// <summary>
+        ///  repository url
+        /// </summary>
+        public const string RepositoryUrl = "RepositoryUrl";
+
+        /// <summary>
+        ///  clone repository always
+        /// </summary>
+        public const string CloneRepositoryAlways = "CloneRepositoryAlways";
+
+        /// <summary>
+        ///  remote name
+        /// </summary>
+        public const string RemoteName = "RemoteName";
+
+        /// <summary>
+        ///  branch name
+        /// </summary>
+        public const string BranchName = "BranchName";
 
         /// <summary>
         /// Gets the component types

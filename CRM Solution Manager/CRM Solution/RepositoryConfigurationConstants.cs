@@ -11,12 +11,21 @@ namespace CrmSolution
     using System.Configuration;
     using System.Diagnostics;
     using System.IO;
+    using Microsoft.Xrm.Sdk;
 
     /// <summary>
     /// constants file for repository configurations
     /// </summary>
-    internal class RepositoryConfigurationConstants
+    internal class RepositoryConfigurationConstants : ConfigurationSettings
     {
+        private static string solutionFolder;
+        private static string jsDirectory;
+        private static string htmlDirectory;
+        private static string imagesDirectory;
+        private static string repositoryUrl;
+        private static string cloneRepositoryAlways;
+        private static string repositoryRemoteName;
+        private static string branchName;
         /// <summary>
         /// Method substitutes drive
         /// </summary>
@@ -32,72 +41,6 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Gets repository release directory containing CRM Solutions
-        /// </summary>
-        public static string SolutionFolder
-        {
-            get
-            {
-                return Path.Combine(LocalDirectory, ConfigurationManager.AppSettings["RepositorySolutionFolder"]);
-            }
-        }
-
-        /// <summary>
-        /// Gets repository script directory
-        /// </summary>
-        public static string JsDirectory
-        {
-            get
-            {
-                return Path.Combine(LocalDirectory, ConfigurationManager.AppSettings["RepositoryJsDirectory"]);
-            }
-        }
-
-        /// <summary>
-        /// Gets repository html directory
-        /// </summary>
-        public static string HtmlDirectory
-        {
-            get
-            {
-                return Path.Combine(LocalDirectory, ConfigurationManager.AppSettings["RepositoryHtmlDirectory"]);
-            }
-        }
-
-        /// <summary>
-        /// Gets repository Images directory
-        /// </summary>
-        public static string ImagesDirectory
-        {
-            get
-            {
-                return Path.Combine(LocalDirectory, ConfigurationManager.AppSettings["RepositoryImagesDirectory"]);
-            }
-        }
-
-        /// <summary>
-        /// Gets repository url
-        /// </summary>
-        public static string RepositoryUrl
-        {
-            get
-            {
-                return ConfigurationManager.AppSettings["RepositoryUrl"];
-            }
-        }
-
-        /// <summary>
-        /// Gets repository url
-        /// </summary>
-        public static string CloneRepositoryAlways
-        {
-            get
-            {
-                return ConfigurationManager.AppSettings["CloneRepositoryAlways"];
-            }
-        }
-
-        /// <summary>
         /// Gets repository url
         /// </summary>
         public static string GitUserName
@@ -106,6 +49,7 @@ namespace CrmSolution
             {
                 return ConfigurationManager.AppSettings["GitUserName"];
             }
+            set { }
         }
 
         /// <summary>
@@ -117,6 +61,79 @@ namespace CrmSolution
             {
                 return ConfigurationManager.AppSettings["GitPassword"];
             }
+            set { }
+        }
+
+        /// <summary>
+        /// Gets repository release directory containing CRM Solutions
+        /// </summary>
+        public static string SolutionFolder
+        {
+            get
+            {
+                return solutionFolder;
+            }
+            set { }
+        }
+
+        /// <summary>
+        /// Gets repository script directory
+        /// </summary>
+        public static string JsDirectory
+        {
+            get
+            {
+                return jsDirectory;
+            }
+            set { }
+        }
+
+        /// <summary>
+        /// Gets repository html directory
+        /// </summary>
+        public static string HtmlDirectory
+        {
+            get
+            {
+                return htmlDirectory;
+            }
+            set { }
+        }
+
+        /// <summary>
+        /// Gets repository Images directory
+        /// </summary>
+        public static string ImagesDirectory
+        {
+            get
+            {
+                return imagesDirectory;
+            }
+            set { }
+        }
+
+        /// <summary>
+        /// Gets repository url
+        /// </summary>
+        public static string RepositoryUrl
+        {
+            get
+            {
+                return repositoryUrl;
+            }
+            set { }
+        }
+
+        /// <summary>
+        /// Gets repository url
+        /// </summary>
+        public static string CloneRepositoryAlways
+        {
+            get
+            {
+                return cloneRepositoryAlways;
+            }
+            set { }
         }
 
         /// <summary>
@@ -126,8 +143,9 @@ namespace CrmSolution
         {
             get
             {
-                return ConfigurationManager.AppSettings["RemoteName"];
+                return repositoryRemoteName;
             }
+            set { }
         }
 
         /// <summary>
@@ -137,7 +155,50 @@ namespace CrmSolution
         {
             get
             {
-                return ConfigurationManager.AppSettings["BranchName"];
+                return branchName;
+            }
+            set { }
+        }
+
+        /// <summary>
+        /// Method sets repository configuration constant property values
+        /// </summary>
+        /// <param name="retrievedConfigurationSettingsList">entity collection</param>
+        public override void SetRepositoryConfigurationProperties(EntityCollection retrievedConfigurationSettingsList)
+        {
+            foreach (Entity setting in retrievedConfigurationSettingsList.Entities)
+            {
+                string key = setting.GetAttributeValue<string>("syed_name");
+
+                switch (key)
+                {
+                    case Constants.RepositorySolutionFolder:
+                        solutionFolder = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.RepositoryJsDirectory:
+                        jsDirectory = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.RepositoryHtmlDirectory:
+                        htmlDirectory = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.RepositoryImagesDirectory:
+                        imagesDirectory = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.RepositoryUrl:
+                        repositoryUrl = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.CloneRepositoryAlways:
+                        cloneRepositoryAlways = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.RemoteName:
+                        repositoryRemoteName = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.BranchName:
+                        branchName = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 

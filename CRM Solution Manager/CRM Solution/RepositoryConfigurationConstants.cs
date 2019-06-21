@@ -8,15 +8,25 @@
 namespace CrmSolution
 {
     using System;
-    using System.Configuration;
     using System.Diagnostics;
     using System.IO;
+    using Microsoft.Xrm.Sdk;
 
     /// <summary>
     /// constants file for repository configurations
     /// </summary>
-    internal class RepositoryConfigurationConstants
+    internal class RepositoryConfigurationConstants : ConfigurationSettings
     {
+        private static string solutionFolder;
+        private static string jsDirectory;
+        private static string htmlDirectory;
+        private static string imagesDirectory;
+        private static string repositoryUrl;
+        private static string cloneRepositoryAlways;
+        private static string gitUserName;
+        private static string gitUserPassword;
+        private static string repositoryRemoteName;
+        private static string branchName;
         /// <summary>
         /// Method substitutes drive
         /// </summary>
@@ -38,8 +48,9 @@ namespace CrmSolution
         {
             get
             {
-                return Path.Combine(LocalDirectory, ConfigurationManager.AppSettings["RepositorySolutionFolder"]);
+                return solutionFolder;
             }
+            set { }
         }
 
         /// <summary>
@@ -49,8 +60,9 @@ namespace CrmSolution
         {
             get
             {
-                return Path.Combine(LocalDirectory, ConfigurationManager.AppSettings["RepositoryJsDirectory"]);
+                return jsDirectory;
             }
+            set { }
         }
 
         /// <summary>
@@ -60,8 +72,9 @@ namespace CrmSolution
         {
             get
             {
-                return Path.Combine(LocalDirectory, ConfigurationManager.AppSettings["RepositoryHtmlDirectory"]);
+                return htmlDirectory;
             }
+            set { }
         }
 
         /// <summary>
@@ -71,8 +84,9 @@ namespace CrmSolution
         {
             get
             {
-                return Path.Combine(LocalDirectory, ConfigurationManager.AppSettings["RepositoryImagesDirectory"]);
+                return imagesDirectory;
             }
+            set { }
         }
 
         /// <summary>
@@ -82,8 +96,9 @@ namespace CrmSolution
         {
             get
             {
-                return ConfigurationManager.AppSettings["RepositoryUrl"];
+                return repositoryUrl;
             }
+            set { }
         }
 
         /// <summary>
@@ -93,8 +108,9 @@ namespace CrmSolution
         {
             get
             {
-                return ConfigurationManager.AppSettings["CloneRepositoryAlways"];
+                return cloneRepositoryAlways;
             }
+            set { }
         }
 
         /// <summary>
@@ -104,8 +120,9 @@ namespace CrmSolution
         {
             get
             {
-                return ConfigurationManager.AppSettings["GitUserName"];
+                return gitUserName;
             }
+            set { }
         }
 
         /// <summary>
@@ -115,8 +132,9 @@ namespace CrmSolution
         {
             get
             {
-                return ConfigurationManager.AppSettings["GitPassword"];
+                return gitUserPassword;
             }
+            set { }
         }
 
         /// <summary>
@@ -126,8 +144,9 @@ namespace CrmSolution
         {
             get
             {
-                return ConfigurationManager.AppSettings["RemoteName"];
+                return repositoryRemoteName;
             }
+            set { }
         }
 
         /// <summary>
@@ -137,7 +156,56 @@ namespace CrmSolution
         {
             get
             {
-                return ConfigurationManager.AppSettings["BranchName"];
+                return branchName;
+            }
+            set { }
+        }
+
+        /// <summary>
+        /// Method sets repository configuration constant property values
+        /// </summary>
+        /// <param name="retrievedConfigurationSettingsList">entity collection</param>
+        public override void SetRepositoryConfigurationProperties(EntityCollection retrievedConfigurationSettingsList)
+        {
+            foreach (Entity setting in retrievedConfigurationSettingsList.Entities)
+            {
+                string key = setting.GetAttributeValue<string>("syed_name");
+
+                switch (key)
+                {
+                    case "RepositorySolutionFolder":
+                        solutionFolder = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case "RepositoryJsDirectory":
+                        jsDirectory = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case "RepositoryHtmlDirectory":
+                        htmlDirectory = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case "RepositoryImagesDirectory":
+                        imagesDirectory = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case "RepositoryUrl":
+                        repositoryUrl = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case "CloneRepositoryAlways":
+                        cloneRepositoryAlways = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case "GitUserName":
+                        gitUserName = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case "GitPassword":
+                        gitUserPassword = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case "RemoteName":
+                        repositoryRemoteName = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case "BranchName":
+                        branchName = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 

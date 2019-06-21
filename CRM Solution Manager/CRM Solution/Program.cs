@@ -5,6 +5,8 @@
 // <author>Syed Amrullah Mazhar</author>
 //-----------------------------------------------------------------------
 
+using Microsoft.Xrm.Sdk;
+
 namespace CrmSolution
 {
     /// <summary>
@@ -27,6 +29,12 @@ namespace CrmSolution
             string committerName = args[1];
             string committerEmail = args[2];
             string authorEmail = "TestSolutionCommitterService@microsoft.com";
+
+            ConfigurationSettings configurationSettings = new CrmConstants();
+            EntityCollection configurationSettingsList = configurationSettings.GetConfigurationSettings();
+            configurationSettings.SetCrmProperties(configurationSettingsList);
+            configurationSettings = new RepositoryConfigurationConstants();
+            configurationSettings.SetRepositoryConfigurationProperties(configurationSettingsList);
 
             RepositoryHelper.TryUpdateToRepository(solutionUniqueName, committerName, committerEmail, authorEmail);
         }

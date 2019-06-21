@@ -98,17 +98,26 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     copySettings.SourceSolutions.Add(solution);
                 }
             }
-            Console.WriteLine("Displaying different(additional) components after merging");
+            Console.WriteLine("Copying components into Master Solution...");
             var components = this.CopyComponents(copySettings);
             var componentsMaster = this.RetrieveComponentsFromSolutions(copySettings.TargetSolutions.Select(T => T.Id).ToList(), copySettings.ComponentsTypes);
             var differentComponents = (from cm in componentsMaster where !components.Any(list => list.GetAttributeValue<Guid>("objectid") == cm.GetAttributeValue<Guid>("objectid")) select cm).ToList();
-            foreach (var target in copySettings.TargetSolutions)
+            if(differentComponents!=null)
             {
-                foreach (var componentdetails in differentComponents)
+                Console.WriteLine("Displaying different(additional) components after merging");
+                foreach (var target in copySettings.TargetSolutions)
                 {
-                    GetComponentDetails(copySettings, target, componentdetails, componentdetails.GetAttributeValue<OptionSetValue>("componenttype").Value, false);
+                    foreach (var componentdetails in differentComponents)
+                    {
+                        GetComponentDetails(copySettings, target, componentdetails, componentdetails.GetAttributeValue<OptionSetValue>("componenttype").Value, false);
+                    }
                 }
             }
+            else
+            {
+                Console.WriteLine("No different(additional components found after Merging)");
+            }
+            
             //GetComponentDetails(copySettings,)
             //var differComponents = componentsMaster.Select(list => list.GetAttributeValue<Guid>("objectid") != components[0].GetAttributeValue<Guid>("objectid"));
             solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemMergingSuccessfulStatus;

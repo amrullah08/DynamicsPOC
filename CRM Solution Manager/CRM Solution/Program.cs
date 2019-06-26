@@ -5,10 +5,10 @@
 // <author>Syed Amrullah Mazhar</author>
 //-----------------------------------------------------------------------
 
-using Microsoft.Xrm.Sdk;
-
 namespace CrmSolution
 {
+    using Microsoft.Xrm.Sdk;
+
     /// <summary>
     /// Main entry point of the program
     /// </summary>

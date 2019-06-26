@@ -7,24 +7,47 @@
 
 namespace CrmSolution
 {
-    using Microsoft.Xrm.Sdk;
-    using Microsoft.Xrm.Sdk.Client;
-    using Microsoft.Xrm.Sdk.Query;
     using System;
     using System.Configuration;
     using System.ServiceModel.Description;
+    using Microsoft.Xrm.Sdk;
+    using Microsoft.Xrm.Sdk.Client;
+    using Microsoft.Xrm.Sdk.Query;
 
     /// <summary>
     /// class contains constants for dynamics
     /// </summary>
     internal class CrmConstants : ConfigurationSettings
     {
-        private ClientCredentials clientCredentials;
+        /// <summary>
+        /// Solution Packager Path
+        /// </summary>
         private static string solutionPackagerPath;
+
+        /// <summary>
+        /// Multiple Solutions Import
+        /// </summary>
         private static string multilpleSolutionsImport;
+
+        /// <summary>
+        /// Solution To Be Imported
+        /// </summary>
         private static string solutionToBeImported;
+
+        /// <summary>
+        /// Solution Packager Relative Path
+        /// </summary>
         private static string solutionPackagerRelativePath;
+
+        /// <summary>
+        /// Sleep Timeout In Millis
+        /// </summary>
         private static string sleepTimeoutInMillis;
+
+        /// <summary>
+        /// client credentials
+        /// </summary>
+        private ClientCredentials clientCredentials;
 
         /// <summary>
         /// Gets organization service url
@@ -49,7 +72,7 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Gets Dynamics password
+        /// Gets or Sets Dynamics password
         /// </summary>
         public static string DynamicsPassword
         {
@@ -60,7 +83,7 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Gets solution packager path
+        /// Gets or sets solution packager path
         /// </summary>
         public static string SolutionPackagerPath
         {
@@ -68,11 +91,14 @@ namespace CrmSolution
             {
                 return solutionPackagerPath;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
-        /// Gets MultilpleSolutionsImport PS path
+        /// Gets or sets MultipleSolutionsImport PS path
         /// </summary>
         public static string MultilpleSolutionsImport
         {
@@ -80,11 +106,14 @@ namespace CrmSolution
             {
                 return multilpleSolutionsImport;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
-        /// Gets SolutionToBeImported PS path
+        /// Gets or sets SolutionToBeImported PS path
         /// </summary>
         public static string SolutionToBeImported
         {
@@ -92,11 +121,14 @@ namespace CrmSolution
             {
                 return solutionToBeImported;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
-        /// Gets solution packager relative path
+        /// Gets or sets solution packager relative path
         /// </summary>
         public static string SolutionPackagerRelativePath
         {
@@ -104,12 +136,14 @@ namespace CrmSolution
             {
                 return solutionPackagerRelativePath;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
-
         /// <summary>
-        /// Gets sleep timeout in millis
+        /// Gets or sets sleep timeout in millis
         /// </summary>
         public static string SleepTimeoutInMillis
         {
@@ -117,19 +151,23 @@ namespace CrmSolution
             {
                 return sleepTimeoutInMillis;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
         /// Method returns configuration settings entity collection list
         /// </summary>
+        /// <returns>returns entity collection</returns>
         public override EntityCollection GetConfigurationSettings()
         {
             this.clientCredentials = new ClientCredentials();
-            clientCredentials.UserName.UserName = DynamicsUserName;
-            clientCredentials.UserName.Password = DynamicsPassword;
+            this.clientCredentials.UserName.UserName = DynamicsUserName;
+            this.clientCredentials.UserName.Password = DynamicsPassword;
             var serviceProxy = this.InitializeOrganizationService();
-            EntityCollection retrievedConfigurationSettingsList = RetrieveConfigurationSettings(serviceProxy);
+            EntityCollection retrievedConfigurationSettingsList = this.RetrieveConfigurationSettings(serviceProxy);
 
             return retrievedConfigurationSettingsList;
         }
@@ -171,7 +209,7 @@ namespace CrmSolution
         /// Method retrieves active configuration settings record
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
-        /// <returns></returns>
+        /// <returns>returns entity collection</returns>
         private EntityCollection RetrieveConfigurationSettings(OrganizationServiceProxy serviceProxy)
         {
             try
@@ -200,7 +238,7 @@ namespace CrmSolution
         /// <summary>
         /// Method returns new instance of organization service
         /// </summary>
-        /// <returns></returns>
+        /// <returns>returns organization service proxy</returns>
         private OrganizationServiceProxy InitializeOrganizationService()
         {
             return new OrganizationServiceProxy(new Uri(OrgServiceUrl), null, this.clientCredentials, null);

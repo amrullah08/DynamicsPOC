@@ -18,18 +18,50 @@ namespace CrmSolution
     /// </summary>
     internal class RepositoryConfigurationConstants : ConfigurationSettings
     {
-        private static string solutionFolder;
-        private static string jsDirectory;
-        private static string htmlDirectory;
-        private static string imagesDirectory;
-        private static string repositoryUrl;
-        private static string cloneRepositoryAlways;
-        private static string repositoryRemoteName;
-        private static string branchName;
         /// <summary>
         /// Method substitutes drive
         /// </summary>
         public const string SubstDrive = "k";
+
+        /// <summary>
+        /// Solution Folder
+        /// </summary>
+        private static string solutionFolder;
+
+        /// <summary>
+        /// JavaScript Directory
+        /// </summary>
+        private static string javaScriptDirectory;
+
+        /// <summary>
+        /// Html Directory
+        /// </summary>
+        private static string htmlDirectory;
+
+        /// <summary>
+        /// Images Directory
+        /// </summary>
+        private static string imagesDirectory;
+
+        /// <summary>
+        /// Repository Url
+        /// </summary>
+        private static string repositoryUrl;
+
+        /// <summary>
+        /// Clone Repository Always
+        /// </summary>
+        private static string cloneRepositoryAlways;
+
+        /// <summary>
+        /// Repository Remote Name
+        /// </summary>
+        private static string repositoryRemoteName;
+
+        /// <summary>
+        /// Branch Name
+        /// </summary>
+        private static string branchName;
 
         /// <summary>
         /// Gets or sets Repository local directory
@@ -41,7 +73,7 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Gets repository url
+        /// Gets or sets repository url
         /// </summary>
         public static string GitUserName
         {
@@ -49,11 +81,14 @@ namespace CrmSolution
             {
                 return ConfigurationManager.AppSettings["GitUserName"];
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
-        /// Gets repository url
+        /// Gets or sets repository url
         /// </summary>
         public static string GitUserPassword
         {
@@ -61,11 +96,14 @@ namespace CrmSolution
             {
                 return ConfigurationManager.AppSettings["GitPassword"];
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
-        /// Gets repository release directory containing CRM Solutions
+        /// Gets or sets repository release directory containing CRM Solutions
         /// </summary>
         public static string SolutionFolder
         {
@@ -73,23 +111,29 @@ namespace CrmSolution
             {
                 return solutionFolder;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
-        /// Gets repository script directory
+        /// Gets or sets repository script directory
         /// </summary>
         public static string JsDirectory
         {
             get
             {
-                return jsDirectory;
+                return javaScriptDirectory;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
-        /// Gets repository html directory
+        /// Gets or sets repository html directory
         /// </summary>
         public static string HtmlDirectory
         {
@@ -97,11 +141,14 @@ namespace CrmSolution
             {
                 return htmlDirectory;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
-        /// Gets repository Images directory
+        /// Gets or sets repository Images directory
         /// </summary>
         public static string ImagesDirectory
         {
@@ -109,11 +156,14 @@ namespace CrmSolution
             {
                 return imagesDirectory;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
-        /// Gets repository url
+        /// Gets or sets repository url
         /// </summary>
         public static string RepositoryUrl
         {
@@ -121,11 +171,14 @@ namespace CrmSolution
             {
                 return repositoryUrl;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
-        /// Gets repository url
+        /// Gets or sets repository url
         /// </summary>
         public static string CloneRepositoryAlways
         {
@@ -133,11 +186,14 @@ namespace CrmSolution
             {
                 return cloneRepositoryAlways;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
-        /// Gets repository remote name
+        /// Gets or sets repository remote name
         /// </summary>
         public static string RepositoryRemoteName
         {
@@ -145,11 +201,14 @@ namespace CrmSolution
             {
                 return repositoryRemoteName;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
-        /// Gets Repository branch name
+        /// Gets or sets Repository branch name
         /// </summary>
         public static string BranchName
         {
@@ -157,7 +216,21 @@ namespace CrmSolution
             {
                 return branchName;
             }
-            set { }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
+        /// method resets local directory
+        /// </summary>
+        public static void ResetLocalDirectory()
+        {
+            // LocalDirectory = @"\\?\" + Path.GetTempFileName().Replace(".","") + "devopsTmp\\";
+            LocalDirectory = Path.GetTempFileName().Replace(".", string.Empty) + "devopsTmp\\";
+            CrmSolutionHelper.CreateEmptyFolder(LocalDirectory);
+            SubstTempDirectory();
         }
 
         /// <summary>
@@ -176,7 +249,7 @@ namespace CrmSolution
                         solutionFolder = setting.GetAttributeValue<string>("syed_value");
                         break;
                     case Constants.RepositoryJsDirectory:
-                        jsDirectory = setting.GetAttributeValue<string>("syed_value");
+                        javaScriptDirectory = setting.GetAttributeValue<string>("syed_value");
                         break;
                     case Constants.RepositoryHtmlDirectory:
                         htmlDirectory = setting.GetAttributeValue<string>("syed_value");
@@ -200,17 +273,6 @@ namespace CrmSolution
                         break;
                 }
             }
-        }
-
-        /// <summary>
-        /// method resets local directory
-        /// </summary>
-        public static void ResetLocalDirectory()
-        {
-            // LocalDirectory = @"\\?\" + Path.GetTempFileName().Replace(".","") + "devopsTmp\\";
-            LocalDirectory = Path.GetTempFileName().Replace(".", string.Empty) + "devopsTmp\\";
-            CrmSolutionHelper.CreateEmptyFolder(LocalDirectory);
-            SubstTempDirectory();
         }
 
         /// <summary>

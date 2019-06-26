@@ -108,6 +108,7 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Configuration Settings.xlsx" />
     <None Include="CoreTools\CrmSvcUtil.exe.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

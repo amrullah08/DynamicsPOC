@@ -47,12 +47,12 @@ namespace CrmSolution
             this.OwnerName = solution.GetAttributeValue<EntityReference>(Constants.SourceControlQueueAttributeNameForOwnerId).Name;
             this.IncludeInRelease = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForIncludeInRelease);
             this.CheckInSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForCheckinSolution);
-            this.MergeSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForMergeSolution);
+            //this.MergeSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForMergeSolution);
             this.ExportAsManaged = solutionDetail.GetAttributeValue<bool>("syed_exportas");
-            this.SolutionsTxt = solution.GetAttributeValue<OptionSetValue>(Constants.SourceControlQueueAttributeNameForOverwriteSolutionsTxt).Value;
+            this.SolutionsTxt = solution.GetAttributeValue<OptionSetValue>(Constants.SourceControlQueueAttributeNameForOverwriteSolutionsTxt)?.Value ?? 0;
             this.RemoteName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRemote);
             this.GitRepoUrl = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryUrl);
-            EntityCollection retrieveSolutionsToBeMerged = CrmSolutionHelper.RetrieveSolutionsToBeMergedByListOfSolutionId(organizationServiceProxy, solution.Id);
+            EntityCollection retrieveSolutionsToBeMerged = CrmSolutionHelper.RetrieveSolutionsToBeMergedByListOfSolutionId(organizationServiceProxy, solutionDetail.Id);
 
 
 
@@ -63,7 +63,7 @@ namespace CrmSolution
                 CrmSolutionHelper.CreateEmptyFolder(this.SolutionExtractionPath);
             }
 
-            if (retrieveSolutionsToBeMerged.Entities.Count > 0 && this.MergeSolution)
+            if (retrieveSolutionsToBeMerged.Entities.Count > 0)
             {
                 foreach (Entity solutionsToBeMerged in retrieveSolutionsToBeMerged.Entities)
                 {

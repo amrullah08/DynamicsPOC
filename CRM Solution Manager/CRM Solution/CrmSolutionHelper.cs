@@ -119,11 +119,12 @@ namespace CrmSolution
                 try
                 {
                     var infos = SolutionFileInfo.GetSolutionFileInfo(querySampleSolutionResults.Entities[i], serviceProxy);
-                    this.ExportListOfSolutionsToBeMerged(serviceProxy, infos[0]);
+
                     foreach (var info in infos)
                     {
                         try
                         {
+                            this.ExportListOfSolutionsToBeMerged(serviceProxy, info);
                             this.ExportMasterSolution(serviceProxy, info);
                             solutionFileInfos.Add(info);
                             if (info.CheckInSolution)
@@ -187,7 +188,6 @@ namespace CrmSolution
                                         <attribute name='syed_order' />
                                         <attribute name='syed_solutionid' />
                                         <attribute name='syed_exportas' />
-                                        <attribute name='syed_ismaster' />
                                         <attribute name='syed_listofsolutions' />
                                         <order attribute='syed_order' descending='false' />
                                         <filter type='and'>
@@ -210,7 +210,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <returns>returns entity collection</returns>
-        public static EntityCollection RetrieveSolutionsToBeMergedByListOfSolutionId(OrganizationServiceProxy service, Guid sourceControlId)
+        public static EntityCollection RetrieveSolutionsToBeMergedByListOfSolutionId(OrganizationServiceProxy service, Guid masterSolutionId)
         {
             try
             {
@@ -222,7 +222,7 @@ namespace CrmSolution
                                         <attribute name='syed_order' />
                                         <order attribute='syed_order' descending='false' />
                                         <filter type='and'>
-                                            <condition attribute='syed_listofsolution' operator='eq' uitype='syed_sourcecontrolqueue' value='" + sourceControlId + @"' />
+                                            <condition attribute='syed_mastersolution' operator='eq' uitype='syed_solutiondetail' value='" + masterSolutionId + @"' />
                                         </filter>
                                         </entity>
                                     </fetch>";

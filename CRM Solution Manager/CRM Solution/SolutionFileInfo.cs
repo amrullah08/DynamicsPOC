@@ -22,6 +22,13 @@ namespace CrmSolution
     public class SolutionFileInfo
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="SolutionFileInfo" /> class without parameter
+        /// </summary>
+        public SolutionFileInfo()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SolutionFileInfo" /> class
         /// </summary>
         /// <param name="organizationServiceProxy">Organization proxy</param>
@@ -52,7 +59,7 @@ namespace CrmSolution
             this.SolutionsTxt = solution.GetAttributeValue<OptionSetValue>(Constants.SourceControlQueueAttributeNameForOverwriteSolutionsTxt)?.Value ?? 0;
             this.RemoteName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRemote);
             this.GitRepoUrl = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryUrl);
-            EntityCollection retrieveSolutionsToBeMerged = CrmSolutionHelper.RetrieveSolutionsToBeMergedByListOfSolutionId(organizationServiceProxy, solutionDetail.Id);
+            EntityCollection retrieveSolutionsToBeMerged = Singleton.CrmSolutionHelperInstance.RetrieveSolutionsToBeMergedByListOfSolutionId(organizationServiceProxy, solutionDetail.Id);
 
 
 
@@ -60,7 +67,7 @@ namespace CrmSolution
             {
                 this.SolutionExtractionPath = Path.GetTempPath() + this.SolutionUniqueName;
                 this.BranchName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForBranch);
-                CrmSolutionHelper.CreateEmptyFolder(this.SolutionExtractionPath);
+                Singleton.CrmSolutionHelperInstance.CreateEmptyFolder(this.SolutionExtractionPath);
             }
 
             if (retrieveSolutionsToBeMerged.Entities.Count > 0)
@@ -186,10 +193,10 @@ namespace CrmSolution
         /// <param name="solution">solution entity</param>
         /// <param name="organizationServiceProxy">organization proxy</param>
         /// <returns>returns list of solution file info by splitting source solution by comma</returns>
-        public static List<SolutionFileInfo> GetSolutionFileInfo(Entity solution, OrganizationServiceProxy organizationServiceProxy)
+        public List<SolutionFileInfo> GetSolutionFileInfo(Entity solution, OrganizationServiceProxy organizationServiceProxy)
         {
             List<SolutionFileInfo> solutionFileInfos = new List<SolutionFileInfo>();
-            EntityCollection retrievedMasterSolution = CrmSolutionHelper.RetrieveMasterSolutionDetailsByListOfSolutionId(organizationServiceProxy, solution.Id);
+            EntityCollection retrievedMasterSolution = Singleton.CrmSolutionHelperInstance.RetrieveMasterSolutionDetailsByListOfSolutionId(organizationServiceProxy, solution.Id);
             if (retrievedMasterSolution.Entities.Count > 0)
             {
                 foreach (Entity solutiondetail in retrievedMasterSolution.Entities)
@@ -224,7 +231,7 @@ namespace CrmSolution
         {
             try
             {
-                var tempSolutionPackagerPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), CrmConstants.SolutionPackagerRelativePath);
+                var tempSolutionPackagerPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.SolutionPackagerRelativePath);
                 Console.WriteLine("Solution Packager Path " + tempSolutionPackagerPath);
 
                 if (File.Exists(tempSolutionPackagerPath))

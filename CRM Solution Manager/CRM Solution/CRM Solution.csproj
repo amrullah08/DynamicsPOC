@@ -101,6 +101,7 @@
     </Compile>
     <Compile Include="RepositoryConfigurationConstants.cs" />
     <Compile Include="RepositoryHelper.cs" />
+    <Compile Include="Singleton.cs" />
     <Compile Include="SolutionFileInfo.cs" />
     <Compile Include="SolutionManager.cs" />
   </ItemGroup>

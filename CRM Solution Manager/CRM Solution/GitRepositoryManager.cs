@@ -154,7 +154,7 @@ namespace GitDeploy
         /// </summary>
         /// <param name="path">directory path</param>
         /// <returns>method returns if directory is empty</returns>
-        public static bool IsDirectoryEmpty(string path)
+        public bool IsDirectoryEmpty(string path)
         {
             return !Directory.EnumerateFileSystemEntries(path).Any();
         }
@@ -169,12 +169,12 @@ namespace GitDeploy
             try
             {
                 Console.WriteLine("Committing Powershell Scripts");
-                string multilpleSolutionsImportPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), CrmConstants.MultilpleSolutionsImport);
-                string multilpleSolutionsImportPSPathVirtual = this.localFolder + CrmConstants.MultilpleSolutionsImport;
+                string multilpleSolutionsImportPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.MultilpleSolutionsImport);
+                string multilpleSolutionsImportPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.MultilpleSolutionsImport;
                 File.Copy(multilpleSolutionsImportPSPath, multilpleSolutionsImportPSPathVirtual, true);
 
-                string solutionToBeImportedPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), CrmConstants.SolutionToBeImported);
-                string solutionToBeImportedPSPathVirtual = this.localFolder + CrmConstants.SolutionToBeImported;
+                string solutionToBeImportedPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.SolutionToBeImported);
+                string solutionToBeImportedPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.SolutionToBeImported;
                 File.Copy(solutionToBeImportedPSPath, solutionToBeImportedPSPathVirtual, true);
 
                 Console.WriteLine("Committing solutions");
@@ -457,7 +457,7 @@ namespace GitDeploy
         /// Method empties folder
         /// </summary>
         /// <param name="directory">Directory to be emptied</param>
-        private static void EmptyFolder(DirectoryInfo directory)
+        private void EmptyFolder(DirectoryInfo directory)
         {
             foreach (FileInfo file in directory.GetFiles())
             {

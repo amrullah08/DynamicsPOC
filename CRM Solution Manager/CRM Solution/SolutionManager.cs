@@ -22,7 +22,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
     /// Class merges components of solution to specified solution
     /// </summary>
     internal class SolutionManager
-    {       
+    {        
         /// <summary>
         /// organization service
         /// </summary>

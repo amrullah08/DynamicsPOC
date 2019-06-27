@@ -18,10 +18,18 @@ namespace CrmSolution
     /// </summary>
     public class RepositoryConfigurationConstants : ConfigurationSettings
     {
+        private static string solutionFolder;
+        private static string jsDirectory;
+        private static string htmlDirectory;
+        private static string imagesDirectory;
+        private static string repositoryUrl;
+        private static string cloneRepositoryAlways;
+        private static string repositoryRemoteName;
+        private static string branchName;
         /// <summary>
-        /// Method substitutes drive
+        /// Branch Name
         /// </summary>
-        public const string SubstDrive = "k";
+        private static string branchName;
 
         /// <summary>
         /// Solution Folder
@@ -96,10 +104,7 @@ namespace CrmSolution
             {
                 return ConfigurationManager.AppSettings["GitPassword"];
             }
-
-            set
-            {
-            }
+            set { }
         }
 
         /// <summary>
@@ -111,10 +116,7 @@ namespace CrmSolution
             {
                 return solutionFolder;
             }
-
-            set
-            {
-            }
+            set { }
         }
 
         /// <summary>
@@ -141,10 +143,7 @@ namespace CrmSolution
             {
                 return htmlDirectory;
             }
-
-            set
-            {
-            }
+            set { }
         }
 
         /// <summary>
@@ -156,10 +155,7 @@ namespace CrmSolution
             {
                 return imagesDirectory;
             }
-
-            set
-            {
-            }
+            set { }
         }
 
         /// <summary>
@@ -171,10 +167,7 @@ namespace CrmSolution
             {
                 return repositoryUrl;
             }
-
-            set
-            {
-            }
+            set { }
         }
 
         /// <summary>
@@ -186,10 +179,7 @@ namespace CrmSolution
             {
                 return cloneRepositoryAlways;
             }
-
-            set
-            {
-            }
+            set { }
         }
 
         /// <summary>
@@ -216,21 +206,7 @@ namespace CrmSolution
             {
                 return branchName;
             }
-
-            set
-            {
-            }
-        }
-
-        /// <summary>
-        /// method resets local directory
-        /// </summary>
-        public void ResetLocalDirectory()
-        {
-            // LocalDirectory = @"\\?\" + Path.GetTempFileName().Replace(".","") + "devopsTmp\\";
-            LocalDirectory = Path.GetTempFileName().Replace(".", string.Empty) + "devopsTmp\\";
-            Singleton.CrmSolutionHelperInstance.CreateEmptyFolder(LocalDirectory);
-            SubstTempDirectory();
+            set { }
         }
 
         /// <summary>

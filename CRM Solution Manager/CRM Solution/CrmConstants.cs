@@ -17,32 +17,14 @@ namespace CrmSolution
     /// <summary>
     /// class contains constants for dynamics
     /// </summary>
-    public class CrmConstants : ConfigurationSettings
-    {       
-        /// <summary>
-        /// Solution Packager Path
-        /// </summary>
-        private string solutionPackagerPath;
-
-        /// <summary>
-        /// Multiple Solutions Import
-        /// </summary>
-        private string multilpleSolutionsImport;
-
-        /// <summary>
-        /// Solution To Be Imported
-        /// </summary>
-        private string solutionToBeImported;
-
-        /// <summary>
-        /// Solution Packager Relative Path
-        /// </summary>
-        private string solutionPackagerRelativePath;
-
-        /// <summary>
-        /// Sleep Timeout In Millis
-        /// </summary>
-        private string sleepTimeoutInMillis;
+    internal class CrmConstants : ConfigurationSettings
+    {
+        private ClientCredentials clientCredentials;
+        private static string solutionPackagerPath;
+        private static string multilpleSolutionsImport;
+        private static string solutionToBeImported;
+        private static string solutionPackagerRelativePath;
+        private static string sleepTimeoutInMillis;
 
         /// <summary>
         /// client credentials
@@ -106,10 +88,7 @@ namespace CrmSolution
             {
                 return multilpleSolutionsImport;
             }
-
-            set
-            {
-            }
+            set { }
         }
 
         /// <summary>
@@ -121,10 +100,7 @@ namespace CrmSolution
             {
                 return solutionToBeImported;
             }
-
-            set
-            {
-            }
+            set { }
         }
 
         /// <summary>

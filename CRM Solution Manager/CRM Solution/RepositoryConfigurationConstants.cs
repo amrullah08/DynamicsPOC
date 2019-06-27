@@ -18,18 +18,10 @@ namespace CrmSolution
     /// </summary>
     public class RepositoryConfigurationConstants : ConfigurationSettings
     {
-        private static string solutionFolder;
-        private static string jsDirectory;
-        private static string htmlDirectory;
-        private static string imagesDirectory;
-        private static string repositoryUrl;
-        private static string cloneRepositoryAlways;
-        private static string repositoryRemoteName;
-        private static string branchName;
         /// <summary>
-        /// Branch Name
+        /// Method substitutes drive
         /// </summary>
-        private static string branchName;
+        public const string SubstDrive = "k";
 
         /// <summary>
         /// Solution Folder
@@ -104,7 +96,10 @@ namespace CrmSolution
             {
                 return ConfigurationManager.AppSettings["GitPassword"];
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
@@ -114,9 +109,12 @@ namespace CrmSolution
         {
             get
             {
-                return solutionFolder;
+                return this.solutionFolder;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
@@ -126,7 +124,7 @@ namespace CrmSolution
         {
             get
             {
-                return javaScriptDirectory;
+                return this.javaScriptDirectory;
             }
 
             set
@@ -141,9 +139,12 @@ namespace CrmSolution
         {
             get
             {
-                return htmlDirectory;
+                return this.htmlDirectory;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
@@ -153,9 +154,12 @@ namespace CrmSolution
         {
             get
             {
-                return imagesDirectory;
+                return this.imagesDirectory;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
@@ -165,9 +169,12 @@ namespace CrmSolution
         {
             get
             {
-                return repositoryUrl;
+                return this.repositoryUrl;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
@@ -177,9 +184,12 @@ namespace CrmSolution
         {
             get
             {
-                return cloneRepositoryAlways;
+                return this.cloneRepositoryAlways;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
@@ -189,7 +199,7 @@ namespace CrmSolution
         {
             get
             {
-                return repositoryRemoteName;
+                return this.repositoryRemoteName;
             }
 
             set
@@ -204,9 +214,23 @@ namespace CrmSolution
         {
             get
             {
-                return branchName;
+                return this.branchName;
             }
-            set { }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
+        /// method resets local directory
+        /// </summary>
+        public void ResetLocalDirectory()
+        {
+            // LocalDirectory = @"\\?\" + Path.GetTempFileName().Replace(".","") + "devopsTmp\\";
+            this.LocalDirectory = Path.GetTempFileName().Replace(".", string.Empty) + "devopsTmp\\";
+            Singleton.CrmSolutionHelperInstance.CreateEmptyFolder(this.LocalDirectory);
+            this.SubstTempDirectory();
         }
 
         /// <summary>
@@ -222,28 +246,28 @@ namespace CrmSolution
                 switch (key)
                 {
                     case Constants.RepositorySolutionFolder:
-                        solutionFolder = setting.GetAttributeValue<string>("syed_value");
+                        this.solutionFolder = setting.GetAttributeValue<string>("syed_value");
                         break;
                     case Constants.RepositoryJsDirectory:
-                        javaScriptDirectory = setting.GetAttributeValue<string>("syed_value");
+                        this.javaScriptDirectory = setting.GetAttributeValue<string>("syed_value");
                         break;
                     case Constants.RepositoryHtmlDirectory:
-                        htmlDirectory = setting.GetAttributeValue<string>("syed_value");
+                        this.htmlDirectory = setting.GetAttributeValue<string>("syed_value");
                         break;
                     case Constants.RepositoryImagesDirectory:
-                        imagesDirectory = setting.GetAttributeValue<string>("syed_value");
+                        this.imagesDirectory = setting.GetAttributeValue<string>("syed_value");
                         break;
                     case Constants.RepositoryUrl:
-                        repositoryUrl = setting.GetAttributeValue<string>("syed_value");
+                        this.repositoryUrl = setting.GetAttributeValue<string>("syed_value");
                         break;
                     case Constants.CloneRepositoryAlways:
-                        cloneRepositoryAlways = setting.GetAttributeValue<string>("syed_value");
+                        this.cloneRepositoryAlways = setting.GetAttributeValue<string>("syed_value");
                         break;
                     case Constants.RemoteName:
-                        repositoryRemoteName = setting.GetAttributeValue<string>("syed_value");
+                        this.repositoryRemoteName = setting.GetAttributeValue<string>("syed_value");
                         break;
                     case Constants.BranchName:
-                        branchName = setting.GetAttributeValue<string>("syed_value");
+                        this.branchName = setting.GetAttributeValue<string>("syed_value");
                         break;
                     default:
                         break;
@@ -260,19 +284,19 @@ namespace CrmSolution
             {
                 if (Directory.Exists(SubstDrive + ":\\"))
                 {
-                    DeleteSubstTempDirectory();
+                    this.DeleteSubstTempDirectory();
                 }
 
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
                     FileName = "subst",
-                    Arguments = SubstDrive + ": '" + LocalDirectory + "'"
+                    Arguments = SubstDrive + ": '" + this.LocalDirectory + "'"
                 };
                 Process.Start(startInfo);
 
                 Process process = new Process();
                 process.StartInfo.FileName = "subst.exe";
-                process.StartInfo.Arguments = " " + SubstDrive + ": \"" + LocalDirectory.Remove(LocalDirectory.Length - 1, 1) + "\"";
+                process.StartInfo.Arguments = " " + SubstDrive + ": \"" + this.LocalDirectory.Remove(this.LocalDirectory.Length - 1, 1) + "\"";
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.RedirectStandardOutput = true;
                 process.StartInfo.RedirectStandardError = true;
@@ -285,7 +309,7 @@ namespace CrmSolution
                 process.WaitForExit();
 
                 Directory.CreateDirectory(SubstDrive + ":\\1\\");
-                LocalDirectory = SubstDrive + ":\\1\\";
+                this.LocalDirectory = SubstDrive + ":\\1\\";
             }
             catch (Exception ex)
             {
@@ -303,7 +327,7 @@ namespace CrmSolution
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
                     FileName = "subst",
-                    Arguments = SubstDrive + ": '" + LocalDirectory + "'"
+                    Arguments = SubstDrive + ": '" + this.LocalDirectory + "'"
                 };
                 Process.Start(startInfo);
 

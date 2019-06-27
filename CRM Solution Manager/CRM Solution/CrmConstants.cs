@@ -17,14 +17,32 @@ namespace CrmSolution
     /// <summary>
     /// class contains constants for dynamics
     /// </summary>
-    internal class CrmConstants : ConfigurationSettings
+    public class CrmConstants : ConfigurationSettings
     {
-        private ClientCredentials clientCredentials;
-        private static string solutionPackagerPath;
-        private static string multilpleSolutionsImport;
-        private static string solutionToBeImported;
-        private static string solutionPackagerRelativePath;
-        private static string sleepTimeoutInMillis;
+        /// <summary>
+        /// Solution Packager Path
+        /// </summary>
+        private string solutionPackagerPath;
+
+        /// <summary>
+        /// Multiple Solutions Import
+        /// </summary>
+        private string multilpleSolutionsImport;
+
+        /// <summary>
+        /// Solution To Be Imported
+        /// </summary>
+        private string solutionToBeImported;
+
+        /// <summary>
+        /// Solution Packager Relative Path
+        /// </summary>
+        private string solutionPackagerRelativePath;
+
+        /// <summary>
+        /// Sleep Timeout In Millis
+        /// </summary>
+        private string sleepTimeoutInMillis;
 
         /// <summary>
         /// client credentials
@@ -71,7 +89,7 @@ namespace CrmSolution
         {
             get
             {
-                return solutionPackagerPath;
+                return this.solutionPackagerPath;
             }
 
             set
@@ -86,9 +104,12 @@ namespace CrmSolution
         {
             get
             {
-                return multilpleSolutionsImport;
+                return this.multilpleSolutionsImport;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
@@ -98,9 +119,12 @@ namespace CrmSolution
         {
             get
             {
-                return solutionToBeImported;
+                return this.solutionToBeImported;
             }
-            set { }
+
+            set
+            {
+            }
         }
 
         /// <summary>
@@ -110,7 +134,7 @@ namespace CrmSolution
         {
             get
             {
-                return solutionPackagerRelativePath;
+                return this.solutionPackagerRelativePath;
             }
 
             set
@@ -125,7 +149,7 @@ namespace CrmSolution
         {
             get
             {
-                return sleepTimeoutInMillis;
+                return this.sleepTimeoutInMillis;
             }
 
             set
@@ -140,8 +164,8 @@ namespace CrmSolution
         public override EntityCollection GetConfigurationSettings()
         {
             this.clientCredentials = new ClientCredentials();
-            this.clientCredentials.UserName.UserName = DynamicsUserName;
-            this.clientCredentials.UserName.Password = DynamicsPassword;
+            this.clientCredentials.UserName.UserName = this.DynamicsUserName;
+            this.clientCredentials.UserName.Password = this.DynamicsPassword;
             var serviceProxy = this.InitializeOrganizationService();
             EntityCollection retrievedConfigurationSettingsList = this.RetrieveConfigurationSettings(serviceProxy);
 
@@ -161,19 +185,19 @@ namespace CrmSolution
                 switch (key)
                 {
                     case Constants.SolutionPackagerPath:
-                        solutionPackagerPath = setting.GetAttributeValue<string>("syed_value");
+                        this.solutionPackagerPath = setting.GetAttributeValue<string>("syed_value");
                         break;
                     case Constants.MultilpleSolutionsImport:
-                        multilpleSolutionsImport = setting.GetAttributeValue<string>("syed_value");
+                        this.multilpleSolutionsImport = setting.GetAttributeValue<string>("syed_value");
                         break;
                     case Constants.SolutionToBeImported:
-                        solutionToBeImported = setting.GetAttributeValue<string>("syed_value");
+                        this.solutionToBeImported = setting.GetAttributeValue<string>("syed_value");
                         break;
                     case Constants.SolutionPackagerRelativePath:
-                        solutionPackagerRelativePath = setting.GetAttributeValue<string>("syed_value");
+                        this.solutionPackagerRelativePath = setting.GetAttributeValue<string>("syed_value");
                         break;
                     case Constants.SleepTimeoutInMillis:
-                        sleepTimeoutInMillis = setting.GetAttributeValue<string>("syed_value");
+                        this.sleepTimeoutInMillis = setting.GetAttributeValue<string>("syed_value");
                         break;
                     default:
                         break;
@@ -217,7 +241,7 @@ namespace CrmSolution
         /// <returns>returns organization service proxy</returns>
         private OrganizationServiceProxy InitializeOrganizationService()
         {
-            return new OrganizationServiceProxy(new Uri(OrgServiceUrl), null, this.clientCredentials, null);
+            return new OrganizationServiceProxy(new Uri(this.OrgServiceUrl), null, this.clientCredentials, null);
         }
     }
 }

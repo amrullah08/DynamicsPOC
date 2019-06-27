@@ -21,7 +21,7 @@ namespace CrmSolution
     /// <summary>
     /// Class that assist management of source control queues
     /// </summary>
-    internal class CrmSolutionHelper : ICrmSolutionHelper
+    public class CrmSolutionHelper : ICrmSolutionHelper
     {
         /// <summary>
         /// Gets or sets client credentials
@@ -32,6 +32,13 @@ namespace CrmSolution
         /// Organization service uri
         /// </summary>
         private readonly Uri serviceUri;
+
+        /// <summary>
+        ///  /// Initializes a new instance of the <see cref="CrmSolutionHelper" /> class without parameter.
+        /// </summary>
+        public CrmSolutionHelper()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CrmSolutionHelper" /> class.
@@ -90,7 +97,7 @@ namespace CrmSolution
         /// Empties folder
         /// </summary>
         /// <param name="directory">folder to be emptied</param>
-        public static void CreateEmptyFolder(string directory)
+        public void CreateEmptyFolder(string directory)
         {
             if (Directory.Exists(directory))
             {
@@ -118,7 +125,7 @@ namespace CrmSolution
             {
                 try
                 {
-                    var infos = SolutionFileInfo.GetSolutionFileInfo(querySampleSolutionResults.Entities[i], serviceProxy);
+                    var infos = Singleton.SolutionFileInfoInstance.GetSolutionFileInfo(querySampleSolutionResults.Entities[i], serviceProxy);
 
                     foreach (var info in infos)
                     {
@@ -155,7 +162,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <returns>returns entity collection</returns>
-        private static EntityCollection FetchSourceControlQueues(OrganizationServiceProxy serviceProxy)
+        private EntityCollection FetchSourceControlQueues(OrganizationServiceProxy serviceProxy)
         {
             QueryExpression querySampleSolution = new QueryExpression
             {
@@ -176,7 +183,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <returns>returns entity collection</returns>
-        public static EntityCollection RetrieveMasterSolutionDetailsByListOfSolutionId(OrganizationServiceProxy service, Guid sourceControlId)
+        public EntityCollection RetrieveMasterSolutionDetailsByListOfSolutionId(OrganizationServiceProxy service, Guid sourceControlId)
         {
             try
             {
@@ -210,7 +217,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <returns>returns entity collection</returns>
-        public static EntityCollection RetrieveSolutionsToBeMergedByListOfSolutionId(OrganizationServiceProxy service, Guid masterSolutionId)
+        public EntityCollection RetrieveSolutionsToBeMergedByListOfSolutionId(OrganizationServiceProxy service, Guid masterSolutionId)
         {
             try
             {
@@ -240,7 +247,7 @@ namespace CrmSolution
         /// Deletes directory
         /// </summary>
         /// <param name="path">folder path</param>
-        private static void DeleteDirectory(string path)
+        private void DeleteDirectory(string path)
         {
             if (Directory.Exists(path))
             {
@@ -377,7 +384,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <param name="solutionImportPath">solution import path</param>
-        public static void ImportSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile, Uri uri)
+        public void ImportSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile, Uri uri)
         {
             string solutionImportPath = solutionFile.SolutionFilePathManaged ?? solutionFile.SolutionFilePath;
             Console.WriteLine("Started importing solution to Organization " + uri);
@@ -448,7 +455,7 @@ namespace CrmSolution
         /// Method publish all the customization
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
-        public static void PublishAllCustomizationChanges(OrganizationServiceProxy serviceProxy)
+        public void PublishAllCustomizationChanges(OrganizationServiceProxy serviceProxy)
         {
             PublishAllXmlRequest publishAllXmlRequest = new PublishAllXmlRequest();
             serviceProxy.Execute(publishAllXmlRequest);
@@ -461,7 +468,7 @@ namespace CrmSolution
         /// <param name="serviceProxy">service proxy</param>
         /// <param name="sourceControlId">source control id</param>
         /// <returns></returns>
-        public static EntityCollection FetchDeplopymentInstance(IOrganizationService serviceProxy, Guid sourceControlId)
+        public EntityCollection FetchDeplopymentInstance(IOrganizationService serviceProxy, Guid sourceControlId)
         {
             try
             {

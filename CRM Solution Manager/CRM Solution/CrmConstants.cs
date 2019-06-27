@@ -17,32 +17,32 @@ namespace CrmSolution
     /// <summary>
     /// class contains constants for dynamics
     /// </summary>
-    internal class CrmConstants : ConfigurationSettings
-    {
+    public class CrmConstants : ConfigurationSettings
+    {       
         /// <summary>
         /// Solution Packager Path
         /// </summary>
-        private static string solutionPackagerPath;
+        private string solutionPackagerPath;
 
         /// <summary>
         /// Multiple Solutions Import
         /// </summary>
-        private static string multilpleSolutionsImport;
+        private string multilpleSolutionsImport;
 
         /// <summary>
         /// Solution To Be Imported
         /// </summary>
-        private static string solutionToBeImported;
+        private string solutionToBeImported;
 
         /// <summary>
         /// Solution Packager Relative Path
         /// </summary>
-        private static string solutionPackagerRelativePath;
+        private string solutionPackagerRelativePath;
 
         /// <summary>
         /// Sleep Timeout In Millis
         /// </summary>
-        private static string sleepTimeoutInMillis;
+        private string sleepTimeoutInMillis;
 
         /// <summary>
         /// client credentials
@@ -52,7 +52,7 @@ namespace CrmSolution
         /// <summary>
         /// Gets organization service url
         /// </summary>
-        public static string OrgServiceUrl
+        public string OrgServiceUrl
         {
             get
             {
@@ -63,7 +63,7 @@ namespace CrmSolution
         /// <summary>
         /// Gets Dynamics User Name
         /// </summary>
-        public static string DynamicsUserName
+        public string DynamicsUserName
         {
             get
             {
@@ -74,7 +74,7 @@ namespace CrmSolution
         /// <summary>
         /// Gets or Sets Dynamics password
         /// </summary>
-        public static string DynamicsPassword
+        public string DynamicsPassword
         {
             get
             {
@@ -85,7 +85,7 @@ namespace CrmSolution
         /// <summary>
         /// Gets or sets solution packager path
         /// </summary>
-        public static string SolutionPackagerPath
+        public string SolutionPackagerPath
         {
             get
             {
@@ -100,7 +100,7 @@ namespace CrmSolution
         /// <summary>
         /// Gets or sets MultipleSolutionsImport PS path
         /// </summary>
-        public static string MultilpleSolutionsImport
+        public string MultilpleSolutionsImport
         {
             get
             {
@@ -115,7 +115,7 @@ namespace CrmSolution
         /// <summary>
         /// Gets or sets SolutionToBeImported PS path
         /// </summary>
-        public static string SolutionToBeImported
+        public string SolutionToBeImported
         {
             get
             {
@@ -130,7 +130,7 @@ namespace CrmSolution
         /// <summary>
         /// Gets or sets solution packager relative path
         /// </summary>
-        public static string SolutionPackagerRelativePath
+        public string SolutionPackagerRelativePath
         {
             get
             {
@@ -145,7 +145,7 @@ namespace CrmSolution
         /// <summary>
         /// Gets or sets sleep timeout in millis
         /// </summary>
-        public static string SleepTimeoutInMillis
+        public string SleepTimeoutInMillis
         {
             get
             {

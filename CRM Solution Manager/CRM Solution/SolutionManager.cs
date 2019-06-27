@@ -22,7 +22,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
     /// Class merges components of solution to specified solution
     /// </summary>
     internal class SolutionManager
-    {
+    {       
         /// <summary>
         /// organization service
         /// </summary>
@@ -131,7 +131,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
         private CopySettings GetCopySettings()
         {
             CopySettings copySettings = new CopySettings() { ComponentsTypes = new List<int>(), SourceSolutions = new List<Entity>(), TargetSolutions = new List<Entity>() };
-            copySettings.ComponentsTypes.AddRange(Constants.ComponentTypes);
+            copySettings.ComponentsTypes.AddRange(Singleton.ConstantsInstance.ComponentTypes);
             return copySettings;
         }
 

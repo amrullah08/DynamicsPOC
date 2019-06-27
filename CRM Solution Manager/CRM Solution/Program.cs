@@ -36,7 +36,7 @@ namespace CrmSolution
             configurationSettings = new RepositoryConfigurationConstants();
             configurationSettings.SetRepositoryConfigurationProperties(configurationSettingsList);
 
-            RepositoryHelper.TryUpdateToRepository(solutionUniqueName, committerName, committerEmail, authorEmail);
+            Singleton.RepositoryHelperInstance.TryUpdateToRepository(solutionUniqueName, committerName, committerEmail, authorEmail);
         }
     }
 }

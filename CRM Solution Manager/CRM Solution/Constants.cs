@@ -12,7 +12,7 @@ namespace CrmSolution
     /// <summary>
     /// class for keeping constants
     /// </summary>
-    internal class Constants
+    public class Constants
     {
         /// <summary>
         /// Entity Source Control Queue
@@ -192,7 +192,7 @@ namespace CrmSolution
         /// <summary>
         /// Gets the component types
         /// </summary>
-        public static List<int> ComponentTypes
+        public List<int> ComponentTypes
         {
             get => new List<int>
             {

@@ -20,7 +20,7 @@ namespace SolutionManagement
         /// <summary>
         /// Plugin Target
         /// </summary>
-        public const string PluginTarget = "PluginTarget";
+        public const string PluginTarget = "Target";
 
         /// <summary>
         /// Plugin Update Message

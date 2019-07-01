@@ -21,6 +21,7 @@ namespace GitDeploy
     /// </summary>
     public class GitRepositoryManager : IGitRepositoryManager
     {
+      
         /// <summary>
         /// Repository url
         /// </summary>
@@ -168,7 +169,7 @@ namespace GitDeploy
         {
             try
             {
-                Console.WriteLine("Committing Powershell Scripts");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Committing Powershell Scripts" + "<br>");
                 string multilpleSolutionsImportPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.MultilpleSolutionsImport);
                 string multilpleSolutionsImportPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.MultilpleSolutionsImport;
                 File.Copy(multilpleSolutionsImportPSPath, multilpleSolutionsImportPSPathVirtual, true);
@@ -177,7 +178,7 @@ namespace GitDeploy
                 string solutionToBeImportedPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.SolutionToBeImported;
                 File.Copy(solutionToBeImportedPSPath, solutionToBeImportedPSPathVirtual, true);
 
-                Console.WriteLine("Committing solutions");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Committing solutions" + "<br>");
                 string fileUnmanaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_.zip";
                 File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
 
@@ -221,7 +222,7 @@ namespace GitDeploy
             }
             catch (EmptyCommitException ex)
             {
-                Console.WriteLine(ex);
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(ex.Message + "<br>");
             }
         }
 
@@ -259,12 +260,12 @@ namespace GitDeploy
                     }
                 }
 
-                Console.WriteLine("Pushing Changes to the Repository ");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Pushing Changes to the Repository " + "<br>");
 
                 repo.Network.Push(remote, pushRefs + ":" + pushRefs, options);
                 try
                 {
-                    var remoteOrigin = repo.Network.Remotes.FirstOrDefault(r => r.Name == "remotes/origin");
+                    var remoteOrigin = repo.Network.Remotes.FirstOrDefault(r => r.Name == "remotes/origin" + "<br>");
 
                     if (remoteOrigin != null)
                     {
@@ -273,10 +274,10 @@ namespace GitDeploy
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.Message);
+                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(e.Message + "<br>");
                 }
 
-                Console.WriteLine("Pushed changes");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Pushed changes" + "<br>");
             }
         }
 
@@ -376,7 +377,7 @@ namespace GitDeploy
                     }
                     catch (LibGit2Sharp.RepositoryNotFoundException r)
                     {
-                        Console.WriteLine(r.Message);
+                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(r.Message + "<br>");
                     }
                 }
                 else
@@ -388,7 +389,7 @@ namespace GitDeploy
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex.Message);
+                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(ex.Message + "<br>");
                     }
                 }
             }
@@ -411,7 +412,7 @@ namespace GitDeploy
             }
             catch
             {
-                Console.WriteLine("One possibility for the exception could be check for branch or incorrect branch" + branchName);
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("One possibility for the exception could be check for branch or incorrect branch" + branchName + "<br>");
                 throw;
             }
         }

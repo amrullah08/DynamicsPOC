@@ -12,6 +12,7 @@ namespace CrmSolution
     using System.Configuration;
     using System.IO;
     using System.Reflection;
+    using System.Text;
     using CliWrap;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Client;
@@ -21,6 +22,7 @@ namespace CrmSolution
     /// </summary>
     public class SolutionFileInfo
     {
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SolutionFileInfo" /> class without parameter
         /// </summary>
@@ -35,6 +37,28 @@ namespace CrmSolution
         public SolutionFileInfo(Microsoft.Xrm.Sdk.Client.OrganizationServiceProxy organizationServiceProxy)
         {
             this.OrganizationServiceProxy = organizationServiceProxy;
+        }
+
+        public string webJobs()
+        {
+            string text = Singleton.SolutionFileInfoInstance.webJobLogs.ToString();
+            return text;
+        }
+
+        public void UploadFiletoDynamics(IOrganizationService service, Entity dynamicsSourceControl)
+        {
+            string strMessage = Singleton.SolutionFileInfoInstance.webJobLogs.ToString();
+            byte[] filename = Encoding.ASCII.GetBytes(strMessage);
+            string encodedData = System.Convert.ToBase64String(filename);
+            Entity _annotation = new Entity("annotation");
+            _annotation.Attributes["objectid"] = new EntityReference(dynamicsSourceControl.LogicalName, dynamicsSourceControl.Id);
+            _annotation.Attributes["objecttypecode"] = dynamicsSourceControl.LogicalName;
+            _annotation.Attributes["subject"] = "Demo";
+            _annotation.Attributes["documentbody"] = encodedData;
+            _annotation.Attributes["mimetype"] = @"text/plain";
+            _annotation.Attributes["notetext"] = dynamicsSourceControl.Attributes["syed_name"] + DateTime.Now.ToString();
+            _annotation.Attributes["filename"] = dynamicsSourceControl.Attributes["syed_name"] + DateTime.Now.ToString() + ".txt";
+            service.Update(_annotation);
         }
 
         /// <summary>
@@ -95,6 +119,8 @@ namespace CrmSolution
         /// Gets or sets Unique solution name
         /// </summary>
         public string SolutionUniqueName { get; set; }
+
+        public StringBuilder webJobLogs = new StringBuilder();
 
         /// <summary>
         /// Gets Unique solution file zip name
@@ -232,7 +258,7 @@ namespace CrmSolution
             try
             {
                 var tempSolutionPackagerPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.SolutionPackagerRelativePath);
-                Console.WriteLine("Solution Packager Path " + tempSolutionPackagerPath);
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Solution Packager Path " + tempSolutionPackagerPath + "<br>");
 
                 if (File.Exists(tempSolutionPackagerPath))
                 {
@@ -241,20 +267,20 @@ namespace CrmSolution
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(ex.Message + "<br>");
                 throw;
             }
 
             if (!File.Exists(solutionPackagerPath))
             {
-                Console.WriteLine("SolutionPackager.exe doesnot exists in the specified location : " + solutionPackagerPath);
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("SolutionPackager.exe doesnot exists in the specified location : " + solutionPackagerPath + "<br>");
                 return;
             }
 
             var result = Cli.Wrap(solutionPackagerPath)
                             .SetArguments("/action:Extract /zipfile:\"" + this.SolutionFilePath + "\" /folder:\"" + this.SolutionExtractionPath + "\"")
-                           .SetStandardOutputCallback(l => Console.WriteLine($"StdOut> {l}")) // triggered on every line in stdout
-                           .SetStandardErrorCallback(l => Console.WriteLine($"StdErr> {l}")) // triggered on every line in stderr
+                           .SetStandardOutputCallback(l => Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine($"StdOut> {l}" + "<br>")) // triggered on every line in stdout
+                           .SetStandardErrorCallback(l => Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine($"StdErr> {l}" + "<br>")) // triggered on every line in stderr
                            .Execute();
         }
     }

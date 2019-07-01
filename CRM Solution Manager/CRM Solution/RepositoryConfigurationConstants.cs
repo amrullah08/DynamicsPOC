@@ -18,6 +18,7 @@ namespace CrmSolution
     /// </summary>
     public class RepositoryConfigurationConstants : ConfigurationSettings
     {
+       
         /// <summary>
         /// Method substitutes drive
         /// </summary>
@@ -303,9 +304,9 @@ namespace CrmSolution
                 process.Start();
 
                 string output = process.StandardOutput.ReadToEnd();
-                Console.WriteLine(output);
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(output + "<br>");
                 string err = process.StandardError.ReadToEnd();
-                Console.WriteLine(err);
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(err + "<br>");
                 process.WaitForExit();
 
                 Directory.CreateDirectory(SubstDrive + ":\\1\\");
@@ -313,7 +314,7 @@ namespace CrmSolution
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(ex.Message + "<br>");
             }
         }
 
@@ -339,14 +340,14 @@ namespace CrmSolution
                 process.StartInfo.RedirectStandardError = true;
                 process.Start();
                 string output = process.StandardOutput.ReadToEnd();
-                Console.WriteLine(output);
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(output + "<br>");
                 string err = process.StandardError.ReadToEnd();
-                Console.WriteLine(err);
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(err + "<br>");
                 process.WaitForExit();
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(ex.Message + "<br>");
             }
         }
     }

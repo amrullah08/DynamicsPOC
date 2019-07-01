@@ -50,6 +50,11 @@ namespace CrmSolution
         private ClientCredentials clientCredentials;
 
         /// <summary>
+        /// service proxy
+        /// </summary>
+        private OrganizationServiceProxy serviceProxy;
+
+        /// <summary>
         /// Gets organization service url
         /// </summary>
         public string OrgServiceUrl
@@ -157,6 +162,17 @@ namespace CrmSolution
             }
         }
 
+        public OrganizationServiceProxy ServiceProxy
+        {
+            get
+            {
+                return this.serviceProxy;
+            }
+            set
+            {
+            }
+        }
+
         /// <summary>
         /// Method returns configuration settings entity collection list
         /// </summary>
@@ -166,7 +182,7 @@ namespace CrmSolution
             this.clientCredentials = new ClientCredentials();
             this.clientCredentials.UserName.UserName = this.DynamicsUserName;
             this.clientCredentials.UserName.Password = this.DynamicsPassword;
-            var serviceProxy = this.InitializeOrganizationService();
+            this.serviceProxy = this.InitializeOrganizationService();
             EntityCollection retrievedConfigurationSettingsList = this.RetrieveConfigurationSettings(serviceProxy);
 
             return retrievedConfigurationSettingsList;

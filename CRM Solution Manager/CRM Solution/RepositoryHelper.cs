@@ -17,7 +17,8 @@ namespace CrmSolution
     /// Repository helper
     /// </summary>
     public class RepositoryHelper
-    {       
+    {
+       
         /// <summary>
         /// Method tries to update repository
         /// </summary>
@@ -26,7 +27,7 @@ namespace CrmSolution
         /// <param name="committerEmail">committer email</param>
         /// <param name="authorEmail">author email</param>
         public void TryUpdateToRepository(string solutionUniqueName, string committerName, string committerEmail, string authorEmail)
-        {    
+        {
             string solutionFilePath = string.Empty;
             ICrmSolutionHelper crmSolutionHelper = new CrmSolutionHelper(
                             Singleton.RepositoryConfigurationConstantsInstance.RepositoryUrl,
@@ -53,20 +54,21 @@ namespace CrmSolution
 
                         // continue;
                     }
-                    Singleton.RepositoryConfigurationConstantsInstance.ResetLocalDirectory();
+                    //Singleton.RepositoryConfigurationConstantsInstance.ResetLocalDirectory();
                     solutionFilePath = Singleton.RepositoryConfigurationConstantsInstance.LocalDirectory + "solutions.txt";
 
                     // todo: enable solutions file clear from crm portal
-                    PopulateHashset(solutionFilePath, new HashSet<string>());                    
+                    PopulateHashset(solutionFilePath, new HashSet<string>());
                     GitDeploy.GitRepositoryManager gitRepositoryManager = GetRepositoryManager(committerName, committerEmail, authorEmail, solutionFiles[0]);
-                    
-                       
+
+
 
                     foreach (var solutionFile in solutionFiles)
                     {
                         if (solutionFile.CheckInSolution)
                         {
                             TryPushToRepository(committerName, committerEmail, authorEmail, solutionFile, solutionFilePath, hashSet, gitRepositoryManager);
+                            //Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(Singleton.CrmConstantsInstance.ServiceProxy, solutionFile.Solution);
                         }
                     }
                 }
@@ -136,7 +138,7 @@ namespace CrmSolution
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(ex.Message);
             }
         }
 
@@ -172,6 +174,7 @@ namespace CrmSolution
             //RepositoryConfigurationConstants.ResetLocalDirectory();
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushingToStatus;
+            solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.webJobs();
             solutionFile.Update();
 
             //GitDeploy.GitRepositoryManager gitRepositoryManager = GetRepositoryManager(committerName, committerEmail, authorEmail, solutionFile);
@@ -184,12 +187,12 @@ namespace CrmSolution
                 hashSet.Clear();
             }
 
-            PopulateHashset(solutionFilePath, hashSet);                       
+            PopulateHashset(solutionFilePath, hashSet);
 
             if (!hashSet.Contains(solutionFile.SolutionFileZipName) && solutionFile.IncludeInRelease)
             {
                 hashSet.Add(solutionFile.SolutionFileZipName);
-            }            
+            }
 
             SaveHashSet(solutionFilePath, hashSet);
             gitRepositoryManager.CommitAllChanges(solutionFile, solutionFilePath);
@@ -197,6 +200,7 @@ namespace CrmSolution
             gitRepositoryManager.PushCommits();
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushToRepositorySuccessStatus;
+            solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.webJobs();
             solutionFile.Update();
         }
     }

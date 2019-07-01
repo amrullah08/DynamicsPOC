@@ -18,7 +18,6 @@ namespace CrmSolution
     /// </summary>
     public class RepositoryHelper
     {
-       
         /// <summary>
         /// Method tries to update repository
         /// </summary>
@@ -54,25 +53,22 @@ namespace CrmSolution
 
                         // continue;
                     }
-                    //Singleton.RepositoryConfigurationConstantsInstance.ResetLocalDirectory();
+
                     solutionFilePath = Singleton.RepositoryConfigurationConstantsInstance.LocalDirectory + "solutions.txt";
 
                     // todo: enable solutions file clear from crm portal
-                    PopulateHashset(solutionFilePath, new HashSet<string>());
-                    GitDeploy.GitRepositoryManager gitRepositoryManager = GetRepositoryManager(committerName, committerEmail, authorEmail, solutionFiles[0]);
-
-
+                    this.PopulateHashset(solutionFilePath, new HashSet<string>());
+                    GitDeploy.GitRepositoryManager gitRepositoryManager = this.GetRepositoryManager(committerName, committerEmail, authorEmail, solutionFiles[0]);
 
                     foreach (var solutionFile in solutionFiles)
                     {
                         if (solutionFile.CheckInSolution)
                         {
-                            TryPushToRepository(committerName, committerEmail, authorEmail, solutionFile, solutionFilePath, hashSet, gitRepositoryManager);
-                            //Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(Singleton.CrmConstantsInstance.ServiceProxy, solutionFile.Solution);
+                            this.TryPushToRepository(committerName, committerEmail, authorEmail, solutionFile, solutionFilePath, hashSet, gitRepositoryManager);
+                            ////Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(Singleton.CrmConstantsInstance.ServiceProxy, solutionFile.Solution);
                         }
                     }
                 }
-
                 catch (Exception ex)
                 {
                     Console.Write(ex);
@@ -96,9 +92,9 @@ namespace CrmSolution
             return new GitDeploy.GitRepositoryManager(
                                                     Singleton.RepositoryConfigurationConstantsInstance.GitUserName,
                                                     Singleton.RepositoryConfigurationConstantsInstance.GitUserPassword,
-                                                    solutionFile.GitRepoUrl ?? Singleton.RepositoryConfigurationConstantsInstance.RepositoryUrl,
-                                                    solutionFile.RemoteName ?? Singleton.RepositoryConfigurationConstantsInstance.RepositoryRemoteName,
-                                                    solutionFile.BranchName ?? Singleton.RepositoryConfigurationConstantsInstance.BranchName,
+                                                    Singleton.RepositoryConfigurationConstantsInstance.RepositoryUrl,
+                                                    Singleton.RepositoryConfigurationConstantsInstance.RepositoryRemoteName,
+                                                    Singleton.RepositoryConfigurationConstantsInstance.BranchName,
                                                     Convert.ToBoolean(Singleton.RepositoryConfigurationConstantsInstance.CloneRepositoryAlways),
                                                     Singleton.RepositoryConfigurationConstantsInstance.LocalDirectory,
                                                     Singleton.RepositoryConfigurationConstantsInstance.JsDirectory,
@@ -162,6 +158,7 @@ namespace CrmSolution
         /// <param name="solutionFile">solution file info</param>
         /// <param name="solutionFilePath">path of file that contains list of solution to be released</param>
         /// <param name="hashSet">hash set to store release solution</param>
+        /// <param name="gitRepositoryManager">object initialization for class gitRepositoryManager</param>
         private void TryPushToRepository(
                                                 string committerName,
                                                 string committerEmail,
@@ -171,30 +168,31 @@ namespace CrmSolution
                                                 HashSet<string> hashSet,
                                                 GitDeploy.GitRepositoryManager gitRepositoryManager)
         {
-            //RepositoryConfigurationConstants.ResetLocalDirectory();
+            ////RepositoryConfigurationConstants.ResetLocalDirectory();
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushingToStatus;
             solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.webJobs();
             solutionFile.Update();
 
-            //GitDeploy.GitRepositoryManager gitRepositoryManager = GetRepositoryManager(committerName, committerEmail, authorEmail, solutionFile);
+            ////GitDeploy.GitRepositoryManager gitRepositoryManager = GetRepositoryManager(committerName, committerEmail, authorEmail, solutionFile);
 
             gitRepositoryManager.UpdateRepository();
 
-            if (solutionFile.SolutionsTxt == 433710000 && File.Exists(solutionFilePath)) //433710000 value for Yes
+            ////433710000 value for Yes
+            if (solutionFile.SolutionsTxt == 433710000 && File.Exists(solutionFilePath))
             {
-                File.WriteAllText(solutionFilePath, String.Empty);
+                File.WriteAllText(solutionFilePath, string.Empty);
                 hashSet.Clear();
             }
 
-            PopulateHashset(solutionFilePath, hashSet);
+            this.PopulateHashset(solutionFilePath, hashSet);
 
             if (!hashSet.Contains(solutionFile.SolutionFileZipName) && solutionFile.IncludeInRelease)
             {
                 hashSet.Add(solutionFile.SolutionFileZipName);
             }
 
-            SaveHashSet(solutionFilePath, hashSet);
+            this.SaveHashSet(solutionFilePath, hashSet);
             gitRepositoryManager.CommitAllChanges(solutionFile, solutionFilePath);
 
             gitRepositoryManager.PushCommits();

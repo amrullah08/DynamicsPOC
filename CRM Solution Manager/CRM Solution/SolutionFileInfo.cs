@@ -258,7 +258,8 @@ namespace CrmSolution
             try
             {
                 var tempSolutionPackagerPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.SolutionPackagerRelativePath);
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Solution Packager Path " + tempSolutionPackagerPath + "<br>");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. Solution Packager Path " + tempSolutionPackagerPath + "<br>");
+                Console.WriteLine("Solution Packager Path " + tempSolutionPackagerPath);
 
                 if (File.Exists(tempSolutionPackagerPath))
                 {
@@ -267,13 +268,16 @@ namespace CrmSolution
             }
             catch (Exception ex)
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(ex.Message + "<br>");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. " + ex.Message + "<br>");
+                Console.WriteLine(ex.Message);
+
                 throw;
             }
 
             if (!File.Exists(solutionPackagerPath))
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("SolutionPackager.exe doesnot exists in the specified location : " + solutionPackagerPath + "<br>");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. " + "SolutionPackager.exe doesnot exists in the specified location : " + solutionPackagerPath + "<br>");
+                Console.WriteLine("SolutionPackager.exe doesnot exists in the specified location : " + solutionPackagerPath);
                 return;
             }
 

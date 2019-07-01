@@ -303,9 +303,11 @@ namespace CrmSolution
                 process.Start();
 
                 string output = process.StandardOutput.ReadToEnd();
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(output + "<br>");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. " + output + "<br>");
+                Console.WriteLine(output);
                 string err = process.StandardError.ReadToEnd();
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(err + "<br>");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. " + err + "<br>");
+                Console.WriteLine(err);
                 process.WaitForExit();
 
                 Directory.CreateDirectory(SubstDrive + ":\\1\\");
@@ -313,7 +315,8 @@ namespace CrmSolution
             }
             catch (Exception ex)
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(ex.Message + "<br>");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".." + ex.Message + "<br>");
+                Console.WriteLine(ex.Message);
             }
         }
 
@@ -339,14 +342,17 @@ namespace CrmSolution
                 process.StartInfo.RedirectStandardError = true;
                 process.Start();
                 string output = process.StandardOutput.ReadToEnd();
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(output + "<br>");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. " + output + "<br>");
+                Console.WriteLine(output);
                 string err = process.StandardError.ReadToEnd();
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(err + "<br>");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. " + err + "<br>");
+                Console.WriteLine(err);
                 process.WaitForExit();
             }
             catch (Exception ex)
             {
                 Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(ex.Message + "<br>");
+                Console.WriteLine(ex.Message);
             }
         }
     }

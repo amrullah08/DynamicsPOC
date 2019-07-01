@@ -21,7 +21,7 @@ namespace GitDeploy
     /// </summary>
     public class GitRepositoryManager : IGitRepositoryManager
     {
-      
+
         /// <summary>
         /// Repository url
         /// </summary>
@@ -169,7 +169,8 @@ namespace GitDeploy
         {
             try
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Committing Powershell Scripts" + "<br>");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. Committing Powershell Scripts" + "<br>");
+                Console.WriteLine("Committing Powershell Scripts");
                 string multilpleSolutionsImportPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.MultilpleSolutionsImport);
                 string multilpleSolutionsImportPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.MultilpleSolutionsImport;
                 File.Copy(multilpleSolutionsImportPSPath, multilpleSolutionsImportPSPathVirtual, true);
@@ -178,7 +179,8 @@ namespace GitDeploy
                 string solutionToBeImportedPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.SolutionToBeImported;
                 File.Copy(solutionToBeImportedPSPath, solutionToBeImportedPSPathVirtual, true);
 
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Committing solutions" + "<br>");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. Committing solutions" + "<br>");
+                Console.WriteLine("Committing solutions");
                 string fileUnmanaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_.zip";
                 File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
 
@@ -222,7 +224,8 @@ namespace GitDeploy
             }
             catch (EmptyCommitException ex)
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(ex.Message + "<br>");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. " + ex.Message + "<br>");
+                Console.WriteLine(ex.Message);
             }
         }
 
@@ -260,7 +263,8 @@ namespace GitDeploy
                     }
                 }
 
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Pushing Changes to the Repository " + "<br>");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. Pushing Changes to the Repository " + "<br>");
+                Console.WriteLine(".. Pushing Changes to the Repository ");
 
                 repo.Network.Push(remote, pushRefs + ":" + pushRefs, options);
                 try
@@ -274,10 +278,12 @@ namespace GitDeploy
                 }
                 catch (Exception e)
                 {
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(e.Message + "<br>");
+                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. " + e.Message + "<br>");
+                    Console.WriteLine(e.Message);
                 }
 
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Pushed changes" + "<br>");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. " + "Pushed changes" + "<br>");
+                Console.WriteLine("Pushed changes");
             }
         }
 
@@ -377,7 +383,8 @@ namespace GitDeploy
                     }
                     catch (LibGit2Sharp.RepositoryNotFoundException r)
                     {
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(r.Message + "<br>");
+                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. " + r.Message + "<br>");
+                        Console.WriteLine(r.Message);
                     }
                 }
                 else
@@ -389,7 +396,8 @@ namespace GitDeploy
                     }
                     catch (Exception ex)
                     {
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(ex.Message + "<br>");
+                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. " + ex.Message + "<br>");
+                        Console.WriteLine(ex.Message);
                     }
                 }
             }
@@ -412,7 +420,8 @@ namespace GitDeploy
             }
             catch
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("One possibility for the exception could be check for branch or incorrect branch" + branchName + "<br>");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. One possibility for the exception could be check for branch or incorrect branch" + branchName + "<br>");
+                Console.WriteLine("One possibility for the exception could be check for branch or incorrect branch" + branchName);
                 throw;
             }
         }

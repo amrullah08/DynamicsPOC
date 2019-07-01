@@ -70,7 +70,8 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
             }
             catch (Exception ex)
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Error for solution " + solutionUniqueName + " " + ex.Message);
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. " + "Error for solution " + solutionUniqueName + " " + ex.Message);
+                Console.WriteLine("Error for solution " + solutionUniqueName + " " + ex.Message);
             }
 
             // Join entities Id and solution Components Id
@@ -98,13 +99,15 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     copySettings.SourceSolutions.Add(solution);
                 }
             }
-            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Copying components into Master Solution...");
+            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. Copying components into Master Solution...");
+            Console.WriteLine("Copying components into Master Solution...");
             var components = this.CopyComponents(copySettings);
             var componentsMaster = this.RetrieveComponentsFromSolutions(copySettings.TargetSolutions.Select(T => T.Id).ToList(), copySettings.ComponentsTypes);
             var differentComponents = (from cm in componentsMaster where !components.Any(list => list.GetAttributeValue<Guid>("objectid") == cm.GetAttributeValue<Guid>("objectid")) select cm).ToList();
             if (differentComponents != null)
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Displaying different(additional) components after merging");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. Displaying different(additional) components after merging");
+                Console.WriteLine("Displaying different(additional) components after merging");
                 foreach (var target in copySettings.TargetSolutions)
                 {
                     foreach (var componentdetails in differentComponents)
@@ -115,7 +118,8 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
             }
             else
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("No different(additional components found after Merging)");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. No different(additional components found after Merging)");
+                Console.WriteLine("No different(additional components found after Merging)");
             }
 
             //GetComponentDetails(copySettings,)
@@ -195,6 +199,20 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
             return components;
         }
 
+        private void PrintLog(string componentName, string componentType, Guid componentId, string sourceSolution, string targetSolution)
+        {
+            Console.WriteLine("Component Name: " + componentName);
+            Console.WriteLine("Component Type: " + componentType);
+            Console.WriteLine("Component Id: " + componentId);
+            Console.WriteLine("Source Solution: " + sourceSolution);
+            Console.WriteLine("Target Solution: " + targetSolution);
+
+            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. Component Name: " + componentName + "<br>");
+            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. Component Type: " + componentType + "<br>");
+            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. Component Id: " + componentId + "<br>");
+            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. Source Solution: " + sourceSolution + "<br>");
+            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. Target Solution: " + targetSolution + "<br>");
+        }
         private void GetComponentDetails(CopySettings settings, Entity target, Entity component, int ComponentType, bool isSourceSolutionAvailable)
         {
             switch (ComponentType)
@@ -203,12 +221,12 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var entityReq = new RetrieveEntityRequest();
                     entityReq.MetadataId = component.GetAttributeValue<Guid>("objectid");
                     var retrievedEntity = (RetrieveEntityResponse)service.Execute(entityReq);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + retrievedEntity.EntityMetadata.LogicalName + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+
+                    PrintLog(retrievedEntity.EntityMetadata.LogicalName,
+component.FormattedValues["componenttype"],
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.WebResources:
@@ -216,36 +234,33 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     webresource.Target = new EntityReference("webresource", component.GetAttributeValue<Guid>("objectid"));
                     webresource.ColumnSet = new ColumnSet(true);
                     var retrievedWebresource = (RetrieveResponse)service.Execute(webresource);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedWebresource.Entity.Contains("name") ? retrievedWebresource.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedWebresource.Entity.Contains("name") ? retrievedWebresource.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.Attribute:
                     var attributeReq = new RetrieveAttributeRequest();
                     attributeReq.MetadataId = component.GetAttributeValue<Guid>("objectid");
                     var retrievedAttribute = (RetrieveAttributeResponse)service.Execute(attributeReq);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + retrievedAttribute.AttributeMetadata.LogicalName + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedAttribute.AttributeMetadata.LogicalName,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.Relationship:
                     var relationshipReq = new RetrieveRelationshipRequest();
                     relationshipReq.MetadataId = component.GetAttributeValue<Guid>("objectid");
                     var retrievedrelationshipReq = (RetrieveRelationshipResponse)service.Execute(relationshipReq);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + retrievedrelationshipReq.RelationshipMetadata.SchemaName + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedrelationshipReq.RelationshipMetadata.SchemaName,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.DisplayString:
@@ -253,12 +268,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     displayStringRequest.Target = new EntityReference("displaystring", component.GetAttributeValue<Guid>("objectid"));
                     displayStringRequest.ColumnSet = new ColumnSet(true);
                     var retrievedDisplayString = (RetrieveResponse)service.Execute(displayStringRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedDisplayString.Entity.Contains("name") ? retrievedDisplayString.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedDisplayString.Entity.Contains("name") ? retrievedDisplayString.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SavedQuery:
@@ -266,12 +280,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     savedQueryRequest.Target = new EntityReference("savedquery", component.GetAttributeValue<Guid>("objectid"));
                     savedQueryRequest.ColumnSet = new ColumnSet(true);
                     var retrievedSavedQuery = (RetrieveResponse)service.Execute(savedQueryRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedSavedQuery.Entity.Contains("name") ? retrievedSavedQuery.Entity.Attributes["name"] : string.Empty));
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedSavedQuery.Entity.Contains("name") ? retrievedSavedQuery.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SavedQueryVisualization:
@@ -279,12 +292,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     savedQueryVisualizationRequest.Target = new EntityReference("savedqueryvisualization", component.GetAttributeValue<Guid>("objectid"));
                     savedQueryVisualizationRequest.ColumnSet = new ColumnSet(true);
                     var retrievedSavedQueryVisualization = (RetrieveResponse)service.Execute(savedQueryVisualizationRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedSavedQueryVisualization.Entity.Contains("name") ? retrievedSavedQueryVisualization.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedSavedQueryVisualization.Entity.Contains("name") ? retrievedSavedQueryVisualization.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SystemForm:
@@ -292,12 +304,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     systemFormRequest.Target = new EntityReference("systemform", component.GetAttributeValue<Guid>("objectid"));
                     systemFormRequest.ColumnSet = new ColumnSet(true);
                     var retrievedSystemForm = (RetrieveResponse)service.Execute(systemFormRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedSystemForm.Entity.Contains("name") ? retrievedSystemForm.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedSystemForm.Entity.Contains("name") ? retrievedSystemForm.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.HierarchyRule:
@@ -305,12 +316,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     hierarchyRuleRequest.Target = new EntityReference("hierarchyrule", component.GetAttributeValue<Guid>("objectid"));
                     hierarchyRuleRequest.ColumnSet = new ColumnSet(true);
                     var retrievedHierarchyRule = (RetrieveResponse)service.Execute(hierarchyRuleRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedHierarchyRule.Entity.Contains("name") ? retrievedHierarchyRule.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedHierarchyRule.Entity.Contains("name") ? retrievedHierarchyRule.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SiteMap:
@@ -318,12 +328,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     siteMapRequest.Target = new EntityReference("sitemap", component.GetAttributeValue<Guid>("objectid"));
                     siteMapRequest.ColumnSet = new ColumnSet(true);
                     var retrievedSiteMap = (RetrieveResponse)service.Execute(siteMapRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedSiteMap.Entity.Contains("name") ? retrievedSiteMap.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedSiteMap.Entity.Contains("name") ? retrievedSiteMap.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.PluginAssembly:
@@ -331,12 +340,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     pluginAssemblyRequest.Target = new EntityReference("pluginassembly", component.GetAttributeValue<Guid>("objectid"));
                     pluginAssemblyRequest.ColumnSet = new ColumnSet(true);
                     var retrievedPluginAssembly = (RetrieveResponse)service.Execute(pluginAssemblyRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedPluginAssembly.Entity.Contains("name") ? retrievedPluginAssembly.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedPluginAssembly.Entity.Contains("name") ? retrievedPluginAssembly.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SDKMessageProcessingStep:
@@ -344,12 +352,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     sdkMessageProcessingStepRequest.Target = new EntityReference("sdkmessageprocessingstep", component.GetAttributeValue<Guid>("objectid"));
                     sdkMessageProcessingStepRequest.ColumnSet = new ColumnSet(true);
                     var retrievedSDKMessageProcessingStep = (RetrieveResponse)service.Execute(sdkMessageProcessingStepRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedSDKMessageProcessingStep.Entity.Contains("name") ? retrievedSDKMessageProcessingStep.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedSDKMessageProcessingStep.Entity.Contains("name") ? retrievedSDKMessageProcessingStep.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.ServiceEndpoint:
@@ -357,12 +364,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     serviceEndpointRequest.Target = new EntityReference("serviceendpoint", component.GetAttributeValue<Guid>("objectid"));
                     serviceEndpointRequest.ColumnSet = new ColumnSet(true);
                     var retrievedServiceEndpoint = (RetrieveResponse)service.Execute(serviceEndpointRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedServiceEndpoint.Entity.Contains("name") ? retrievedServiceEndpoint.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedServiceEndpoint.Entity.Contains("name") ? retrievedServiceEndpoint.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.Report:
@@ -370,12 +376,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     reportRequest.Target = new EntityReference("report", component.GetAttributeValue<Guid>("objectid"));
                     reportRequest.ColumnSet = new ColumnSet(true);
                     var retrievedReport = (RetrieveResponse)service.Execute(reportRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedReport.Entity.Contains("name") ? retrievedReport.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedReport.Entity.Contains("name") ? retrievedReport.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.Role:
@@ -383,12 +388,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     roleRequest.Target = new EntityReference("role", component.GetAttributeValue<Guid>("objectid"));
                     roleRequest.ColumnSet = new ColumnSet(true);
                     var retrievedRole = (RetrieveResponse)service.Execute(roleRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedRole.Entity.Contains("name") ? retrievedRole.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedRole.Entity.Contains("name") ? retrievedRole.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.FieldSecurityProfile:
@@ -396,12 +400,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     fieldSecurityProfileRequest.Target = new EntityReference("fieldsecurityprofile", component.GetAttributeValue<Guid>("objectid"));
                     fieldSecurityProfileRequest.ColumnSet = new ColumnSet(true);
                     var retrievedFieldSecurityProfile = (RetrieveResponse)service.Execute(fieldSecurityProfileRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedFieldSecurityProfile.Entity.Contains("name") ? retrievedFieldSecurityProfile.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedFieldSecurityProfile.Entity.Contains("name") ? retrievedFieldSecurityProfile.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.ConnectionRole:
@@ -409,12 +412,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     connectionRoleRequest.Target = new EntityReference("connectionrole", component.GetAttributeValue<Guid>("objectid"));
                     connectionRoleRequest.ColumnSet = new ColumnSet(true);
                     var retrievedConnectionRole = (RetrieveResponse)service.Execute(connectionRoleRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedConnectionRole.Entity.Contains("name") ? retrievedConnectionRole.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedConnectionRole.Entity.Contains("name") ? retrievedConnectionRole.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.Workflow:
@@ -422,12 +424,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     workflowRequest.Target = new EntityReference("workflow", component.GetAttributeValue<Guid>("objectid"));
                     workflowRequest.ColumnSet = new ColumnSet(true);
                     var retrievedWorkflow = (RetrieveResponse)service.Execute(workflowRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedWorkflow.Entity.Contains("name") ? retrievedWorkflow.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedWorkflow.Entity.Contains("name") ? retrievedWorkflow.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.KBArticleTemplate:
@@ -435,12 +436,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     kbArticleTemplateRequest.Target = new EntityReference("kbarticletemplate", component.GetAttributeValue<Guid>("objectid"));
                     kbArticleTemplateRequest.ColumnSet = new ColumnSet(true);
                     var retrievedKBArticleTemplate = (RetrieveResponse)service.Execute(kbArticleTemplateRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedKBArticleTemplate.Entity.Contains("name") ? retrievedKBArticleTemplate.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedKBArticleTemplate.Entity.Contains("name") ? retrievedKBArticleTemplate.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.MailMergeTemplate:
@@ -448,12 +448,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     mailMergeTemplateRequest.Target = new EntityReference("mailmergetemplate", component.GetAttributeValue<Guid>("objectid"));
                     mailMergeTemplateRequest.ColumnSet = new ColumnSet(true);
                     var retrievedMailMergeTemplate = (RetrieveResponse)service.Execute(mailMergeTemplateRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedMailMergeTemplate.Entity.Contains("name") ? retrievedMailMergeTemplate.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedMailMergeTemplate.Entity.Contains("name") ? retrievedMailMergeTemplate.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.ContractTemplate:
@@ -461,12 +460,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     contractTemplateRequest.Target = new EntityReference("contracttemplate", component.GetAttributeValue<Guid>("objectid"));
                     contractTemplateRequest.ColumnSet = new ColumnSet(true);
                     var retrievedContractTemplate = (RetrieveResponse)service.Execute(contractTemplateRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedContractTemplate.Entity.Contains("name") ? retrievedContractTemplate.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedContractTemplate.Entity.Contains("name") ? retrievedContractTemplate.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.EmailTemplate:
@@ -474,12 +472,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     emailTemplateRequest.Target = new EntityReference("template", component.GetAttributeValue<Guid>("objectid"));
                     emailTemplateRequest.ColumnSet = new ColumnSet(true);
                     var retrievedEmailTemplate = (RetrieveResponse)service.Execute(emailTemplateRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedEmailTemplate.Entity.Contains("name") ? retrievedEmailTemplate.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedEmailTemplate.Entity.Contains("name") ? retrievedEmailTemplate.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SLA:
@@ -487,12 +484,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     slaRequest.Target = new EntityReference("sla", component.GetAttributeValue<Guid>("objectid"));
                     slaRequest.ColumnSet = new ColumnSet(true);
                     var retrievedSLA = (RetrieveResponse)service.Execute(slaRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedSLA.Entity.Contains("name") ? retrievedSLA.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedSLA.Entity.Contains("name") ? retrievedSLA.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.ConvertRule:
@@ -500,16 +496,16 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     convertRuleRequest.Target = new EntityReference("convertrule", component.GetAttributeValue<Guid>("objectid"));
                     convertRuleRequest.ColumnSet = new ColumnSet(true);
                     var retrievedConvertRule = (RetrieveResponse)service.Execute(convertRuleRequest);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Name: " + (retrievedConvertRule.Entity.Contains("name") ? retrievedConvertRule.Entity.Attributes["name"] : string.Empty) + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Type: " + component.FormattedValues["componenttype"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Component Id: " + component.Id + "<br>");
-                    if (isSourceSolutionAvailable)
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"] + "<br>");
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Master Solution: " + target.Attributes["friendlyname"] + "<br>");
+                    PrintLog(retrievedConvertRule.Entity.Contains("name") ? retrievedConvertRule.Entity.Attributes["name"].ToString() : string.Empty,
+component.FormattedValues["componenttype"].ToString(),
+component.Id,
+settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Contains("friendlyname") ? settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"].ToString() : string.Empty,
+target.Attributes["friendlyname"].ToString());
                     break;
 
                 default:
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Unable to copy component type: " + component.FormattedValues["componenttype"] + " and objectID: " + component.Attributes["objectid"].ToString() + "<br>");
+                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Unable to copy component type: " + component.FormattedValues["componenttype"] + " and objectID: " + component.Attributes["objectid"].ToString());
+                    Console.WriteLine("Unable to copy component type: " + component.FormattedValues["componenttype"] + " and objectID: " + component.Attributes["objectid"].ToString());
                     break;
             }
         }

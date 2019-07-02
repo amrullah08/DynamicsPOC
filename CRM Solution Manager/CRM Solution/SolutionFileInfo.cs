@@ -22,90 +22,6 @@ namespace CrmSolution
     /// </summary>
     public class SolutionFileInfo
     {
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SolutionFileInfo" /> class without parameter
-        /// </summary>
-        public SolutionFileInfo()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SolutionFileInfo" /> class
-        /// </summary>
-        /// <param name="organizationServiceProxy">Organization proxy</param>
-        public SolutionFileInfo(Microsoft.Xrm.Sdk.Client.OrganizationServiceProxy organizationServiceProxy)
-        {
-            this.OrganizationServiceProxy = organizationServiceProxy;
-        }
-
-        public string webJobs()
-        {
-            string text = Singleton.SolutionFileInfoInstance.webJobLogs.ToString();
-            return text;
-        }
-
-        public void UploadFiletoDynamics(IOrganizationService service, Entity dynamicsSourceControl)
-        {
-            string strMessage = Singleton.SolutionFileInfoInstance.webJobLogs.ToString();
-            strMessage = strMessage.Replace("<br>", "");
-            byte[] filename = Encoding.ASCII.GetBytes(strMessage);
-            string encodedData = System.Convert.ToBase64String(filename);
-            Entity _annotation = new Entity("annotation");
-            _annotation.Attributes["objectid"] = new EntityReference(dynamicsSourceControl.LogicalName, dynamicsSourceControl.Id);
-            _annotation.Attributes["objecttypecode"] = dynamicsSourceControl.LogicalName;
-            _annotation.Attributes["subject"] = dynamicsSourceControl.Attributes["syed_name"] + "_Log_" + DateTime.Now.ToString();
-            _annotation.Attributes["documentbody"] = encodedData;
-            _annotation.Attributes["mimetype"] = @"text/plain";
-            _annotation.Attributes["notetext"] = dynamicsSourceControl.Attributes["syed_name"] + DateTime.Now.ToString();
-            _annotation.Attributes["filename"] = dynamicsSourceControl.Attributes["syed_name"] + DateTime.Now.ToString() + ".txt";
-            service.Create(_annotation);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SolutionFileInfo" /> class
-        /// </summary>
-        /// <param name="solution">solution entity</param>
-        /// <param name="organizationServiceProxy">Organization proxy</param>
-        /// <param name="uniqueSolutionName">unique solution name</param>
-        public SolutionFileInfo(Entity solution, OrganizationServiceProxy organizationServiceProxy, Entity solutionDetail)
-        {
-            this.OrganizationServiceProxy = organizationServiceProxy;
-            this.SolutionsToBeMerged = new List<string>();
-            this.SolutionUniqueName = solutionDetail.GetAttributeValue<string>("syed_listofsolutions");
-
-            // solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSolutionName);
-            this.Message = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForComment);
-            this.OwnerName = solution.GetAttributeValue<EntityReference>(Constants.SourceControlQueueAttributeNameForOwnerId).Name;
-            this.IncludeInRelease = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForIncludeInRelease);
-            this.CheckInSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForCheckinSolution);
-            //this.MergeSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForMergeSolution);
-            this.ExportAsManaged = solutionDetail.GetAttributeValue<bool>("syed_exportas");
-            this.SolutionsTxt = solution.GetAttributeValue<OptionSetValue>(Constants.SourceControlQueueAttributeNameForOverwriteSolutionsTxt)?.Value ?? 0;
-            this.RemoteName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRemote);
-            this.GitRepoUrl = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryUrl);
-            EntityCollection retrieveSolutionsToBeMerged = Singleton.CrmSolutionHelperInstance.RetrieveSolutionsToBeMergedByListOfSolutionId(organizationServiceProxy, solutionDetail.Id);
-
-
-
-            if (this.CheckInSolution)
-            {
-                this.SolutionExtractionPath = Path.GetTempPath() + this.SolutionUniqueName;
-                this.BranchName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForBranch);
-                Singleton.CrmSolutionHelperInstance.CreateEmptyFolder(this.SolutionExtractionPath);
-            }
-
-            if (retrieveSolutionsToBeMerged.Entities.Count > 0)
-            {
-                foreach (Entity solutionsToBeMerged in retrieveSolutionsToBeMerged.Entities)
-                {
-                    this.SolutionsToBeMerged.Add(solutionsToBeMerged.GetAttributeValue<string>("syed_uniquename"));
-                }
-            }
-
-            this.Solution = solution;
-        }
-
         /// <summary>
         /// Gets or sets where unmanaged solution is downloaded
         /// </summary>
@@ -213,6 +129,88 @@ namespace CrmSolution
         /// Gets value of solution extraction path
         /// </summary>
         public string SolutionExtractionPath { get; private set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SolutionFileInfo" /> class without parameter
+        /// </summary>
+        public SolutionFileInfo()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SolutionFileInfo" /> class
+        /// </summary>
+        /// <param name="organizationServiceProxy">Organization proxy</param>
+        public SolutionFileInfo(Microsoft.Xrm.Sdk.Client.OrganizationServiceProxy organizationServiceProxy)
+        {
+            this.OrganizationServiceProxy = organizationServiceProxy;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SolutionFileInfo" /> class
+        /// </summary>
+        /// <param name="solution">solution entity</param>
+        /// <param name="organizationServiceProxy">Organization proxy</param>
+        /// <param name="uniqueSolutionName">unique solution name</param>
+        public SolutionFileInfo(Entity solution, OrganizationServiceProxy organizationServiceProxy, Entity solutionDetail)
+        {
+            this.OrganizationServiceProxy = organizationServiceProxy;
+            this.SolutionsToBeMerged = new List<string>();
+            this.SolutionUniqueName = solutionDetail.GetAttributeValue<string>("syed_listofsolutions");
+
+            // solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSolutionName);
+            this.Message = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForComment);
+            this.OwnerName = solution.GetAttributeValue<EntityReference>(Constants.SourceControlQueueAttributeNameForOwnerId).Name;
+            this.IncludeInRelease = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForIncludeInRelease);
+            this.CheckInSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForCheckinSolution);
+            //this.MergeSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForMergeSolution);
+            this.ExportAsManaged = solutionDetail.GetAttributeValue<bool>("syed_exportas");
+            this.SolutionsTxt = solution.GetAttributeValue<OptionSetValue>(Constants.SourceControlQueueAttributeNameForOverwriteSolutionsTxt)?.Value ?? 0;
+            this.RemoteName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRemote);
+            this.GitRepoUrl = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryUrl);
+            EntityCollection retrieveSolutionsToBeMerged = Singleton.CrmSolutionHelperInstance.RetrieveSolutionsToBeMergedByListOfSolutionId(organizationServiceProxy, solutionDetail.Id);
+
+
+
+            if (this.CheckInSolution)
+            {
+                this.SolutionExtractionPath = Path.GetTempPath() + this.SolutionUniqueName;
+                this.BranchName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForBranch);
+                Singleton.CrmSolutionHelperInstance.CreateEmptyFolder(this.SolutionExtractionPath);
+            }
+
+            if (retrieveSolutionsToBeMerged.Entities.Count > 0)
+            {
+                foreach (Entity solutionsToBeMerged in retrieveSolutionsToBeMerged.Entities)
+                {
+                    this.SolutionsToBeMerged.Add(solutionsToBeMerged.GetAttributeValue<string>("syed_uniquename"));
+                }
+            }
+
+            this.Solution = solution;
+        }
+
+        public string webJobs()
+        {
+            string text = Singleton.SolutionFileInfoInstance.webJobLogs.ToString();
+            return text;
+        }
+
+        public void UploadFiletoDynamics(IOrganizationService service, Entity dynamicsSourceControl)
+        {
+            string strMessage = Singleton.SolutionFileInfoInstance.webJobLogs.ToString();
+            strMessage = strMessage.Replace("<br>", "");
+            byte[] filename = Encoding.ASCII.GetBytes(strMessage);
+            string encodedData = System.Convert.ToBase64String(filename);
+            Entity _annotation = new Entity("annotation");
+            _annotation.Attributes["objectid"] = new EntityReference(dynamicsSourceControl.LogicalName, dynamicsSourceControl.Id);
+            _annotation.Attributes["objecttypecode"] = dynamicsSourceControl.LogicalName;
+            _annotation.Attributes["subject"] = dynamicsSourceControl.Attributes["syed_name"] + "_Log_" + DateTime.Now.ToString();
+            _annotation.Attributes["documentbody"] = encodedData;
+            _annotation.Attributes["mimetype"] = @"text/plain";
+            _annotation.Attributes["notetext"] = dynamicsSourceControl.Attributes["syed_name"] + DateTime.Now.ToString();
+            _annotation.Attributes["filename"] = dynamicsSourceControl.Attributes["syed_name"] + DateTime.Now.ToString() + ".txt";
+            service.Create(_annotation);
+        }
 
         /// <summary>
         ///  Method returns solution info based on unique solution name

@@ -209,13 +209,14 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                 Console.WriteLine("Source Solution: " + sourceSolution);
                 Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Source Solution: " + sourceSolution + "<br>");
             }
-            Console.WriteLine("Target Solution: " + targetSolution);
 
+            Console.WriteLine("Target Solution: " + targetSolution);
             Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Component Name: " + componentName + "<br>");
             Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Component Type: " + componentType + "<br>");
             Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Component Id: " + componentId + "<br>");
             Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Target Solution: " + targetSolution + "<br>");
         }
+
         private void GetComponentDetails(CopySettings settings, Entity target, Entity component, int ComponentType)
         {
             var sourceSolution = settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id);
@@ -225,310 +226,190 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                 case Constants.Entity:
                     var entityReq = new RetrieveEntityRequest();
                     entityReq.MetadataId = component.GetAttributeValue<Guid>("objectid");
-                    var retrievedEntity = (RetrieveEntityResponse)service.Execute(entityReq);
-
-                    PrintLog(retrievedEntity.EntityMetadata.LogicalName,
-component.FormattedValues["componenttype"],
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedEntity = (RetrieveEntityResponse)this.service.Execute(entityReq);
+                    this.PrintLog(retrievedEntity.EntityMetadata.LogicalName, component.FormattedValues["componenttype"], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.WebResources:
                     var webresource = new RetrieveRequest();
                     webresource.Target = new EntityReference("webresource", component.GetAttributeValue<Guid>("objectid"));
                     webresource.ColumnSet = new ColumnSet(true);
-                    var retrievedWebresource = (RetrieveResponse)service.Execute(webresource);
-
-                    PrintLog(retrievedWebresource.Entity.Contains("name") ? retrievedWebresource.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedWebresource = (RetrieveResponse)this.service.Execute(webresource);
+                    this.PrintLog(retrievedWebresource.Entity.Contains("name") ? retrievedWebresource.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.Attribute:
                     var attributeReq = new RetrieveAttributeRequest();
                     attributeReq.MetadataId = component.GetAttributeValue<Guid>("objectid");
-                    var retrievedAttribute = (RetrieveAttributeResponse)service.Execute(attributeReq);
-
-                    PrintLog(retrievedAttribute.AttributeMetadata.LogicalName,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedAttribute = (RetrieveAttributeResponse)this.service.Execute(attributeReq);
+                    this.PrintLog(retrievedAttribute.AttributeMetadata.LogicalName, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.Relationship:
                     var relationshipReq = new RetrieveRelationshipRequest();
                     relationshipReq.MetadataId = component.GetAttributeValue<Guid>("objectid");
-                    var retrievedrelationshipReq = (RetrieveRelationshipResponse)service.Execute(relationshipReq);
-
-                    PrintLog(retrievedrelationshipReq.RelationshipMetadata.SchemaName,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedrelationshipReq = (RetrieveRelationshipResponse)this.service.Execute(relationshipReq);
+                    this.PrintLog(retrievedrelationshipReq.RelationshipMetadata.SchemaName, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.DisplayString:
                     var displayStringRequest = new RetrieveRequest();
                     displayStringRequest.Target = new EntityReference("displaystring", component.GetAttributeValue<Guid>("objectid"));
                     displayStringRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedDisplayString = (RetrieveResponse)service.Execute(displayStringRequest);
-
-                    PrintLog(retrievedDisplayString.Entity.Contains("name") ? retrievedDisplayString.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedDisplayString = (RetrieveResponse)this.service.Execute(displayStringRequest);
+                    this.PrintLog(retrievedDisplayString.Entity.Contains("name") ? retrievedDisplayString.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SavedQuery:
                     var savedQueryRequest = new RetrieveRequest();
                     savedQueryRequest.Target = new EntityReference("savedquery", component.GetAttributeValue<Guid>("objectid"));
                     savedQueryRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedSavedQuery = (RetrieveResponse)service.Execute(savedQueryRequest);
-
-                    PrintLog(retrievedSavedQuery.Entity.Contains("name") ? retrievedSavedQuery.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedSavedQuery = (RetrieveResponse)this.service.Execute(savedQueryRequest);
+                    this.PrintLog(retrievedSavedQuery.Entity.Contains("name") ? retrievedSavedQuery.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SavedQueryVisualization:
                     var savedQueryVisualizationRequest = new RetrieveRequest();
                     savedQueryVisualizationRequest.Target = new EntityReference("savedqueryvisualization", component.GetAttributeValue<Guid>("objectid"));
                     savedQueryVisualizationRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedSavedQueryVisualization = (RetrieveResponse)service.Execute(savedQueryVisualizationRequest);
-
-                    PrintLog(retrievedSavedQueryVisualization.Entity.Contains("name") ? retrievedSavedQueryVisualization.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedSavedQueryVisualization = (RetrieveResponse)this.service.Execute(savedQueryVisualizationRequest);
+                    this.PrintLog(retrievedSavedQueryVisualization.Entity.Contains("name") ? retrievedSavedQueryVisualization.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SystemForm:
                     var systemFormRequest = new RetrieveRequest();
                     systemFormRequest.Target = new EntityReference("systemform", component.GetAttributeValue<Guid>("objectid"));
                     systemFormRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedSystemForm = (RetrieveResponse)service.Execute(systemFormRequest);
-
-                    PrintLog(retrievedSystemForm.Entity.Contains("name") ? retrievedSystemForm.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedSystemForm = (RetrieveResponse)this.service.Execute(systemFormRequest);
+                    this.PrintLog(retrievedSystemForm.Entity.Contains("name") ? retrievedSystemForm.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.HierarchyRule:
                     var hierarchyRuleRequest = new RetrieveRequest();
                     hierarchyRuleRequest.Target = new EntityReference("hierarchyrule", component.GetAttributeValue<Guid>("objectid"));
                     hierarchyRuleRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedHierarchyRule = (RetrieveResponse)service.Execute(hierarchyRuleRequest);
-
-                    PrintLog(retrievedHierarchyRule.Entity.Contains("name") ? retrievedHierarchyRule.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedHierarchyRule = (RetrieveResponse)this.service.Execute(hierarchyRuleRequest);
+                    this.PrintLog(retrievedHierarchyRule.Entity.Contains("name") ? retrievedHierarchyRule.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SiteMap:
                     var siteMapRequest = new RetrieveRequest();
                     siteMapRequest.Target = new EntityReference("sitemap", component.GetAttributeValue<Guid>("objectid"));
                     siteMapRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedSiteMap = (RetrieveResponse)service.Execute(siteMapRequest);
-
-                    PrintLog(retrievedSiteMap.Entity.Contains("name") ? retrievedSiteMap.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedSiteMap = (RetrieveResponse)this.service.Execute(siteMapRequest);
+                    this.PrintLog(retrievedSiteMap.Entity.Contains("name") ? retrievedSiteMap.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.PluginAssembly:
                     var pluginAssemblyRequest = new RetrieveRequest();
                     pluginAssemblyRequest.Target = new EntityReference("pluginassembly", component.GetAttributeValue<Guid>("objectid"));
                     pluginAssemblyRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedPluginAssembly = (RetrieveResponse)service.Execute(pluginAssemblyRequest);
-
-                    PrintLog(retrievedPluginAssembly.Entity.Contains("name") ? retrievedPluginAssembly.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedPluginAssembly = (RetrieveResponse)this.service.Execute(pluginAssemblyRequest);
+                    this.PrintLog(retrievedPluginAssembly.Entity.Contains("name") ? retrievedPluginAssembly.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SDKMessageProcessingStep:
                     var sdkMessageProcessingStepRequest = new RetrieveRequest();
                     sdkMessageProcessingStepRequest.Target = new EntityReference("sdkmessageprocessingstep", component.GetAttributeValue<Guid>("objectid"));
                     sdkMessageProcessingStepRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedSDKMessageProcessingStep = (RetrieveResponse)service.Execute(sdkMessageProcessingStepRequest);
-
-                    PrintLog(retrievedSDKMessageProcessingStep.Entity.Contains("name") ? retrievedSDKMessageProcessingStep.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedSDKMessageProcessingStep = (RetrieveResponse)this.service.Execute(sdkMessageProcessingStepRequest);
+                    this.PrintLog(retrievedSDKMessageProcessingStep.Entity.Contains("name") ? retrievedSDKMessageProcessingStep.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.ServiceEndpoint:
                     var serviceEndpointRequest = new RetrieveRequest();
                     serviceEndpointRequest.Target = new EntityReference("serviceendpoint", component.GetAttributeValue<Guid>("objectid"));
                     serviceEndpointRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedServiceEndpoint = (RetrieveResponse)service.Execute(serviceEndpointRequest);
-
-                    PrintLog(retrievedServiceEndpoint.Entity.Contains("name") ? retrievedServiceEndpoint.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedServiceEndpoint = (RetrieveResponse)this.service.Execute(serviceEndpointRequest);
+                    this.PrintLog(retrievedServiceEndpoint.Entity.Contains("name") ? retrievedServiceEndpoint.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.Report:
                     var reportRequest = new RetrieveRequest();
                     reportRequest.Target = new EntityReference("report", component.GetAttributeValue<Guid>("objectid"));
                     reportRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedReport = (RetrieveResponse)service.Execute(reportRequest);
-
-                    PrintLog(retrievedReport.Entity.Contains("name") ? retrievedReport.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedReport = (RetrieveResponse)this.service.Execute(reportRequest);
+                    this.PrintLog(retrievedReport.Entity.Contains("name") ? retrievedReport.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.Role:
                     var roleRequest = new RetrieveRequest();
                     roleRequest.Target = new EntityReference("role", component.GetAttributeValue<Guid>("objectid"));
                     roleRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedRole = (RetrieveResponse)service.Execute(roleRequest);
-
-                    PrintLog(retrievedRole.Entity.Contains("name") ? retrievedRole.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedRole = (RetrieveResponse)this.service.Execute(roleRequest);
+                    this.PrintLog(retrievedRole.Entity.Contains("name") ? retrievedRole.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.FieldSecurityProfile:
                     var fieldSecurityProfileRequest = new RetrieveRequest();
                     fieldSecurityProfileRequest.Target = new EntityReference("fieldsecurityprofile", component.GetAttributeValue<Guid>("objectid"));
                     fieldSecurityProfileRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedFieldSecurityProfile = (RetrieveResponse)service.Execute(fieldSecurityProfileRequest);
-
-                    PrintLog(retrievedFieldSecurityProfile.Entity.Contains("name") ? retrievedFieldSecurityProfile.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedFieldSecurityProfile = (RetrieveResponse)this.service.Execute(fieldSecurityProfileRequest);
+                    this.PrintLog(retrievedFieldSecurityProfile.Entity.Contains("name") ? retrievedFieldSecurityProfile.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.ConnectionRole:
                     var connectionRoleRequest = new RetrieveRequest();
                     connectionRoleRequest.Target = new EntityReference("connectionrole", component.GetAttributeValue<Guid>("objectid"));
                     connectionRoleRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedConnectionRole = (RetrieveResponse)service.Execute(connectionRoleRequest);
-
-                    PrintLog(retrievedConnectionRole.Entity.Contains("name") ? retrievedConnectionRole.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedConnectionRole = (RetrieveResponse)this.service.Execute(connectionRoleRequest);
+                    this.PrintLog(retrievedConnectionRole.Entity.Contains("name") ? retrievedConnectionRole.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.Workflow:
                     var workflowRequest = new RetrieveRequest();
                     workflowRequest.Target = new EntityReference("workflow", component.GetAttributeValue<Guid>("objectid"));
                     workflowRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedWorkflow = (RetrieveResponse)service.Execute(workflowRequest);
-
-                    PrintLog(retrievedWorkflow.Entity.Contains("name") ? retrievedWorkflow.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedWorkflow = (RetrieveResponse)this.service.Execute(workflowRequest);
+                    this.PrintLog(retrievedWorkflow.Entity.Contains("name") ? retrievedWorkflow.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.KBArticleTemplate:
-                    var kbArticleTemplateRequest = new RetrieveRequest();
-                    kbArticleTemplateRequest.Target = new EntityReference("kbarticletemplate", component.GetAttributeValue<Guid>("objectid"));
-                    kbArticleTemplateRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedKBArticleTemplate = (RetrieveResponse)service.Execute(kbArticleTemplateRequest);
-
-                    PrintLog(retrievedKBArticleTemplate.Entity.Contains("name") ? retrievedKBArticleTemplate.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var articleTemplateRequest = new RetrieveRequest();
+                    articleTemplateRequest.Target = new EntityReference("kbarticletemplate", component.GetAttributeValue<Guid>("objectid"));
+                    articleTemplateRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedKBArticleTemplate = (RetrieveResponse)this.service.Execute(articleTemplateRequest);
+                    this.PrintLog(retrievedKBArticleTemplate.Entity.Contains("name") ? retrievedKBArticleTemplate.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.MailMergeTemplate:
                     var mailMergeTemplateRequest = new RetrieveRequest();
                     mailMergeTemplateRequest.Target = new EntityReference("mailmergetemplate", component.GetAttributeValue<Guid>("objectid"));
                     mailMergeTemplateRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedMailMergeTemplate = (RetrieveResponse)service.Execute(mailMergeTemplateRequest);
-
-                    PrintLog(retrievedMailMergeTemplate.Entity.Contains("name") ? retrievedMailMergeTemplate.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedMailMergeTemplate = (RetrieveResponse)this.service.Execute(mailMergeTemplateRequest);
+                    this.PrintLog(retrievedMailMergeTemplate.Entity.Contains("name") ? retrievedMailMergeTemplate.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.ContractTemplate:
                     var contractTemplateRequest = new RetrieveRequest();
                     contractTemplateRequest.Target = new EntityReference("contracttemplate", component.GetAttributeValue<Guid>("objectid"));
                     contractTemplateRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedContractTemplate = (RetrieveResponse)service.Execute(contractTemplateRequest);
-
-                    PrintLog(retrievedContractTemplate.Entity.Contains("name") ? retrievedContractTemplate.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedContractTemplate = (RetrieveResponse)this.service.Execute(contractTemplateRequest);
+                    this.PrintLog(retrievedContractTemplate.Entity.Contains("name") ? retrievedContractTemplate.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.EmailTemplate:
                     var emailTemplateRequest = new RetrieveRequest();
                     emailTemplateRequest.Target = new EntityReference("template", component.GetAttributeValue<Guid>("objectid"));
                     emailTemplateRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedEmailTemplate = (RetrieveResponse)service.Execute(emailTemplateRequest);
-
-                    PrintLog(retrievedEmailTemplate.Entity.Contains("name") ? retrievedEmailTemplate.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedEmailTemplate = (RetrieveResponse)this.service.Execute(emailTemplateRequest);
+                    this.PrintLog(retrievedEmailTemplate.Entity.Contains("name") ? retrievedEmailTemplate.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SLA:
                     var slaRequest = new RetrieveRequest();
                     slaRequest.Target = new EntityReference("sla", component.GetAttributeValue<Guid>("objectid"));
                     slaRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedSLA = (RetrieveResponse)service.Execute(slaRequest);
-
-                    PrintLog(retrievedSLA.Entity.Contains("name") ? retrievedSLA.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedSLA = (RetrieveResponse)this.service.Execute(slaRequest);
+                    this.PrintLog(retrievedSLA.Entity.Contains("name") ? retrievedSLA.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.ConvertRule:
                     var convertRuleRequest = new RetrieveRequest();
                     convertRuleRequest.Target = new EntityReference("convertrule", component.GetAttributeValue<Guid>("objectid"));
                     convertRuleRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedConvertRule = (RetrieveResponse)service.Execute(convertRuleRequest);
-
-                    PrintLog(retrievedConvertRule.Entity.Contains("name") ? retrievedConvertRule.Entity.Attributes["name"].ToString() : string.Empty,
-component.FormattedValues["componenttype"].ToString(),
-component.Id,
-sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty,
-target.Attributes["friendlyname"].ToString());
+                    var retrievedConvertRule = (RetrieveResponse)this.service.Execute(convertRuleRequest);
+                    this.PrintLog(retrievedConvertRule.Entity.Contains("name") ? retrievedConvertRule.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 default:

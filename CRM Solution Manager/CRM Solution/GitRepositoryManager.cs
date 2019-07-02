@@ -21,77 +21,6 @@ namespace GitDeploy
     /// </summary>
     public class GitRepositoryManager : IGitRepositoryManager
     {
-
-        /// <summary>
-        /// Repository url
-        /// </summary>
-        private readonly string repoUrl;
-
-        /// <summary>
-        /// Author name for the commit
-        /// </summary>
-        private readonly string authorName;
-
-        /// <summary>
-        /// Author Email for the commit
-        /// </summary>
-        private readonly string authorEmail;
-
-        /// <summary>
-        /// Committer name
-        /// </summary>
-        private readonly string committerName;
-
-        /// <summary>
-        /// Committer email
-        /// </summary>
-        private readonly string committerEmail;
-
-        /// <summary>
-        /// remote name
-        /// </summary>
-        private readonly string remoteName;
-
-        /// <summary>
-        /// Branch name
-        /// </summary>
-        private readonly string branchName;
-
-        /// <summary>
-        /// User name and password credentials
-        /// </summary>
-        private readonly UsernamePasswordCredentials credentials;
-
-        /// <summary>
-        /// local repository folder
-        /// </summary>
-        private readonly DirectoryInfo localFolder;
-
-        /// <summary>
-        /// local java script folder
-        /// </summary>
-        private readonly DirectoryInfo webResourcesJsFolder;
-
-        /// <summary>
-        /// local Images folder
-        /// </summary>
-        private readonly DirectoryInfo webResourcesImageslocalFolder;
-
-        /// <summary>
-        /// local html folder
-        /// </summary>
-        private readonly DirectoryInfo webResourcesHtmllocalFolder;
-
-        /// <summary>
-        /// solution local folder
-        /// </summary>
-        private readonly DirectoryInfo solutionlocalFolder;
-
-        /// <summary>
-        /// Every time repository will be cloned
-        /// </summary>
-        private bool cloneAlways;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="GitRepositoryManager" /> class.
         /// </summary>
@@ -191,12 +120,10 @@ namespace GitDeploy
 
                 using (var repo = new Repository(this.localFolder.FullName))
                 {
-                    AddRepositoryIndexes(fileUnmanaged, repo);
-                    AddRepositoryIndexes(fileManaged, repo);
-
+                    this.AddRepositoryIndexes(fileUnmanaged, repo);
+                    this.AddRepositoryIndexes(fileManaged, repo);
                     this.AddWebResourcesToRepository(webResources, repo);
-
-                    // todo: add extracted solution files to repository
+                    //// todo: add extracted solution files to repository
                     this.AddExtractedSolutionToRepository(solutionFileInfo, repo);
 
                     repo.Index.Add(solutionFilePath.Replace(this.localFolder.FullName, string.Empty));
@@ -287,43 +214,7 @@ namespace GitDeploy
             }
         }
 
-        /// <summary>
-        /// Adds indexes for repository
-        /// </summary>
-        /// <param name="file">Export solution location</param>
-        /// <param name="repo">Repository</param>
-        private void AddRepositoryIndexes(string file, Repository repo)
-        {
-            if (string.IsNullOrEmpty(file))
-            {
-                var files = this.solutionlocalFolder.GetFiles("*.zip").Select(f => f.FullName);
-
-                {
-                    foreach (var f in files)
-                    {
-                        if (string.IsNullOrEmpty(file))
-                        {
-                            repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
-                        }
-                        else
-                        {
-                            if (f.EndsWith(file))
-                            {
-                                repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                repo.Index.Add(file.Replace(this.localFolder.FullName, string.Empty));
-            }
-        }
-
-
-
-        /// <summary>
+               /// <summary>
         /// Method updates repository
         /// </summary>
         public void UpdateRepository()
@@ -464,6 +355,76 @@ namespace GitDeploy
         }
 
         /// <summary>
+        /// Repository url
+        /// </summary>
+        private readonly string repoUrl;
+
+        /// <summary>
+        /// Author name for the commit
+        /// </summary>
+        private readonly string authorName;
+
+        /// <summary>
+        /// Author Email for the commit
+        /// </summary>
+        private readonly string authorEmail;
+
+        /// <summary>
+        /// Committer name
+        /// </summary>
+        private readonly string committerName;
+
+        /// <summary>
+        /// Committer email
+        /// </summary>
+        private readonly string committerEmail;
+
+        /// <summary>
+        /// remote name
+        /// </summary>
+        private readonly string remoteName;
+
+        /// <summary>
+        /// Branch name
+        /// </summary>
+        private readonly string branchName;
+
+        /// <summary>
+        /// User name and password credentials
+        /// </summary>
+        private readonly UsernamePasswordCredentials credentials;
+
+        /// <summary>
+        /// local repository folder
+        /// </summary>
+        private readonly DirectoryInfo localFolder;
+
+        /// <summary>
+        /// local java script folder
+        /// </summary>
+        private readonly DirectoryInfo webResourcesJsFolder;
+
+        /// <summary>
+        /// local Images folder
+        /// </summary>
+        private readonly DirectoryInfo webResourcesImageslocalFolder;
+
+        /// <summary>
+        /// local html folder
+        /// </summary>
+        private readonly DirectoryInfo webResourcesHtmllocalFolder;
+
+        /// <summary>
+        /// solution local folder
+        /// </summary>
+        private readonly DirectoryInfo solutionlocalFolder;
+
+        /// <summary>
+        /// Every time repository will be cloned
+        /// </summary>
+        private bool cloneAlways;
+
+        /// <summary>
         /// Method empties folder
         /// </summary>
         /// <param name="directory">Directory to be emptied</param>
@@ -537,6 +498,39 @@ namespace GitDeploy
         private void AddExtractedSolutionToRepository(SolutionFileInfo solutionFileInfo, Repository repo)
         {
             this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.solutionlocalFolder.FullName + solutionFileInfo.SolutionUniqueName, repo);
+        }
+
+        /// <summary>
+        /// Adds indexes for repository
+        /// </summary>
+        /// <param name="file">Export solution location</param>
+        /// <param name="repo">Repository details</param>
+        private void AddRepositoryIndexes(string file, Repository repo)
+        {
+            if (string.IsNullOrEmpty(file))
+            {
+                var files = this.solutionlocalFolder.GetFiles("*.zip").Select(f => f.FullName);
+                {
+                    foreach (var f in files)
+                    {
+                        if (string.IsNullOrEmpty(file))
+                        {
+                            repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
+                        }
+                        else
+                        {
+                            if (f.EndsWith(file))
+                            {
+                                repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                repo.Index.Add(file.Replace(this.localFolder.FullName, string.Empty));
+            }
         }
     }
 }

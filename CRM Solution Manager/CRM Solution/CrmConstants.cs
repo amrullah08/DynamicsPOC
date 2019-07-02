@@ -162,12 +162,16 @@ namespace CrmSolution
             }
         }
 
+        /// <summary>
+        /// Gets or sets Organization Service Proxy
+        /// </summary>
         public OrganizationServiceProxy ServiceProxy
         {
             get
             {
                 return this.serviceProxy;
             }
+
             set
             {
             }
@@ -183,7 +187,7 @@ namespace CrmSolution
             this.clientCredentials.UserName.UserName = this.DynamicsUserName;
             this.clientCredentials.UserName.Password = this.DynamicsPassword;
             this.serviceProxy = this.InitializeOrganizationService();
-            EntityCollection retrievedConfigurationSettingsList = this.RetrieveConfigurationSettings(serviceProxy);
+            EntityCollection retrievedConfigurationSettingsList = this.RetrieveConfigurationSettings(this.serviceProxy);
 
             return retrievedConfigurationSettingsList;
         }

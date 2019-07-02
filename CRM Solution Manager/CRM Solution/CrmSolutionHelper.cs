@@ -145,28 +145,34 @@ namespace CrmSolution
                             }
                             catch (Exception ex)
                             {
-                                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("" + ex.Message + "<br>");
-                                Console.WriteLine(ex.Message);
-                                querySampleSolutionResults.Entities[i][Constants.SourceControlQueueAttributeNameForStatus] = "Error +" + ex.Message;
-                                querySampleSolutionResults.Entities[i].Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.webJobs();
-                                serviceProxy.Update(querySampleSolutionResults.Entities[i]);
-                                Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(serviceProxy, querySampleSolutionResults.Entities[i]);
+                                throw new Exception(ex.InnerException.Message, ex);
                             }
                         }
 
+                        if (!querySampleSolutionResults.Entities[i].GetAttributeValue<bool>("syed_checkin"))
+                            Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(Singleton.CrmConstantsInstance.ServiceProxy, querySampleSolutionResults.Entities[i]);
                     }
                     catch (Exception ex)
                     {
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + ex.Message + "<br>");
-                        Console.WriteLine(ex.Message);
-                        querySampleSolutionResults.Entities[i][Constants.SourceControlQueueAttributeNameForStatus] = "Error +" + ex.Message;
+                        if (ex.Message == "Authentication Failure")
+                        {
+                            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + "Please re-enter password in deployment instances" + "<br>");
+                            Console.WriteLine("Please re-enter password in deployment instances");
+                            querySampleSolutionResults.Entities[i][Constants.SourceControlQueueAttributeNameForStatus] = "Please re-enter password in deployment instances";
+                        }
+                        else
+                        {
+                            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + ex.Message + "<br>");
+                            Console.WriteLine(ex.Message);
+                            querySampleSolutionResults.Entities[i][Constants.SourceControlQueueAttributeNameForStatus] = "Error +" + ex.Message;
+                        }
+
                         querySampleSolutionResults.Entities[i].Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.webJobs();
                         serviceProxy.Update(querySampleSolutionResults.Entities[i]);
                         Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(serviceProxy, querySampleSolutionResults.Entities[i]);
-                    }
 
-                    if (!querySampleSolutionResults.Entities[i].GetAttributeValue<bool>("syed_checkin"))
-                        Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(Singleton.CrmConstantsInstance.ServiceProxy, querySampleSolutionResults.Entities[i]);
+                        throw new Exception();
+                    }
                 }
             }
             else

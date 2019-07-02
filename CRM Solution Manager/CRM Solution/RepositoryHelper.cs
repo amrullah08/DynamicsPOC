@@ -95,33 +95,37 @@ namespace CrmSolution
         /// <param name="authorEmail">author email</param>
         public void TryUpdateToRepository(string solutionUniqueName, string committerName, string committerEmail, string authorEmail)
         {
-            string solutionFilePath = string.Empty;
-            ICrmSolutionHelper crmSolutionHelper = new CrmSolutionHelper(
-                            Singleton.RepositoryConfigurationConstantsInstance.RepositoryUrl,
-                            Singleton.RepositoryConfigurationConstantsInstance.BranchName,
-                            Singleton.RepositoryConfigurationConstantsInstance.RepositoryRemoteName,
-                            Singleton.CrmConstantsInstance.OrgServiceUrl,
-                            Singleton.CrmConstantsInstance.DynamicsUserName,
-                            Singleton.CrmConstantsInstance.DynamicsPassword,
-                            Singleton.CrmConstantsInstance.SolutionPackagerPath);
+            try
+            {
+                string solutionFilePath = string.Empty;
+                ICrmSolutionHelper crmSolutionHelper = new CrmSolutionHelper(
+                                Singleton.RepositoryConfigurationConstantsInstance.RepositoryUrl,
+                                Singleton.RepositoryConfigurationConstantsInstance.BranchName,
+                                Singleton.RepositoryConfigurationConstantsInstance.RepositoryRemoteName,
+                                Singleton.CrmConstantsInstance.OrgServiceUrl,
+                                Singleton.CrmConstantsInstance.DynamicsUserName,
+                                Singleton.CrmConstantsInstance.DynamicsPassword,
+                                Singleton.CrmConstantsInstance.SolutionPackagerPath);
 
-            int timeOut = Convert.ToInt32(Singleton.CrmConstantsInstance.SleepTimeoutInMillis);
-            var solutionFiles = crmSolutionHelper.DownloadSolutionFile(solutionUniqueName);
-            if (!crmSolutionHelper.CanPush)
-            {
-                System.Threading.Thread.Sleep(timeOut);
-                // continue;
+                int timeOut = Convert.ToInt32(Singleton.CrmConstantsInstance.SleepTimeoutInMillis);
+                var solutionFiles = crmSolutionHelper.DownloadSolutionFile(solutionUniqueName);
+                if (!crmSolutionHelper.CanPush)
+                {
+                    System.Threading.Thread.Sleep(timeOut);
+                    // continue;
+                }
+
+                if (solutionFiles.Count > 0)
+                {
+                    solutionFilePath = Singleton.RepositoryConfigurationConstantsInstance.LocalDirectory + "solutions.txt";
+                    GitDeploy.GitRepositoryManager gitRepositoryManager = configureRepository(solutionFiles[0], committerName, committerEmail, authorEmail, solutionFilePath);
+                    pushRepository(solutionFiles, committerName, committerEmail, authorEmail, solutionFilePath, gitRepositoryManager);
+                    System.Threading.Thread.Sleep(timeOut);
+                }
             }
-            if (solutionFiles.Count > 0)
+            catch(Exception ex)
             {
-                solutionFilePath = Singleton.RepositoryConfigurationConstantsInstance.LocalDirectory + "solutions.txt";
-                GitDeploy.GitRepositoryManager gitRepositoryManager = configureRepository(solutionFiles[0], committerName, committerEmail, authorEmail, solutionFilePath);
-                pushRepository(solutionFiles, committerName, committerEmail, authorEmail, solutionFilePath, gitRepositoryManager);
-                System.Threading.Thread.Sleep(timeOut);
-            }
-            else
-            {
-                Console.WriteLine("There are no records to proceed");
+                Console.WriteLine(ex.Message);
             }
         }
 

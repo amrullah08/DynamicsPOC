@@ -48,17 +48,18 @@ namespace CrmSolution
         public void UploadFiletoDynamics(IOrganizationService service, Entity dynamicsSourceControl)
         {
             string strMessage = Singleton.SolutionFileInfoInstance.webJobLogs.ToString();
+            strMessage = strMessage.Replace("<br>", "");
             byte[] filename = Encoding.ASCII.GetBytes(strMessage);
             string encodedData = System.Convert.ToBase64String(filename);
             Entity _annotation = new Entity("annotation");
             _annotation.Attributes["objectid"] = new EntityReference(dynamicsSourceControl.LogicalName, dynamicsSourceControl.Id);
             _annotation.Attributes["objecttypecode"] = dynamicsSourceControl.LogicalName;
-            _annotation.Attributes["subject"] = "Demo";
+            _annotation.Attributes["subject"] = dynamicsSourceControl.Attributes["syed_name"] + "_Log_" + DateTime.Now.ToString();
             _annotation.Attributes["documentbody"] = encodedData;
             _annotation.Attributes["mimetype"] = @"text/plain";
             _annotation.Attributes["notetext"] = dynamicsSourceControl.Attributes["syed_name"] + DateTime.Now.ToString();
             _annotation.Attributes["filename"] = dynamicsSourceControl.Attributes["syed_name"] + DateTime.Now.ToString() + ".txt";
-            service.Update(_annotation);
+            service.Create(_annotation);
         }
 
         /// <summary>
@@ -258,7 +259,7 @@ namespace CrmSolution
             try
             {
                 var tempSolutionPackagerPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.SolutionPackagerRelativePath);
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. Solution Packager Path " + tempSolutionPackagerPath + "<br>");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Solution Packager Path " + tempSolutionPackagerPath + "<br>");
                 Console.WriteLine("Solution Packager Path " + tempSolutionPackagerPath);
 
                 if (File.Exists(tempSolutionPackagerPath))
@@ -268,7 +269,7 @@ namespace CrmSolution
             }
             catch (Exception ex)
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. " + ex.Message + "<br>");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + ex.Message + "<br>");
                 Console.WriteLine(ex.Message);
 
                 throw;
@@ -276,7 +277,7 @@ namespace CrmSolution
 
             if (!File.Exists(solutionPackagerPath))
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(".. " + "SolutionPackager.exe doesnot exists in the specified location : " + solutionPackagerPath + "<br>");
+                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + "SolutionPackager.exe doesnot exists in the specified location : " + solutionPackagerPath + "<br>");
                 Console.WriteLine("SolutionPackager.exe doesnot exists in the specified location : " + solutionPackagerPath);
                 return;
             }

@@ -8,8 +8,7 @@
 namespace MsCrmTools.SolutionComponentsMover.AppCode
 {
     using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
+    using System.Collections.Generic;    
     using System.Linq;
     using CrmSolution;
     using Microsoft.Crm.Sdk.Messages;
@@ -70,7 +69,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
             }
             catch (Exception ex)
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + "Error for solution " + solutionUniqueName + " " + ex.Message);
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + "Error for solution " + solutionUniqueName + " " + ex.Message);
                 Console.WriteLine("Error for solution " + solutionUniqueName + " " + ex.Message);
             }
 
@@ -99,31 +98,30 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     copySettings.SourceSolutions.Add(solution);
                 }
             }
-            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Copying components into Master Solution.");
+
+            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copying components into Master Solution.");
             Console.WriteLine("Copying components into Master Solution.");
             var components = this.CopyComponents(copySettings);
             var componentsMaster = this.RetrieveComponentsFromSolutions(copySettings.TargetSolutions.Select(T => T.Id).ToList(), copySettings.ComponentsTypes);
             var differentComponents = (from cm in componentsMaster where !components.Any(list => list.GetAttributeValue<Guid>("objectid") == cm.GetAttributeValue<Guid>("objectid")) select cm).ToList();
             if (differentComponents != null)
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Displaying different(additional) components after merging");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Displaying different(additional) components after merging");
                 Console.WriteLine("Displaying different(additional) components after merging");
                 foreach (var target in copySettings.TargetSolutions)
                 {
                     foreach (var componentdetails in differentComponents)
                     {
-                        GetComponentDetails(copySettings, target, componentdetails, componentdetails.GetAttributeValue<OptionSetValue>("componenttype").Value);
+                        this.GetComponentDetails(copySettings, target, componentdetails, componentdetails.GetAttributeValue<OptionSetValue>("componenttype").Value);
                     }
                 }
             }
             else
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" No different(additional components found after Merging)");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" No different(additional components found after Merging)");
                 Console.WriteLine("No different(additional components found after Merging)");
             }
 
-            //GetComponentDetails(copySettings,)
-            //var differComponents = componentsMaster.Select(list => list.GetAttributeValue<Guid>("objectid") != components[0].GetAttributeValue<Guid>("objectid"));
             solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemMergingSuccessfulStatus;
             solutionFileInfo.Update();
         }
@@ -171,6 +169,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
         /// method copies components with the specified settings
         /// </summary>
         /// <param name="settings">copy settings</param>
+        /// <returns>list of components</returns>
         private List<Entity> CopyComponents(CopySettings settings)
         {
             var components = this.RetrieveComponentsFromSolutions(settings.SourceSolutions.Select(s => s.Id).ToList(), settings.ComponentsTypes);
@@ -187,7 +186,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                         SolutionUniqueName = target.GetAttributeValue<string>("uniquename"),
                     };
 
-                    GetComponentDetails(settings, target, component, component.GetAttributeValue<OptionSetValue>("componenttype").Value);
+                    this.GetComponentDetails(settings, target, component, component.GetAttributeValue<OptionSetValue>("componenttype").Value);
 
                     request.DoNotIncludeSubcomponents =
                         component.GetAttributeValue<OptionSetValue>("rootcomponentbehavior")?.Value == 1 ||
@@ -196,9 +195,18 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     this.service.Execute(request);
                 }
             }
+
             return components;
         }
 
+        /// <summary>
+        /// method for updating log file to Dynamic Source control record
+        /// </summary>
+        /// <param name="componentName">component Name</param>
+        /// <param name="componentType">component Type</param>
+        /// <param name="componentId">component Id</param>
+        /// <param name="sourceSolution">source Solution</param>
+        /// <param name="targetSolution">target Solution</param>
         private void PrintLog(string componentName, string componentType, Guid componentId, string sourceSolution, string targetSolution)
         {
             Console.WriteLine("Component Name: " + componentName);
@@ -207,21 +215,28 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
             if (!string.IsNullOrEmpty(sourceSolution))
             {
                 Console.WriteLine("Source Solution: " + sourceSolution);
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Source Solution: " + sourceSolution + "<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Source Solution: " + sourceSolution + "<br>");
             }
 
             Console.WriteLine("Target Solution: " + targetSolution);
-            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Component Name: " + componentName + "<br>");
-            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Component Type: " + componentType + "<br>");
-            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Component Id: " + componentId + "<br>");
-            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Target Solution: " + targetSolution + "<br>");
+            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Component Name: " + componentName + "<br>");
+            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Component Type: " + componentType + "<br>");
+            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Component Id: " + componentId + "<br>");
+            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Target Solution: " + targetSolution + "<br>");
         }
 
-        private void GetComponentDetails(CopySettings settings, Entity target, Entity component, int ComponentType)
+        /// <summary>
+        /// To Get list of components in Solutions
+        /// </summary>
+        /// <param name="settings">settings details</param>
+        /// <param name="target">target details</param>
+        /// <param name="component">component details</param>
+        /// <param name="componentType">component Type</param>
+        private void GetComponentDetails(CopySettings settings, Entity target, Entity component, int componentType)
         {
             var sourceSolution = settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id);
 
-            switch (ComponentType)
+            switch (componentType)
             {
                 case Constants.Entity:
                     var entityReq = new RetrieveEntityRequest();
@@ -413,7 +428,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 default:
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Unable to copy component type: " + component.FormattedValues["componenttype"] + " and objectID: " + component.Attributes["objectid"].ToString());
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Unable to copy component type: " + component.FormattedValues["componenttype"] + " and objectID: " + component.Attributes["objectid"].ToString());
                     Console.WriteLine("Unable to copy component type: " + component.FormattedValues["componenttype"] + " and objectID: " + component.Attributes["objectid"].ToString());
                     break;
             }

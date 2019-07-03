@@ -22,6 +22,76 @@ namespace GitDeploy
     public class GitRepositoryManager : IGitRepositoryManager
     {
         /// <summary>
+        /// Repository url
+        /// </summary>
+        private readonly string repoUrl;
+
+        /// <summary>
+        /// Author name for the commit
+        /// </summary>
+        private readonly string authorName;
+
+        /// <summary>
+        /// Author Email for the commit
+        /// </summary>
+        private readonly string authorEmail;
+
+        /// <summary>
+        /// Committer name
+        /// </summary>
+        private readonly string committerName;
+
+        /// <summary>
+        /// Committer email
+        /// </summary>
+        private readonly string committerEmail;
+
+        /// <summary>
+        /// remote name
+        /// </summary>
+        private readonly string remoteName;
+
+        /// <summary>
+        /// Branch name
+        /// </summary>
+        private readonly string branchName;
+
+        /// <summary>
+        /// User name and password credentials
+        /// </summary>
+        private readonly UsernamePasswordCredentials credentials;
+
+        /// <summary>
+        /// local repository folder
+        /// </summary>
+        private readonly DirectoryInfo localFolder;
+
+        /// <summary>
+        /// local java script folder
+        /// </summary>
+        private readonly DirectoryInfo webResourcesJsFolder;
+
+        /// <summary>
+        /// local Images folder
+        /// </summary>
+        private readonly DirectoryInfo webResourcesImageslocalFolder;
+
+        /// <summary>
+        /// local html folder
+        /// </summary>
+        private readonly DirectoryInfo webResourcesHtmllocalFolder;
+
+        /// <summary>
+        /// solution local folder
+        /// </summary>
+        private readonly DirectoryInfo solutionlocalFolder;
+
+        /// <summary>
+        /// Every time repository will be cloned
+        /// </summary>
+        private bool cloneAlways;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="GitRepositoryManager" /> class.
         /// </summary>
         /// <param name="username">The credentials username.</param>
@@ -98,7 +168,7 @@ namespace GitDeploy
         {
             try
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Committing Powershell Scripts" + "<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Committing Powershell Scripts" + "<br>");
                 Console.WriteLine("Committing Powershell Scripts");
                 string multilpleSolutionsImportPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.MultilpleSolutionsImport);
                 string multilpleSolutionsImportPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.MultilpleSolutionsImport;
@@ -108,7 +178,7 @@ namespace GitDeploy
                 string solutionToBeImportedPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.SolutionToBeImported;
                 File.Copy(solutionToBeImportedPSPath, solutionToBeImportedPSPathVirtual, true);
 
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Committing solutions" + "<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Committing solutions" + "<br>");
                 Console.WriteLine("Committing solutions");
                 string fileUnmanaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_.zip";
                 File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
@@ -151,7 +221,7 @@ namespace GitDeploy
             }
             catch (EmptyCommitException ex)
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + ex.Message + "<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
                 Console.WriteLine(ex.Message);
             }
         }
@@ -190,7 +260,7 @@ namespace GitDeploy
                     }
                 }
 
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Pushing Changes to the Repository " + "<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Pushing Changes to the Repository " + "<br>");
                 Console.WriteLine(" Pushing Changes to the Repository ");
 
                 repo.Network.Push(remote, pushRefs + ":" + pushRefs, options);
@@ -205,16 +275,16 @@ namespace GitDeploy
                 }
                 catch (Exception e)
                 {
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + e.Message + "<br>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + e.Message + "<br>");
                     Console.WriteLine(e.Message);
                 }
 
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + "Pushed changes" + "<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + "Pushed changes" + "<br>");
                 Console.WriteLine("Pushed changes");
             }
         }
 
-               /// <summary>
+        /// <summary>
         /// Method updates repository
         /// </summary>
         public void UpdateRepository()
@@ -274,7 +344,7 @@ namespace GitDeploy
                     }
                     catch (LibGit2Sharp.RepositoryNotFoundException r)
                     {
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + r.Message + "<br>");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + r.Message + "<br>");
                         Console.WriteLine(r.Message);
                     }
                 }
@@ -283,11 +353,11 @@ namespace GitDeploy
                     try
                     {
                         DirectoryInfo attachments_AR = new DirectoryInfo(workingDirectory);
-                        EmptyFolder(attachments_AR);
+                        this.EmptyFolder(attachments_AR);
                     }
                     catch (Exception ex)
                     {
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + ex.Message + "<br>");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
                         Console.WriteLine(ex.Message);
                     }
                 }
@@ -311,7 +381,7 @@ namespace GitDeploy
             }
             catch
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" One possibility for the exception could be check for branch or incorrect branch" + branchName + "<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" One possibility for the exception could be check for branch or incorrect branch" + branchName + "<br>");
                 Console.WriteLine("One possibility for the exception could be check for branch or incorrect branch" + branchName);
                 throw;
             }
@@ -355,76 +425,6 @@ namespace GitDeploy
         }
 
         /// <summary>
-        /// Repository url
-        /// </summary>
-        private readonly string repoUrl;
-
-        /// <summary>
-        /// Author name for the commit
-        /// </summary>
-        private readonly string authorName;
-
-        /// <summary>
-        /// Author Email for the commit
-        /// </summary>
-        private readonly string authorEmail;
-
-        /// <summary>
-        /// Committer name
-        /// </summary>
-        private readonly string committerName;
-
-        /// <summary>
-        /// Committer email
-        /// </summary>
-        private readonly string committerEmail;
-
-        /// <summary>
-        /// remote name
-        /// </summary>
-        private readonly string remoteName;
-
-        /// <summary>
-        /// Branch name
-        /// </summary>
-        private readonly string branchName;
-
-        /// <summary>
-        /// User name and password credentials
-        /// </summary>
-        private readonly UsernamePasswordCredentials credentials;
-
-        /// <summary>
-        /// local repository folder
-        /// </summary>
-        private readonly DirectoryInfo localFolder;
-
-        /// <summary>
-        /// local java script folder
-        /// </summary>
-        private readonly DirectoryInfo webResourcesJsFolder;
-
-        /// <summary>
-        /// local Images folder
-        /// </summary>
-        private readonly DirectoryInfo webResourcesImageslocalFolder;
-
-        /// <summary>
-        /// local html folder
-        /// </summary>
-        private readonly DirectoryInfo webResourcesHtmllocalFolder;
-
-        /// <summary>
-        /// solution local folder
-        /// </summary>
-        private readonly DirectoryInfo solutionlocalFolder;
-
-        /// <summary>
-        /// Every time repository will be cloned
-        /// </summary>
-        private bool cloneAlways;
-
-        /// <summary>
         /// Method empties folder
         /// </summary>
         /// <param name="directory">Directory to be emptied</param>
@@ -437,7 +437,7 @@ namespace GitDeploy
 
             foreach (DirectoryInfo subdirectory in directory.GetDirectories())
             {
-                EmptyFolder(subdirectory);
+                this.EmptyFolder(subdirectory);
                 subdirectory.Delete();
             }
         }

@@ -9,7 +9,6 @@ namespace CrmSolution
 {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.IO;
     using System.Linq;
 
@@ -25,8 +24,9 @@ namespace CrmSolution
         /// <param name="committerName">committer name</param>
         /// <param name="committerEmail">committer email</param>
         /// <param name="authorEmail">author email</param>
-        ///  <param name="solutionFilePath">solution file path</param>
-        public GitDeploy.GitRepositoryManager configureRepository(SolutionFileInfo solutionFiles, string committerName, string committerEmail, string authorEmail, string solutionFilePath)
+        /// <param name="solutionFilePath">solution file path</param>
+        /// <returns> returns repository manager</returns>
+        public GitDeploy.GitRepositoryManager ConfigureRepository(SolutionFileInfo solutionFiles, string committerName, string committerEmail, string authorEmail, string solutionFilePath)
         {
             int timeOut = Convert.ToInt32(Singleton.CrmConstantsInstance.SleepTimeoutInMillis);
             GitDeploy.GitRepositoryManager gitRepositoryManager = null;
@@ -35,18 +35,18 @@ namespace CrmSolution
                 // todo: enable solutions file clear from crm portal
                 this.PopulateHashset(solutionFilePath, new HashSet<string>());
                 gitRepositoryManager = this.GetRepositoryManager(committerName, committerEmail, authorEmail, solutionFiles);
-
             }
             catch (Exception ex)
             {
                 Console.Write(ex.Message);
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("" + ex.Message + "<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
                 solutionFiles.Solution[Constants.SourceControlQueueAttributeNameForStatus] = "Error +" + ex.Message;
-                solutionFiles.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.webJobs();
+                solutionFiles.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
                 solutionFiles.Update();
                 Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(Singleton.CrmConstantsInstance.ServiceProxy, solutionFiles.Solution);
                 System.Threading.Thread.Sleep(timeOut);
             }
+
             return gitRepositoryManager;
         }
 
@@ -57,18 +57,18 @@ namespace CrmSolution
         /// <param name="committerName">committer name</param>
         /// <param name="committerEmail">committer email</param>
         /// <param name="authorEmail">author email</param>
-        ///  <param name="solutionFilePath">solution file path</param>
-        ///  <param name="gitRepositoryManager">git repository manager</param>
-        public void pushRepository(List<SolutionFileInfo> solutionFiles, string committerName, string committerEmail, string authorEmail, string solutionFilePath, GitDeploy.GitRepositoryManager gitRepositoryManager)
+        /// <param name="solutionFilePath">solution file path</param>
+        /// <param name="gitRepositoryManager"> repository manager</param>
+        public void PushRepository(List<SolutionFileInfo> solutionFiles, string committerName, string committerEmail, string authorEmail, string solutionFilePath, GitDeploy.GitRepositoryManager gitRepositoryManager)
         {
             foreach (var solutionFile in solutionFiles)
-            {                
+            {
                 try
                 {
                     if (solutionFile.CheckInSolution)
                     {
-                        Singleton.SolutionFileInfoInstance.webJobLogs.Clear();
-                        Singleton.SolutionFileInfoInstance.webJobLogs.Append(solutionFile.Solution.GetAttributeValue<string>("syed_webjobs"));
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Clear();
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append(solutionFile.Solution.GetAttributeValue<string>("syed_webjobs"));
                         HashSet<string> hashSet = new HashSet<string>();
                         this.TryPushToRepository(committerName, committerEmail, authorEmail, solutionFile, solutionFilePath, hashSet, gitRepositoryManager);
                         Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(Singleton.CrmConstantsInstance.ServiceProxy, solutionFile.Solution);
@@ -77,9 +77,9 @@ namespace CrmSolution
                 catch (Exception ex)
                 {
                     Console.Write(ex.Message);
-                    Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("" + ex.Message + "<br>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
                     solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = "Error +" + ex.Message;
-                    solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.webJobs();
+                    solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
                     solutionFile.Update();
                     Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(Singleton.CrmConstantsInstance.ServiceProxy, solutionFile.Solution);
                 }
@@ -112,23 +112,22 @@ namespace CrmSolution
                 if (!crmSolutionHelper.CanPush)
                 {
                     System.Threading.Thread.Sleep(timeOut);
-                    // continue;
+                    //// continue;
                 }
 
                 if (solutionFiles.Count > 0)
                 {
                     solutionFilePath = Singleton.RepositoryConfigurationConstantsInstance.LocalDirectory + "solutions.txt";
-                    GitDeploy.GitRepositoryManager gitRepositoryManager = configureRepository(solutionFiles[0], committerName, committerEmail, authorEmail, solutionFilePath);
-                    pushRepository(solutionFiles, committerName, committerEmail, authorEmail, solutionFilePath, gitRepositoryManager);
+                    GitDeploy.GitRepositoryManager gitRepositoryManager = this.ConfigureRepository(solutionFiles[0], committerName, committerEmail, authorEmail, solutionFilePath);
+                    this.PushRepository(solutionFiles, committerName, committerEmail, authorEmail, solutionFilePath, gitRepositoryManager);
                     System.Threading.Thread.Sleep(timeOut);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
         }
-
 
         /// <summary>
         /// Method gets repository manager instance
@@ -185,7 +184,7 @@ namespace CrmSolution
             }
             catch (Exception ex)
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + ex.Message);
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message);
                 Console.WriteLine(ex.Message);
             }
         }
@@ -210,7 +209,7 @@ namespace CrmSolution
         /// <param name="solutionFile">solution file info</param>
         /// <param name="solutionFilePath">path of file that contains list of solution to be released</param>
         /// <param name="hashSet">hash set to store release solution</param>
-        /// <param name="gitRepositoryManager">object initialization for class gitRepositoryManager</param>
+        /// <param name="gitRepositoryManager">object initialization for class RepositoryManager</param>
         private void TryPushToRepository(
                                                 string committerName,
                                                 string committerEmail,
@@ -223,7 +222,7 @@ namespace CrmSolution
             ////RepositoryConfigurationConstants.ResetLocalDirectory();
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushingToStatus;
-            solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.webJobs();
+            solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
             solutionFile.Update();
 
             ////GitDeploy.GitRepositoryManager gitRepositoryManager = GetRepositoryManager(committerName, committerEmail, authorEmail, solutionFile);
@@ -250,7 +249,7 @@ namespace CrmSolution
             gitRepositoryManager.PushCommits();
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushToRepositorySuccessStatus;
-            solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.webJobs();
+            solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
             solutionFile.Update();
         }
     }

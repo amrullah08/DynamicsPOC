@@ -24,6 +24,16 @@ namespace CrmSolution
     public class CrmSolutionHelper : ICrmSolutionHelper
     {
         /// <summary>
+        /// Gets or sets client credentials
+        /// </summary>
+        private readonly ClientCredentials clientCredentials;
+
+        /// <summary>
+        /// Organization service uri
+        /// </summary>
+        private readonly Uri serviceUri;
+
+        /// <summary>
         ///  /// Initializes a new instance of the <see cref="CrmSolutionHelper" /> class without parameter.
         /// </summary>
         public CrmSolutionHelper()
@@ -116,8 +126,8 @@ namespace CrmSolution
                 {
                     try
                     {
-                        Singleton.SolutionFileInfoInstance.webJobLogs.Clear();
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Connected to the " + this.serviceUri.OriginalString + "<br>");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Clear();
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Connected to the " + this.serviceUri.OriginalString + "<br>");
                         var infos = Singleton.SolutionFileInfoInstance.GetSolutionFileInfo(querySampleSolutionResults.Entities[i], serviceProxy);
                         foreach (var info in infos)
                         {
@@ -146,18 +156,18 @@ namespace CrmSolution
                     {
                         if (ex.Message == "Authentication Failure")
                         {
-                            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + "Please re-enter password in deployment instances" + "<br>");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + "Please re-enter password in deployment instances" + "<br>");
                             Console.WriteLine("Please re-enter password in deployment instances");
                             querySampleSolutionResults.Entities[i][Constants.SourceControlQueueAttributeNameForStatus] = "Please re-enter password in deployment instances";
                         }
                         else
                         {
-                            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + ex.Message + "<br>");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
                             Console.WriteLine(ex.Message);
                             querySampleSolutionResults.Entities[i][Constants.SourceControlQueueAttributeNameForStatus] = "Error +" + ex.Message;
                         }
 
-                        querySampleSolutionResults.Entities[i].Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.webJobs();
+                        querySampleSolutionResults.Entities[i].Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
                         serviceProxy.Update(querySampleSolutionResults.Entities[i]);
                         Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(serviceProxy, querySampleSolutionResults.Entities[i]);
 
@@ -204,7 +214,7 @@ namespace CrmSolution
             }
             catch (Exception ex)
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + ex.Message + "<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
                 Console.WriteLine(ex.Message);
                 throw new Exception(ex.Message.ToString(), ex);
             }
@@ -238,7 +248,7 @@ namespace CrmSolution
             }
             catch (Exception ex)
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + ex.Message + "<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
                 Console.WriteLine(ex.Message);
                 throw new Exception(ex.Message.ToString(), ex);
             }
@@ -253,7 +263,7 @@ namespace CrmSolution
         public void ImportSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile, Uri uri)
         {
             string solutionImportPath = solutionFile.SolutionFilePathManaged ?? solutionFile.SolutionFilePath;
-            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Started importing solution to Organization " + uri + "<br>");
+            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Started importing solution to Organization " + uri + "<br>");
             Console.WriteLine("Started importing solution to Organization " + uri);
 
             byte[] fileBytes = File.ReadAllBytes(solutionImportPath);
@@ -273,7 +283,7 @@ namespace CrmSolution
             ExecuteAsyncResponse importRequestResponse = (ExecuteAsyncResponse)serviceProxy.Execute(importRequest);
 
             string solutionImportResult = string.Empty;
-            while (solutionImportResult == null)
+            while (solutionImportResult == string.Empty)
             {
                 Guid asyncJobId = importRequestResponse.AsyncJobId;
                 Entity job = (Entity)serviceProxy.Retrieve("asyncoperation", asyncJobId, new ColumnSet(new string[] { "asyncoperationid", "statuscode", "message" }));
@@ -283,34 +293,34 @@ namespace CrmSolution
                     ////Success
                     case 30:
                         solutionImportResult = "success";
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Solution imported successfully to the Organization " + uri + "<br>");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Solution imported successfully to the Organization " + uri + "<br>");
                         Console.WriteLine("Solution imported successfully to the Organization " + uri);
                         solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueImportSuccessfulStatus;
-                        solutionFile.Solution["syed_webjobs"] = Singleton.SolutionFileInfoInstance.webJobs();
+                        solutionFile.Solution["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
                         solutionFile.Update();
                         break;
                     ////Pausing  
                     case 21:
                         solutionImportResult = "pausing";
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(string.Format(" Solution Import Pausing: {0}{1}", jobStatusCode, job["message"]) + "<br>");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(string.Format(" Solution Import Pausing: {0}{1}", jobStatusCode, job["message"]) + "<br>");
                         Console.WriteLine(string.Format("Solution Import Pausing: {0} {1}", jobStatusCode, job["message"]));
                         break;
                     ////Cancelling
                     case 22:
                         solutionImportResult = "cancelling";
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(string.Format("Solution Import Cancelling: {0}{1}", jobStatusCode, job["message"]) + "<br>");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(string.Format("Solution Import Cancelling: {0}{1}", jobStatusCode, job["message"]) + "<br>");
                         Console.WriteLine(string.Format("Solution Import Cancelling: {0}{1}", jobStatusCode, job["message"]));
                         break;
                     ////Failed
                     case 31:
                         solutionImportResult = "failed";
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(string.Format("Solution Import Failed: {0}{1}", jobStatusCode, job["message"]) + "<br>");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(string.Format("Solution Import Failed: {0}{1}", jobStatusCode, job["message"]) + "<br>");
                         Console.WriteLine(string.Format("Solution Import Failed: {0}{1}", jobStatusCode, job["message"]));
                         break;
                     ////Cancelled
                     case 32:
                         Console.WriteLine(string.Format("Solution Import Cancelled: {0}{1}", jobStatusCode, job["message"]));
-                        Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(string.Format("Solution Import Cancelled: {0}{1}", jobStatusCode, job["message"]));
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(string.Format("Solution Import Cancelled: {0}{1}", jobStatusCode, job["message"]));
                         throw new Exception(string.Format("Solution Import Cancelled: {0}{1}", jobStatusCode, job["message"]));
                     default:
                         break;
@@ -321,10 +331,9 @@ namespace CrmSolution
             {
                 this.PublishAllCustomizationChanges(serviceProxy);
                 solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuePublishSuccessfulStatus;
-                Console.WriteLine("Solution published successfully");
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Solution published successfully" + "<br>");
             }
 
+            solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
             solutionFile.Update();
         }
 
@@ -336,7 +345,7 @@ namespace CrmSolution
         {
             PublishAllXmlRequest publishAllXmlRequest = new PublishAllXmlRequest();
             serviceProxy.Execute(publishAllXmlRequest);
-            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine("Successfully published solution components." + "<br>");
+            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Successfully published solution components." + "<br>");
             Console.WriteLine("Successfully published solution components.");
         }
 
@@ -369,7 +378,7 @@ namespace CrmSolution
             }
             catch (Exception ex)
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + ex.Message + "<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
                 Console.WriteLine(ex.Message);
                 throw new Exception(ex.Message.ToString(), ex);
             }
@@ -433,12 +442,12 @@ namespace CrmSolution
             }
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportStatus;
-            solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.webJobs();
+            solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
             solutionFile.Update();
 
             this.ExportSolution(serviceProxy, solutionFile, solutionFile.SolutionUniqueName, "Downloading Master Solution: ", solutionFile.ExportAsManaged);
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportSuccessful;
-            solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.webJobs();
+            solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
             solutionFile.Update();
             this.ImportSolutionToTargetInstance(serviceProxy, solutionFile);
 
@@ -460,14 +469,14 @@ namespace CrmSolution
                 }
 
                 solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportStatus;
-                solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.webJobs();
+                solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
                 solutionFile.Update();
 
                 this.ExportSolution(serviceProxy, solutionFile, solutionFile.SolutionUniqueName, "Downloading Unmanaged Master Solution: ", false);
                 this.ExportSolution(serviceProxy, solutionFile, solutionFile.SolutionUniqueName, "Downloading Managed Master Solution: ", true);
 
                 solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportSuccessful;
-                solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.webJobs();
+                solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
                 solutionFile.Update();
 
                 solutionFile.ProcessSolutionZipFile(this.SolutionPackagerPath);
@@ -547,7 +556,7 @@ namespace CrmSolution
                     SolutionName = solutionName
                 };
 
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + message + solutionName + "<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + message + solutionName + "<br>");
                 Console.WriteLine(message + solutionName);
                 ExportSolutionResponse exportResponse = (ExportSolutionResponse)serviceProxy.Execute(exportRequest);
 
@@ -565,12 +574,12 @@ namespace CrmSolution
                 }
 
                 string solutionExport = string.Format("Solution Successfully Exported to {0}", solutionName);
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + solutionExport + "<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + solutionExport + "<br>");
                 Console.WriteLine(solutionExport);
             }
             catch (Exception ex)
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + ex.Message + "<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
                 Console.WriteLine(ex.Message);
                 throw ex;
             }
@@ -592,20 +601,10 @@ namespace CrmSolution
 
             querySampleSolution.Criteria.AddCondition(Constants.SourceControlQueueAttributeNameForStatus, ConditionOperator.Equal, Constants.SourceControlQueueQueuedStatus);
 
-            Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Fetching Solutions to be copied to Repository " + "<br>");
+            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Fetching Solutions to be copied to Repository " + "<br>");
             Console.WriteLine("Fetching Solutions to be copied to Repository ");
             EntityCollection querySampleSolutionResults = serviceProxy.RetrieveMultiple(querySampleSolution);
             return querySampleSolutionResults;
         }
-
-        /// <summary>
-        /// Gets or sets client credentials
-        /// </summary>
-        private readonly ClientCredentials clientCredentials;
-
-        /// <summary>
-        /// Organization service uri
-        /// </summary>
-        private readonly Uri serviceUri;
     }
 }

@@ -23,6 +23,69 @@ namespace CrmSolution
     public class SolutionFileInfo
     {
         /// <summary>
+        /// web jobs log
+        /// </summary>
+        private StringBuilder webJobsLog = null;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SolutionFileInfo" /> class without parameter
+        /// </summary>
+        public SolutionFileInfo()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SolutionFileInfo" /> class
+        /// </summary>
+        /// <param name="organizationServiceProxy">organization service proxy</param>
+        public SolutionFileInfo(Microsoft.Xrm.Sdk.Client.OrganizationServiceProxy organizationServiceProxy)
+        {
+            this.OrganizationServiceProxy = organizationServiceProxy;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SolutionFileInfo" /> class
+        /// </summary>
+        /// <param name="solution">solution entity</param>
+        /// <param name="organizationServiceProxy">organization service proxy</param>
+        /// <param name="solutionDetail">solution detail</param>
+        public SolutionFileInfo(Entity solution, OrganizationServiceProxy organizationServiceProxy, Entity solutionDetail)
+        {
+            this.OrganizationServiceProxy = organizationServiceProxy;
+            this.SolutionsToBeMerged = new List<string>();
+            this.SolutionUniqueName = solutionDetail.GetAttributeValue<string>("syed_listofsolutions");
+
+            ////solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSolutionName);
+            this.Message = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForComment);
+            this.OwnerName = solution.GetAttributeValue<EntityReference>(Constants.SourceControlQueueAttributeNameForOwnerId).Name;
+            this.IncludeInRelease = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForIncludeInRelease);
+            this.CheckInSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForCheckinSolution);
+            ////this.MergeSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForMergeSolution);
+            this.ExportAsManaged = solutionDetail.GetAttributeValue<bool>("syed_exportas");
+            this.SolutionsTxt = solution.GetAttributeValue<OptionSetValue>(Constants.SourceControlQueueAttributeNameForOverwriteSolutionsTxt)?.Value ?? 0;
+            this.RemoteName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRemote);
+            this.GitRepoUrl = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryUrl);
+            EntityCollection retrieveSolutionsToBeMerged = Singleton.CrmSolutionHelperInstance.RetrieveSolutionsToBeMergedByListOfSolutionId(organizationServiceProxy, solutionDetail.Id);
+
+            if (this.CheckInSolution)
+            {
+                this.SolutionExtractionPath = Path.GetTempPath() + this.SolutionUniqueName;
+                this.BranchName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForBranch);
+                Singleton.CrmSolutionHelperInstance.CreateEmptyFolder(this.SolutionExtractionPath);
+            }
+
+            if (retrieveSolutionsToBeMerged.Entities.Count > 0)
+            {
+                foreach (Entity solutionsToBeMerged in retrieveSolutionsToBeMerged.Entities)
+                {
+                    this.SolutionsToBeMerged.Add(solutionsToBeMerged.GetAttributeValue<string>("syed_uniquename"));
+                }
+            }
+
+            this.Solution = solution;
+        }
+
+        /// <summary>
         /// Gets or sets where unmanaged solution is downloaded
         /// </summary>
         public string SolutionFilePath { get; set; }
@@ -36,29 +99,6 @@ namespace CrmSolution
         /// Gets or sets Unique solution name
         /// </summary>
         public string SolutionUniqueName { get; set; }
-
-        public StringBuilder webJobLogs = new StringBuilder();
-
-        /// <summary>
-        /// Gets Unique solution file zip name
-        /// </summary>
-        public string SolutionFileZipName
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(this.SolutionUniqueName))
-                {
-                    return null;
-                }
-
-                else if (this.ExportAsManaged)
-                {
-                    return this.SolutionUniqueName + "_managed_.zip";
-                }
-
-                return this.SolutionUniqueName + "_.zip";
-            }
-        }
 
         /// <summary>
         /// Gets or sets solution entity
@@ -129,87 +169,73 @@ namespace CrmSolution
         /// Gets value of solution extraction path
         /// </summary>
         public string SolutionExtractionPath { get; private set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SolutionFileInfo" /> class without parameter
-        /// </summary>
-        public SolutionFileInfo()
-        {
-        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SolutionFileInfo" /> class
+        /// Gets web jobs log
         /// </summary>
-        /// <param name="organizationServiceProxy">Organization proxy</param>
-        public SolutionFileInfo(Microsoft.Xrm.Sdk.Client.OrganizationServiceProxy organizationServiceProxy)
+        public StringBuilder WebJobsLog
         {
-            this.OrganizationServiceProxy = organizationServiceProxy;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SolutionFileInfo" /> class
-        /// </summary>
-        /// <param name="solution">solution entity</param>
-        /// <param name="organizationServiceProxy">Organization proxy</param>
-        /// <param name="uniqueSolutionName">unique solution name</param>
-        public SolutionFileInfo(Entity solution, OrganizationServiceProxy organizationServiceProxy, Entity solutionDetail)
-        {
-            this.OrganizationServiceProxy = organizationServiceProxy;
-            this.SolutionsToBeMerged = new List<string>();
-            this.SolutionUniqueName = solutionDetail.GetAttributeValue<string>("syed_listofsolutions");
-
-            // solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSolutionName);
-            this.Message = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForComment);
-            this.OwnerName = solution.GetAttributeValue<EntityReference>(Constants.SourceControlQueueAttributeNameForOwnerId).Name;
-            this.IncludeInRelease = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForIncludeInRelease);
-            this.CheckInSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForCheckinSolution);
-            //this.MergeSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForMergeSolution);
-            this.ExportAsManaged = solutionDetail.GetAttributeValue<bool>("syed_exportas");
-            this.SolutionsTxt = solution.GetAttributeValue<OptionSetValue>(Constants.SourceControlQueueAttributeNameForOverwriteSolutionsTxt)?.Value ?? 0;
-            this.RemoteName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRemote);
-            this.GitRepoUrl = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryUrl);
-            EntityCollection retrieveSolutionsToBeMerged = Singleton.CrmSolutionHelperInstance.RetrieveSolutionsToBeMergedByListOfSolutionId(organizationServiceProxy, solutionDetail.Id);
-
-
-
-            if (this.CheckInSolution)
+            get
             {
-                this.SolutionExtractionPath = Path.GetTempPath() + this.SolutionUniqueName;
-                this.BranchName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForBranch);
-                Singleton.CrmSolutionHelperInstance.CreateEmptyFolder(this.SolutionExtractionPath);
-            }
-
-            if (retrieveSolutionsToBeMerged.Entities.Count > 0)
-            {
-                foreach (Entity solutionsToBeMerged in retrieveSolutionsToBeMerged.Entities)
+                if (this.webJobsLog == null)
                 {
-                    this.SolutionsToBeMerged.Add(solutionsToBeMerged.GetAttributeValue<string>("syed_uniquename"));
+                    this.webJobsLog = new StringBuilder();
                 }
-            }
 
-            this.Solution = solution;
+                return this.webJobsLog;
+            }
         }
 
-        public string webJobs()
+        /// <summary>
+        /// Gets Unique solution file zip name
+        /// </summary>
+        public string SolutionFileZipName
         {
-            string text = Singleton.SolutionFileInfoInstance.webJobLogs.ToString();
+            get
+            {
+                if (string.IsNullOrEmpty(this.SolutionUniqueName))
+                {
+                    return null;
+                }
+                else if (this.ExportAsManaged)
+                {
+                    return this.SolutionUniqueName + "_managed_.zip";
+                }
+
+                return this.SolutionUniqueName + "_.zip";
+            }
+        }
+
+        /// <summary>
+        /// Method returns web jobs log
+        /// </summary>
+        /// <returns>returns web jobs log as string</returns>
+        public string WebJobs()
+        {
+            string text = Singleton.SolutionFileInfoInstance.WebJobsLog.ToString();
             return text;
         }
 
+        /// <summary>
+        /// Method creates annotation record for web jobs log as notes in dynamics source control 
+        /// </summary>
+        /// <param name="service">organization service</param>
+        /// <param name="dynamicsSourceControl">dynamic source control</param>
         public void UploadFiletoDynamics(IOrganizationService service, Entity dynamicsSourceControl)
         {
-            string strMessage = Singleton.SolutionFileInfoInstance.webJobLogs.ToString();
-            strMessage = strMessage.Replace("<br>", "");
+            string strMessage = Singleton.SolutionFileInfoInstance.WebJobsLog.ToString();
+            strMessage = strMessage.Replace("<br>", string.Empty);
             byte[] filename = Encoding.ASCII.GetBytes(strMessage);
             string encodedData = System.Convert.ToBase64String(filename);
-            Entity _annotation = new Entity("annotation");
-            _annotation.Attributes["objectid"] = new EntityReference(dynamicsSourceControl.LogicalName, dynamicsSourceControl.Id);
-            _annotation.Attributes["objecttypecode"] = dynamicsSourceControl.LogicalName;
-            _annotation.Attributes["subject"] = dynamicsSourceControl.Attributes["syed_name"] + "_Log_" + DateTime.Now.ToString();
-            _annotation.Attributes["documentbody"] = encodedData;
-            _annotation.Attributes["mimetype"] = @"text/plain";
-            _annotation.Attributes["notetext"] = dynamicsSourceControl.Attributes["syed_name"] + DateTime.Now.ToString();
-            _annotation.Attributes["filename"] = dynamicsSourceControl.Attributes["syed_name"] + DateTime.Now.ToString() + ".txt";
-            service.Create(_annotation);
+            Entity annotation = new Entity("annotation");
+            annotation.Attributes["objectid"] = new EntityReference(dynamicsSourceControl.LogicalName, dynamicsSourceControl.Id);
+            annotation.Attributes["objecttypecode"] = dynamicsSourceControl.LogicalName;
+            annotation.Attributes["subject"] = dynamicsSourceControl.Attributes["syed_name"] + "_Log_" + DateTime.Now.ToString();
+            annotation.Attributes["documentbody"] = encodedData;
+            annotation.Attributes["mimetype"] = @"text/plain";
+            annotation.Attributes["notetext"] = dynamicsSourceControl.Attributes["syed_name"] + DateTime.Now.ToString();
+            annotation.Attributes["filename"] = dynamicsSourceControl.Attributes["syed_name"] + DateTime.Now.ToString() + ".txt";
+            service.Create(annotation);
         }
 
         /// <summary>
@@ -230,14 +256,16 @@ namespace CrmSolution
                     solutionFileInfos.Add(solutionFile);
                 }
             }
-            return solutionFileInfos;
-            //foreach (var s in solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSolutionName).Split(new string[] { "," }, System.StringSplitOptions.RemoveEmptyEntries))
-            //{
-            //    var solutionFile = new SolutionFileInfo(solution, organizationServiceProxy, s);
-            //    solutionFileInfos.Add(solutionFile);
-            //}
 
-            //return solutionFileInfos;
+            return solutionFileInfos;
+
+            ////foreach (var s in solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSolutionName).Split(new string[] { "," }, System.StringSplitOptions.RemoveEmptyEntries))
+            ////{
+            ////    var solutionFile = new SolutionFileInfo(solution, organizationServiceProxy, s);
+            ////    solutionFileInfos.Add(solutionFile);
+            ////}
+
+            ////return solutionFileInfos;
         }
 
         /// <summary>
@@ -257,7 +285,7 @@ namespace CrmSolution
             try
             {
                 var tempSolutionPackagerPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.SolutionPackagerRelativePath);
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" Solution Packager Path " + tempSolutionPackagerPath + "<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Solution Packager Path " + tempSolutionPackagerPath + "<br>");
                 Console.WriteLine("Solution Packager Path " + tempSolutionPackagerPath);
 
                 if (File.Exists(tempSolutionPackagerPath))
@@ -267,7 +295,7 @@ namespace CrmSolution
             }
             catch (Exception ex)
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + ex.Message + "<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
                 Console.WriteLine(ex.Message);
 
                 throw;
@@ -275,15 +303,15 @@ namespace CrmSolution
 
             if (!File.Exists(solutionPackagerPath))
             {
-                Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine(" " + "SolutionPackager.exe doesnot exists in the specified location : " + solutionPackagerPath + "<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + "SolutionPackager.exe doesnot exists in the specified location : " + solutionPackagerPath + "<br>");
                 Console.WriteLine("SolutionPackager.exe doesnot exists in the specified location : " + solutionPackagerPath);
                 return;
             }
 
             var result = Cli.Wrap(solutionPackagerPath)
                             .SetArguments("/action:Extract /zipfile:\"" + this.SolutionFilePath + "\" /folder:\"" + this.SolutionExtractionPath + "\"")
-                           .SetStandardOutputCallback(l => Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine($"StdOut> {l}" + "<br>")) // triggered on every line in stdout
-                           .SetStandardErrorCallback(l => Singleton.SolutionFileInfoInstance.webJobLogs.AppendLine($"StdErr> {l}" + "<br>")) // triggered on every line in stderr
+                           .SetStandardOutputCallback(l => Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine($"StdOut> {l}" + "<br>")) // triggered on every line in stdout
+                           .SetStandardErrorCallback(l => Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine($"StdErr> {l}" + "<br>")) // triggered on every line in stderr
                            .Execute();
         }
     }

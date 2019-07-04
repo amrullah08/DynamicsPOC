@@ -66,6 +66,7 @@ namespace CrmSolution
             this.RemoteName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRemote);
             this.GitRepoUrl = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryUrl);
             EntityCollection retrieveSolutionsToBeMerged = Singleton.CrmSolutionHelperInstance.RetrieveSolutionsToBeMergedByListOfSolutionId(organizationServiceProxy, solutionDetail.Id);
+            this.MasterSolutionId = solutionDetail.GetAttributeValue<string>("syed_solutionid");
 
             if (this.CheckInSolution)
             {
@@ -84,6 +85,11 @@ namespace CrmSolution
 
             this.Solution = solution;
         }
+
+        /// <summary>
+        /// Gets or sets master solution id
+        /// </summary>
+        public string MasterSolutionId { get; set; }
 
         /// <summary>
         /// Gets or sets where unmanaged solution is downloaded
@@ -224,7 +230,7 @@ namespace CrmSolution
         public void UploadFiletoDynamics(IOrganizationService service, Entity dynamicsSourceControl)
         {
             string strMessage = Singleton.SolutionFileInfoInstance.WebJobsLog.ToString();
-            strMessage = strMessage.Replace("<br>", string.Empty);
+            strMessage = System.Text.RegularExpressions.Regex.Replace(strMessage, "<.*?>", string.Empty);
             byte[] filename = Encoding.ASCII.GetBytes(strMessage);
             string encodedData = System.Convert.ToBase64String(filename);
             Entity annotation = new Entity("annotation");

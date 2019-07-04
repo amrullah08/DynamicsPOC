@@ -168,6 +168,7 @@ namespace GitDeploy
         {
             try
             {
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Committing Powershell Scripts" + "<br>");
                 Console.WriteLine("Committing Powershell Scripts");
                 string multilpleSolutionsImportPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.MultilpleSolutionsImport);
                 string multilpleSolutionsImportPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.MultilpleSolutionsImport;
@@ -177,6 +178,7 @@ namespace GitDeploy
                 string solutionToBeImportedPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.SolutionToBeImported;
                 File.Copy(solutionToBeImportedPSPath, solutionToBeImportedPSPathVirtual, true);
 
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Committing solutions" + "<br>");
                 Console.WriteLine("Committing solutions");
                 string fileUnmanaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_.zip";
                 File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
@@ -188,12 +190,10 @@ namespace GitDeploy
 
                 using (var repo = new Repository(this.localFolder.FullName))
                 {
-                    AddRepositoryIndexes(fileUnmanaged, repo);
-                    AddRepositoryIndexes(fileManaged, repo);
-
+                    this.AddRepositoryIndexes(fileUnmanaged, repo);
+                    this.AddRepositoryIndexes(fileManaged, repo);
                     this.AddWebResourcesToRepository(webResources, repo);
-
-                    // todo: add extracted solution files to repository
+                    //// todo: add extracted solution files to repository
                     this.AddExtractedSolutionToRepository(solutionFileInfo, repo);
 
                     repo.Index.Add(solutionFilePath.Replace(this.localFolder.FullName, string.Empty));
@@ -221,7 +221,8 @@ namespace GitDeploy
             }
             catch (EmptyCommitException ex)
             {
-                Console.WriteLine(ex);
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
+                Console.WriteLine(ex.Message);
             }
         }
 
@@ -259,12 +260,13 @@ namespace GitDeploy
                     }
                 }
 
-                Console.WriteLine("Pushing Changes to the Repository ");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Pushing Changes to the Repository " + "<br>");
+                Console.WriteLine(" Pushing Changes to the Repository ");
 
                 repo.Network.Push(remote, pushRefs + ":" + pushRefs, options);
                 try
                 {
-                    var remoteOrigin = repo.Network.Remotes.FirstOrDefault(r => r.Name == "remotes/origin");
+                    var remoteOrigin = repo.Network.Remotes.FirstOrDefault(r => r.Name == "remotes/origin" + "<br>");
 
                     if (remoteOrigin != null)
                     {
@@ -273,48 +275,14 @@ namespace GitDeploy
                 }
                 catch (Exception e)
                 {
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + e.Message + "<br>");
                     Console.WriteLine(e.Message);
                 }
 
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + "Pushed changes" + "<br>");
                 Console.WriteLine("Pushed changes");
             }
         }
-
-        /// <summary>
-        /// Adds indexes for repository
-        /// </summary>
-        /// <param name="file">Export solution location</param>
-        /// <param name="repo">Repository</param>
-        private void AddRepositoryIndexes(string file, Repository repo)
-        {
-            if (string.IsNullOrEmpty(file))
-            {
-                var files = this.solutionlocalFolder.GetFiles("*.zip").Select(f => f.FullName);
-
-                {
-                    foreach (var f in files)
-                    {
-                        if (string.IsNullOrEmpty(file))
-                        {
-                            repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
-                        }
-                        else
-                        {
-                            if (f.EndsWith(file))
-                            {
-                                repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                repo.Index.Add(file.Replace(this.localFolder.FullName, string.Empty));
-            }
-        }
-
-
 
         /// <summary>
         /// Method updates repository
@@ -376,6 +344,7 @@ namespace GitDeploy
                     }
                     catch (LibGit2Sharp.RepositoryNotFoundException r)
                     {
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + r.Message + "<br>");
                         Console.WriteLine(r.Message);
                     }
                 }
@@ -384,10 +353,11 @@ namespace GitDeploy
                     try
                     {
                         DirectoryInfo attachments_AR = new DirectoryInfo(workingDirectory);
-                        EmptyFolder(attachments_AR);
+                        this.EmptyFolder(attachments_AR);
                     }
                     catch (Exception ex)
                     {
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
                         Console.WriteLine(ex.Message);
                     }
                 }
@@ -411,6 +381,7 @@ namespace GitDeploy
             }
             catch
             {
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" One possibility for the exception could be check for branch or incorrect branch" + branchName + "<br>");
                 Console.WriteLine("One possibility for the exception could be check for branch or incorrect branch" + branchName);
                 throw;
             }
@@ -466,7 +437,7 @@ namespace GitDeploy
 
             foreach (DirectoryInfo subdirectory in directory.GetDirectories())
             {
-                EmptyFolder(subdirectory);
+                this.EmptyFolder(subdirectory);
                 subdirectory.Delete();
             }
         }
@@ -527,6 +498,39 @@ namespace GitDeploy
         private void AddExtractedSolutionToRepository(SolutionFileInfo solutionFileInfo, Repository repo)
         {
             this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.solutionlocalFolder.FullName + solutionFileInfo.SolutionUniqueName, repo);
+        }
+
+        /// <summary>
+        /// Adds indexes for repository
+        /// </summary>
+        /// <param name="file">Export solution location</param>
+        /// <param name="repo">Repository details</param>
+        private void AddRepositoryIndexes(string file, Repository repo)
+        {
+            if (string.IsNullOrEmpty(file))
+            {
+                var files = this.solutionlocalFolder.GetFiles("*.zip").Select(f => f.FullName);
+                {
+                    foreach (var f in files)
+                    {
+                        if (string.IsNullOrEmpty(file))
+                        {
+                            repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
+                        }
+                        else
+                        {
+                            if (f.EndsWith(file))
+                            {
+                                repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                repo.Index.Add(file.Replace(this.localFolder.FullName, string.Empty));
+            }
         }
     }
 }

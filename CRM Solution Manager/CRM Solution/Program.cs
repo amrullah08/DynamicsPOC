@@ -30,10 +30,11 @@ namespace CrmSolution
             string committerEmail = args[2];
             string authorEmail = "TestSolutionCommitterService@microsoft.com";
 
-            ConfigurationSettings configurationSettings = new CrmConstants();
+            ConfigurationSettings configurationSettings = Singleton.CrmConstantsInstance;
             EntityCollection configurationSettingsList = configurationSettings.GetConfigurationSettings();
             configurationSettings.SetCrmProperties(configurationSettingsList);
-            configurationSettings = new RepositoryConfigurationConstants();
+            configurationSettings = Singleton.RepositoryConfigurationConstantsInstance;
+            Singleton.RepositoryConfigurationConstantsInstance.ResetLocalDirectory();
             configurationSettings.SetRepositoryConfigurationProperties(configurationSettingsList);
 
             Singleton.RepositoryHelperInstance.TryUpdateToRepository(solutionUniqueName, committerName, committerEmail, authorEmail);

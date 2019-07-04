@@ -8,8 +8,7 @@
 namespace MsCrmTools.SolutionComponentsMover.AppCode
 {
     using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
+    using System.Collections.Generic;    
     using System.Linq;
     using CrmSolution;
     using Microsoft.Crm.Sdk.Messages;
@@ -22,7 +21,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
     /// Class merges components of solution to specified solution
     /// </summary>
     internal class SolutionManager
-    {        
+    {
         /// <summary>
         /// organization service
         /// </summary>
@@ -70,6 +69,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
             }
             catch (Exception ex)
             {
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + "Error for solution " + solutionUniqueName + " " + ex.Message);
                 Console.WriteLine("Error for solution " + solutionUniqueName + " " + ex.Message);
             }
 
@@ -98,28 +98,30 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     copySettings.SourceSolutions.Add(solution);
                 }
             }
-            Console.WriteLine("Copying components into Master Solution...");
+
+            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copying components into Master Solution.");
+            Console.WriteLine("Copying components into Master Solution.");
             var components = this.CopyComponents(copySettings);
             var componentsMaster = this.RetrieveComponentsFromSolutions(copySettings.TargetSolutions.Select(T => T.Id).ToList(), copySettings.ComponentsTypes);
             var differentComponents = (from cm in componentsMaster where !components.Any(list => list.GetAttributeValue<Guid>("objectid") == cm.GetAttributeValue<Guid>("objectid")) select cm).ToList();
             if (differentComponents != null)
             {
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Displaying different(additional) components after merging");
                 Console.WriteLine("Displaying different(additional) components after merging");
                 foreach (var target in copySettings.TargetSolutions)
                 {
                     foreach (var componentdetails in differentComponents)
                     {
-                        GetComponentDetails(copySettings, target, componentdetails, componentdetails.GetAttributeValue<OptionSetValue>("componenttype").Value, false);
+                        this.GetComponentDetails(copySettings, target, componentdetails, componentdetails.GetAttributeValue<OptionSetValue>("componenttype").Value);
                     }
                 }
             }
             else
             {
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" No different(additional components found after Merging)");
                 Console.WriteLine("No different(additional components found after Merging)");
             }
 
-            //GetComponentDetails(copySettings,)
-            //var differComponents = componentsMaster.Select(list => list.GetAttributeValue<Guid>("objectid") != components[0].GetAttributeValue<Guid>("objectid"));
             solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemMergingSuccessfulStatus;
             solutionFileInfo.Update();
         }
@@ -167,6 +169,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
         /// method copies components with the specified settings
         /// </summary>
         /// <param name="settings">copy settings</param>
+        /// <returns>list of components</returns>
         private List<Entity> CopyComponents(CopySettings settings)
         {
             var components = this.RetrieveComponentsFromSolutions(settings.SourceSolutions.Select(s => s.Id).ToList(), settings.ComponentsTypes);
@@ -183,7 +186,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                         SolutionUniqueName = target.GetAttributeValue<string>("uniquename"),
                     };
 
-                    GetComponentDetails(settings, target, component, component.GetAttributeValue<OptionSetValue>("componenttype").Value, true);
+                    this.GetComponentDetails(settings, target, component, component.GetAttributeValue<OptionSetValue>("componenttype").Value);
 
                     request.DoNotIncludeSubcomponents =
                         component.GetAttributeValue<OptionSetValue>("rootcomponentbehavior")?.Value == 1 ||
@@ -192,323 +195,240 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     this.service.Execute(request);
                 }
             }
+
             return components;
         }
 
-        private void GetComponentDetails(CopySettings settings, Entity target, Entity component, int ComponentType, bool isSourceSolutionAvailable)
+        /// <summary>
+        /// method for updating log file to Dynamic Source control record
+        /// </summary>
+        /// <param name="componentName">component Name</param>
+        /// <param name="componentType">component Type</param>
+        /// <param name="componentId">component Id</param>
+        /// <param name="sourceSolution">source Solution</param>
+        /// <param name="targetSolution">target Solution</param>
+        private void PrintLog(string componentName, string componentType, Guid componentId, string sourceSolution, string targetSolution)
         {
-            switch (ComponentType)
+            Console.WriteLine("Component Name: " + componentName);
+            Console.WriteLine("Component Type: " + componentType);
+            Console.WriteLine("Component Id: " + componentId);
+            if (!string.IsNullOrEmpty(sourceSolution))
+            {
+                Console.WriteLine("Source Solution: " + sourceSolution);
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Source Solution: " + sourceSolution + "<br>");
+            }
+
+            Console.WriteLine("Target Solution: " + targetSolution);
+            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Component Name: " + componentName + "<br>");
+            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Component Type: " + componentType + "<br>");
+            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Component Id: " + componentId + "<br>");
+            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Target Solution: " + targetSolution + "<br>");
+        }
+
+        /// <summary>
+        /// To Get list of components in Solutions
+        /// </summary>
+        /// <param name="settings">settings details</param>
+        /// <param name="target">target details</param>
+        /// <param name="component">component details</param>
+        /// <param name="componentType">component Type</param>
+        private void GetComponentDetails(CopySettings settings, Entity target, Entity component, int componentType)
+        {
+            var sourceSolution = settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id);
+
+            switch (componentType)
             {
                 case Constants.Entity:
                     var entityReq = new RetrieveEntityRequest();
                     entityReq.MetadataId = component.GetAttributeValue<Guid>("objectid");
-                    var retrievedEntity = (RetrieveEntityResponse)service.Execute(entityReq);
-                    Console.WriteLine("Component Name: " + retrievedEntity.EntityMetadata.LogicalName);
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedEntity = (RetrieveEntityResponse)this.service.Execute(entityReq);
+                    this.PrintLog(retrievedEntity.EntityMetadata.LogicalName, component.FormattedValues["componenttype"], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.WebResources:
                     var webresource = new RetrieveRequest();
                     webresource.Target = new EntityReference("webresource", component.GetAttributeValue<Guid>("objectid"));
                     webresource.ColumnSet = new ColumnSet(true);
-                    var retrievedWebresource = (RetrieveResponse)service.Execute(webresource);
-                    Console.WriteLine("Component Name: " + (retrievedWebresource.Entity.Contains("name") ? retrievedWebresource.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedWebresource = (RetrieveResponse)this.service.Execute(webresource);
+                    this.PrintLog(retrievedWebresource.Entity.Contains("name") ? retrievedWebresource.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.Attribute:
                     var attributeReq = new RetrieveAttributeRequest();
                     attributeReq.MetadataId = component.GetAttributeValue<Guid>("objectid");
-                    var retrievedAttribute = (RetrieveAttributeResponse)service.Execute(attributeReq);
-                    Console.WriteLine("Component Name: " + retrievedAttribute.AttributeMetadata.LogicalName);
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedAttribute = (RetrieveAttributeResponse)this.service.Execute(attributeReq);
+                    this.PrintLog(retrievedAttribute.AttributeMetadata.LogicalName, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.Relationship:
                     var relationshipReq = new RetrieveRelationshipRequest();
                     relationshipReq.MetadataId = component.GetAttributeValue<Guid>("objectid");
-                    var retrievedrelationshipReq = (RetrieveRelationshipResponse)service.Execute(relationshipReq);
-                    Console.WriteLine("Component Name: " + retrievedrelationshipReq.RelationshipMetadata.SchemaName);
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedrelationshipReq = (RetrieveRelationshipResponse)this.service.Execute(relationshipReq);
+                    this.PrintLog(retrievedrelationshipReq.RelationshipMetadata.SchemaName, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.DisplayString:
                     var displayStringRequest = new RetrieveRequest();
                     displayStringRequest.Target = new EntityReference("displaystring", component.GetAttributeValue<Guid>("objectid"));
                     displayStringRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedDisplayString = (RetrieveResponse)service.Execute(displayStringRequest);
-                    Console.WriteLine("Component Name: " + (retrievedDisplayString.Entity.Contains("name") ? retrievedDisplayString.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedDisplayString = (RetrieveResponse)this.service.Execute(displayStringRequest);
+                    this.PrintLog(retrievedDisplayString.Entity.Contains("name") ? retrievedDisplayString.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SavedQuery:
                     var savedQueryRequest = new RetrieveRequest();
                     savedQueryRequest.Target = new EntityReference("savedquery", component.GetAttributeValue<Guid>("objectid"));
                     savedQueryRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedSavedQuery = (RetrieveResponse)service.Execute(savedQueryRequest);
-                    Console.WriteLine("Component Name: " + (retrievedSavedQuery.Entity.Contains("name") ? retrievedSavedQuery.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedSavedQuery = (RetrieveResponse)this.service.Execute(savedQueryRequest);
+                    this.PrintLog(retrievedSavedQuery.Entity.Contains("name") ? retrievedSavedQuery.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SavedQueryVisualization:
                     var savedQueryVisualizationRequest = new RetrieveRequest();
                     savedQueryVisualizationRequest.Target = new EntityReference("savedqueryvisualization", component.GetAttributeValue<Guid>("objectid"));
                     savedQueryVisualizationRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedSavedQueryVisualization = (RetrieveResponse)service.Execute(savedQueryVisualizationRequest);
-                    Console.WriteLine("Component Name: " + (retrievedSavedQueryVisualization.Entity.Contains("name") ? retrievedSavedQueryVisualization.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedSavedQueryVisualization = (RetrieveResponse)this.service.Execute(savedQueryVisualizationRequest);
+                    this.PrintLog(retrievedSavedQueryVisualization.Entity.Contains("name") ? retrievedSavedQueryVisualization.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SystemForm:
                     var systemFormRequest = new RetrieveRequest();
                     systemFormRequest.Target = new EntityReference("systemform", component.GetAttributeValue<Guid>("objectid"));
                     systemFormRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedSystemForm = (RetrieveResponse)service.Execute(systemFormRequest);
-                    Console.WriteLine("Component Name: " + (retrievedSystemForm.Entity.Contains("name") ? retrievedSystemForm.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedSystemForm = (RetrieveResponse)this.service.Execute(systemFormRequest);
+                    this.PrintLog(retrievedSystemForm.Entity.Contains("name") ? retrievedSystemForm.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.HierarchyRule:
                     var hierarchyRuleRequest = new RetrieveRequest();
                     hierarchyRuleRequest.Target = new EntityReference("hierarchyrule", component.GetAttributeValue<Guid>("objectid"));
                     hierarchyRuleRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedHierarchyRule = (RetrieveResponse)service.Execute(hierarchyRuleRequest);
-                    Console.WriteLine("Component Name: " + (retrievedHierarchyRule.Entity.Contains("name") ? retrievedHierarchyRule.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedHierarchyRule = (RetrieveResponse)this.service.Execute(hierarchyRuleRequest);
+                    this.PrintLog(retrievedHierarchyRule.Entity.Contains("name") ? retrievedHierarchyRule.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SiteMap:
                     var siteMapRequest = new RetrieveRequest();
                     siteMapRequest.Target = new EntityReference("sitemap", component.GetAttributeValue<Guid>("objectid"));
                     siteMapRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedSiteMap = (RetrieveResponse)service.Execute(siteMapRequest);
-                    Console.WriteLine("Component Name: " + (retrievedSiteMap.Entity.Contains("name") ? retrievedSiteMap.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedSiteMap = (RetrieveResponse)this.service.Execute(siteMapRequest);
+                    this.PrintLog(retrievedSiteMap.Entity.Contains("name") ? retrievedSiteMap.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.PluginAssembly:
                     var pluginAssemblyRequest = new RetrieveRequest();
                     pluginAssemblyRequest.Target = new EntityReference("pluginassembly", component.GetAttributeValue<Guid>("objectid"));
                     pluginAssemblyRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedPluginAssembly = (RetrieveResponse)service.Execute(pluginAssemblyRequest);
-                    Console.WriteLine("Component Name: " + (retrievedPluginAssembly.Entity.Contains("name") ? retrievedPluginAssembly.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedPluginAssembly = (RetrieveResponse)this.service.Execute(pluginAssemblyRequest);
+                    this.PrintLog(retrievedPluginAssembly.Entity.Contains("name") ? retrievedPluginAssembly.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SDKMessageProcessingStep:
                     var sdkMessageProcessingStepRequest = new RetrieveRequest();
                     sdkMessageProcessingStepRequest.Target = new EntityReference("sdkmessageprocessingstep", component.GetAttributeValue<Guid>("objectid"));
                     sdkMessageProcessingStepRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedSDKMessageProcessingStep = (RetrieveResponse)service.Execute(sdkMessageProcessingStepRequest);
-                    Console.WriteLine("Component Name: " + (retrievedSDKMessageProcessingStep.Entity.Contains("name") ? retrievedSDKMessageProcessingStep.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedSDKMessageProcessingStep = (RetrieveResponse)this.service.Execute(sdkMessageProcessingStepRequest);
+                    this.PrintLog(retrievedSDKMessageProcessingStep.Entity.Contains("name") ? retrievedSDKMessageProcessingStep.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.ServiceEndpoint:
                     var serviceEndpointRequest = new RetrieveRequest();
                     serviceEndpointRequest.Target = new EntityReference("serviceendpoint", component.GetAttributeValue<Guid>("objectid"));
                     serviceEndpointRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedServiceEndpoint = (RetrieveResponse)service.Execute(serviceEndpointRequest);
-                    Console.WriteLine("Component Name: " + (retrievedServiceEndpoint.Entity.Contains("name") ? retrievedServiceEndpoint.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedServiceEndpoint = (RetrieveResponse)this.service.Execute(serviceEndpointRequest);
+                    this.PrintLog(retrievedServiceEndpoint.Entity.Contains("name") ? retrievedServiceEndpoint.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.Report:
                     var reportRequest = new RetrieveRequest();
                     reportRequest.Target = new EntityReference("report", component.GetAttributeValue<Guid>("objectid"));
                     reportRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedReport = (RetrieveResponse)service.Execute(reportRequest);
-                    Console.WriteLine("Component Name: " + (retrievedReport.Entity.Contains("name") ? retrievedReport.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedReport = (RetrieveResponse)this.service.Execute(reportRequest);
+                    this.PrintLog(retrievedReport.Entity.Contains("name") ? retrievedReport.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.Role:
                     var roleRequest = new RetrieveRequest();
                     roleRequest.Target = new EntityReference("role", component.GetAttributeValue<Guid>("objectid"));
                     roleRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedRole = (RetrieveResponse)service.Execute(roleRequest);
-                    Console.WriteLine("Component Name: " + (retrievedRole.Entity.Contains("name") ? retrievedRole.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedRole = (RetrieveResponse)this.service.Execute(roleRequest);
+                    this.PrintLog(retrievedRole.Entity.Contains("name") ? retrievedRole.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.FieldSecurityProfile:
                     var fieldSecurityProfileRequest = new RetrieveRequest();
                     fieldSecurityProfileRequest.Target = new EntityReference("fieldsecurityprofile", component.GetAttributeValue<Guid>("objectid"));
                     fieldSecurityProfileRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedFieldSecurityProfile = (RetrieveResponse)service.Execute(fieldSecurityProfileRequest);
-                    Console.WriteLine("Component Name: " + (retrievedFieldSecurityProfile.Entity.Contains("name") ? retrievedFieldSecurityProfile.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedFieldSecurityProfile = (RetrieveResponse)this.service.Execute(fieldSecurityProfileRequest);
+                    this.PrintLog(retrievedFieldSecurityProfile.Entity.Contains("name") ? retrievedFieldSecurityProfile.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.ConnectionRole:
                     var connectionRoleRequest = new RetrieveRequest();
                     connectionRoleRequest.Target = new EntityReference("connectionrole", component.GetAttributeValue<Guid>("objectid"));
                     connectionRoleRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedConnectionRole = (RetrieveResponse)service.Execute(connectionRoleRequest);
-                    Console.WriteLine("Component Name: " + (retrievedConnectionRole.Entity.Contains("name") ? retrievedConnectionRole.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedConnectionRole = (RetrieveResponse)this.service.Execute(connectionRoleRequest);
+                    this.PrintLog(retrievedConnectionRole.Entity.Contains("name") ? retrievedConnectionRole.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.Workflow:
                     var workflowRequest = new RetrieveRequest();
                     workflowRequest.Target = new EntityReference("workflow", component.GetAttributeValue<Guid>("objectid"));
                     workflowRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedWorkflow = (RetrieveResponse)service.Execute(workflowRequest);
-                    Console.WriteLine("Component Name: " + (retrievedWorkflow.Entity.Contains("name") ? retrievedWorkflow.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedWorkflow = (RetrieveResponse)this.service.Execute(workflowRequest);
+                    this.PrintLog(retrievedWorkflow.Entity.Contains("name") ? retrievedWorkflow.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.KBArticleTemplate:
-                    var kbArticleTemplateRequest = new RetrieveRequest();
-                    kbArticleTemplateRequest.Target = new EntityReference("kbarticletemplate", component.GetAttributeValue<Guid>("objectid"));
-                    kbArticleTemplateRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedKBArticleTemplate = (RetrieveResponse)service.Execute(kbArticleTemplateRequest);
-                    Console.WriteLine("Component Name: " + (retrievedKBArticleTemplate.Entity.Contains("name") ? retrievedKBArticleTemplate.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var articleTemplateRequest = new RetrieveRequest();
+                    articleTemplateRequest.Target = new EntityReference("kbarticletemplate", component.GetAttributeValue<Guid>("objectid"));
+                    articleTemplateRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedKBArticleTemplate = (RetrieveResponse)this.service.Execute(articleTemplateRequest);
+                    this.PrintLog(retrievedKBArticleTemplate.Entity.Contains("name") ? retrievedKBArticleTemplate.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.MailMergeTemplate:
                     var mailMergeTemplateRequest = new RetrieveRequest();
                     mailMergeTemplateRequest.Target = new EntityReference("mailmergetemplate", component.GetAttributeValue<Guid>("objectid"));
                     mailMergeTemplateRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedMailMergeTemplate = (RetrieveResponse)service.Execute(mailMergeTemplateRequest);
-                    Console.WriteLine("Component Name: " + (retrievedMailMergeTemplate.Entity.Contains("name") ? retrievedMailMergeTemplate.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedMailMergeTemplate = (RetrieveResponse)this.service.Execute(mailMergeTemplateRequest);
+                    this.PrintLog(retrievedMailMergeTemplate.Entity.Contains("name") ? retrievedMailMergeTemplate.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.ContractTemplate:
                     var contractTemplateRequest = new RetrieveRequest();
                     contractTemplateRequest.Target = new EntityReference("contracttemplate", component.GetAttributeValue<Guid>("objectid"));
                     contractTemplateRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedContractTemplate = (RetrieveResponse)service.Execute(contractTemplateRequest);
-                    Console.WriteLine("Component Name: " + (retrievedContractTemplate.Entity.Contains("name") ? retrievedContractTemplate.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedContractTemplate = (RetrieveResponse)this.service.Execute(contractTemplateRequest);
+                    this.PrintLog(retrievedContractTemplate.Entity.Contains("name") ? retrievedContractTemplate.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.EmailTemplate:
                     var emailTemplateRequest = new RetrieveRequest();
                     emailTemplateRequest.Target = new EntityReference("template", component.GetAttributeValue<Guid>("objectid"));
                     emailTemplateRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedEmailTemplate = (RetrieveResponse)service.Execute(emailTemplateRequest);
-                    Console.WriteLine("Component Name: " + (retrievedEmailTemplate.Entity.Contains("name") ? retrievedEmailTemplate.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedEmailTemplate = (RetrieveResponse)this.service.Execute(emailTemplateRequest);
+                    this.PrintLog(retrievedEmailTemplate.Entity.Contains("name") ? retrievedEmailTemplate.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.SLA:
                     var slaRequest = new RetrieveRequest();
                     slaRequest.Target = new EntityReference("sla", component.GetAttributeValue<Guid>("objectid"));
                     slaRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedSLA = (RetrieveResponse)service.Execute(slaRequest);
-                    Console.WriteLine("Component Name: " + (retrievedSLA.Entity.Contains("name") ? retrievedSLA.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedSLA = (RetrieveResponse)this.service.Execute(slaRequest);
+                    this.PrintLog(retrievedSLA.Entity.Contains("name") ? retrievedSLA.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 case Constants.ConvertRule:
                     var convertRuleRequest = new RetrieveRequest();
                     convertRuleRequest.Target = new EntityReference("convertrule", component.GetAttributeValue<Guid>("objectid"));
                     convertRuleRequest.ColumnSet = new ColumnSet(true);
-                    var retrievedConvertRule = (RetrieveResponse)service.Execute(convertRuleRequest);
-                    Console.WriteLine("Component Name: " + (retrievedConvertRule.Entity.Contains("name") ? retrievedConvertRule.Entity.Attributes["name"] : string.Empty));
-                    Console.WriteLine("Component Type: " + component.FormattedValues["componenttype"]);
-                    Console.WriteLine("Component Id: " + component.Id);
-                    if (isSourceSolutionAvailable)
-                        Console.WriteLine("Source Solution: " + settings.SourceSolutions.Find(item => item.Id == component.GetAttributeValue<EntityReference>("solutionid").Id).Attributes["friendlyname"]);
-                    Console.WriteLine("Master Solution: " + target.Attributes["friendlyname"]);
+                    var retrievedConvertRule = (RetrieveResponse)this.service.Execute(convertRuleRequest);
+                    this.PrintLog(retrievedConvertRule.Entity.Contains("name") ? retrievedConvertRule.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues["componenttype"].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target.Attributes["friendlyname"].ToString());
                     break;
 
                 default:
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Unable to copy component type: " + component.FormattedValues["componenttype"] + " and objectID: " + component.Attributes["objectid"].ToString());
                     Console.WriteLine("Unable to copy component type: " + component.FormattedValues["componenttype"] + " and objectID: " + component.Attributes["objectid"].ToString());
                     break;
             }

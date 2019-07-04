@@ -130,7 +130,7 @@ namespace CrmSolution
         public const string SolutionPackagerPath = "SolutionPackagerPath";
 
         /// <summary>
-        ///  multilple solutions import
+        ///  multiple solutions import
         /// </summary>
         public const string MultilpleSolutionsImport = "MultilpleSolutionsImport";
 
@@ -155,7 +155,7 @@ namespace CrmSolution
         public const string RepositorySolutionFolder = "RepositorySolutionFolder";
 
         /// <summary>
-        ///  repository js directory
+        ///  repository java script directory
         /// </summary>
         public const string RepositoryJsDirectory = "RepositoryJsDirectory";
 
@@ -188,6 +188,146 @@ namespace CrmSolution
         ///  branch name
         /// </summary>
         public const string BranchName = "BranchName";
+
+        /// <summary>
+        ///  Entity value
+        /// </summary>
+        public const int Entity = 1;
+
+        /// <summary>
+        ///  WebResources value
+        /// </summary>
+        public const int WebResources = 61;
+
+        /// <summary>
+        ///  Attribute value
+        /// </summary>
+        public const int Attribute = 2;
+
+        /// <summary>
+        ///  Relationship value
+        /// </summary>
+        public const int Relationship = 10;
+
+        /// <summary>
+        ///  Entity Key value
+        /// </summary>
+        public const int EntityKey = 14;
+
+        /// <summary>
+        ///  Display String value
+        /// </summary>
+        public const int DisplayString = 22;
+
+        /// <summary>
+        ///  Saved Query value
+        /// </summary>
+        public const int SavedQuery = 26;
+
+        /// <summary>
+        ///  Saved Query Visualization value
+        /// </summary>
+        public const int SavedQueryVisualization = 59;
+
+        /// <summary>
+        ///  System Form value
+        /// </summary>
+        public const int SystemForm = 60;
+
+        /// <summary>
+        ///  Hierarchy Rule value
+        /// </summary>
+        public const int HierarchyRule = 65;
+
+        /// <summary>
+        ///  SiteMap value
+        /// </summary>
+        public const int SiteMap = 62;
+
+        /// <summary>
+        ///  Ribbon Customization value
+        /// </summary>
+        public const int RibbonCustomization = 50;
+
+        /// <summary>
+        ///  OptionSet value
+        /// </summary>
+        public const int OptionSet = 9;
+
+        /// <summary>
+        ///  Plugin Assembly value
+        /// </summary>
+        public const int PluginAssembly = 91;
+
+        /// <summary>
+        ///  SDK Message Processing Step value
+        /// </summary>
+        public const int SDKMessageProcessingStep = 92;
+
+        /// <summary>
+        ///  Service End point value
+        /// </summary>
+        public const int ServiceEndpoint = 95;
+
+        /// <summary>
+        ///  Report value
+        /// </summary>
+        public const int Report = 31;
+
+        /// <summary>
+        ///  Role value
+        /// </summary>
+        public const int Role = 20;
+
+        /// <summary>
+        ///  Field Security Profile value
+        /// </summary>
+        public const int FieldSecurityProfile = 70;
+
+        /// <summary>
+        ///  ConnectionRole value
+        /// </summary>
+        public const int ConnectionRole = 63;
+
+        /// <summary>
+        ///  Work flow value
+        /// </summary>
+        public const int Workflow = 29;
+
+        /// <summary>
+        ///  KB Article Template value
+        /// </summary>
+        public const int KBArticleTemplate = 38;
+
+        /// <summary>
+        /// Mail Merge Template value
+        /// </summary>
+        public const int MailMergeTemplate = 39;
+
+        /// <summary>
+        /// Contract Template value
+        /// </summary>
+        public const int ContractTemplate = 37;
+
+        /// <summary>
+        /// Email Template value
+        /// </summary>
+        public const int EmailTemplate = 36;
+
+        /// <summary>
+        /// Routing Rule value
+        /// </summary>
+        public const int RoutingRule = 150;
+
+        /// <summary>
+        /// SLA value
+        /// </summary>
+        public const int SLA = 152;
+
+        /// <summary>
+        /// Convert Rule value
+        /// </summary>
+        public const int ConvertRule = 154;
 
         /// <summary>
         /// Gets the component types
@@ -227,35 +367,5 @@ namespace CrmSolution
                     ConvertRule // convert rules
                 };
         }
-
-        public const int Entity = 1;
-        public const int WebResources = 61;
-        public const int Attribute = 2;
-        public const int Relationship = 10;
-        public const int EntityKey = 14;
-        public const int DisplayString = 22;
-        public const int SavedQuery = 26;
-        public const int SavedQueryVisualization = 59;
-        public const int SystemForm = 60;
-        public const int HierarchyRule = 65;
-        public const int SiteMap = 62;
-        public const int RibbonCustomization = 50;
-        public const int OptionSet = 9;
-        public const int PluginAssembly = 91;
-        public const int SDKMessageProcessingStep = 92;
-        public const int ServiceEndpoint = 95;
-        public const int Report = 31;
-        public const int Role = 20;
-        public const int FieldSecurityProfile = 70;
-        public const int ConnectionRole = 63;
-        public const int Workflow = 29;
-        public const int KBArticleTemplate = 38;
-        public const int MailMergeTemplate = 39;
-        public const int ContractTemplate = 37;
-        public const int EmailTemplate = 36;
-        public const int RoutingRule = 150;
-        public const int SLA = 152;
-        public const int ConvertRule = 154;
-
     }
 }

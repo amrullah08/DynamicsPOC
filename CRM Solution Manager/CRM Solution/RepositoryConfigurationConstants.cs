@@ -246,16 +246,16 @@ namespace CrmSolution
                 switch (key)
                 {
                     case Constants.RepositorySolutionFolder:
-                        this.solutionFolder = setting.GetAttributeValue<string>("syed_value");
+                        this.solutionFolder = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
                         break;
                     case Constants.RepositoryJsDirectory:
-                        this.javaScriptDirectory = setting.GetAttributeValue<string>("syed_value");
+                        this.javaScriptDirectory = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
                         break;
                     case Constants.RepositoryHtmlDirectory:
-                        this.htmlDirectory = setting.GetAttributeValue<string>("syed_value");
+                        this.htmlDirectory = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
                         break;
                     case Constants.RepositoryImagesDirectory:
-                        this.imagesDirectory = setting.GetAttributeValue<string>("syed_value");
+                        this.imagesDirectory = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
                         break;
                     case Constants.RepositoryUrl:
                         this.repositoryUrl = setting.GetAttributeValue<string>("syed_value");
@@ -303,8 +303,10 @@ namespace CrmSolution
                 process.Start();
 
                 string output = process.StandardOutput.ReadToEnd();
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + output + "<br>");
                 Console.WriteLine(output);
                 string err = process.StandardError.ReadToEnd();
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + err + "<br>");
                 Console.WriteLine(err);
                 process.WaitForExit();
 
@@ -313,7 +315,8 @@ namespace CrmSolution
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
+                Console.WriteLine(ex.Message);
             }
         }
 
@@ -339,14 +342,17 @@ namespace CrmSolution
                 process.StartInfo.RedirectStandardError = true;
                 process.Start();
                 string output = process.StandardOutput.ReadToEnd();
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + output + "<br>");
                 Console.WriteLine(output);
                 string err = process.StandardError.ReadToEnd();
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + err + "<br>");
                 Console.WriteLine(err);
                 process.WaitForExit();
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(ex.Message + "<br>");
+                Console.WriteLine(ex.Message);
             }
         }
     }

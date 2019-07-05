@@ -336,8 +336,8 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 default:
-                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Unable to copy component type: " + component.FormattedValues[componentDetails] + " and objectID: " + component.Attributes["objectid"].ToString());
-                    Console.WriteLine("Unable to copy component type: " + component.FormattedValues[componentDetails] + " and objectID: " + component.Attributes["objectid"].ToString());
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Unable to copy component type: " + component.FormattedValues[componentDetails] + " and objectID: " + componentId.ToString());
+                    Console.WriteLine("Unable to copy component type: " + component.FormattedValues[componentDetails] + " and objectID: " + componentId.ToString());
                     break;
             }
         }

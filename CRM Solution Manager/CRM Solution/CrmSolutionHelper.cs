@@ -10,11 +10,12 @@ namespace CrmSolution
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.ServiceModel.Description;
     using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Client;
-    using Microsoft.Xrm.Sdk.Messages;
+    using Microsoft.Xrm.Sdk.Messages;    
     using Microsoft.Xrm.Sdk.Query;
     using MsCrmTools.SolutionComponentsMover.AppCode;
 
@@ -119,6 +120,7 @@ namespace CrmSolution
             List<SolutionFileInfo> solutionFileInfos = new List<SolutionFileInfo>();
             Console.WriteLine("Connecting to the " + this.serviceUri.OriginalString);
             var serviceProxy = this.InitializeOrganizationService();
+            serviceProxy.EnableProxyTypes();
             EntityCollection querySampleSolutionResults = this.FetchSourceControlQueues(serviceProxy);
             if (querySampleSolutionResults.Entities.Count > 0)
             {
@@ -143,6 +145,7 @@ namespace CrmSolution
                             }
                             catch (Exception ex)
                             {
+                                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
                                 throw new Exception(ex.InnerException.Message, ex);
                             }
                         }
@@ -519,8 +522,37 @@ namespace CrmSolution
                     ////Resetting password
                     instance.Attributes["syed_password"] = "Reset_Password";
                     serviceProxy.Update(instance);
-                    OrganizationServiceProxy client = new OrganizationServiceProxy(new Uri(instance.Attributes["syed_instanceurl"].ToString()), null, clientCredentials, null);
-                    this.ImportSolution(client, solutionFile, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
+                    OrganizationServiceProxy targetserviceProxy = new OrganizationServiceProxy(new Uri(instance.Attributes["syed_instanceurl"].ToString()), null, clientCredentials, null);
+                    targetserviceProxy.EnableProxyTypes();
+                    List<EntityCollection> componentDependency = this.GetDependentComponents(serviceProxy, new Guid(solutionFile.MasterSolutionId));
+
+                    SolutionManager sol = new SolutionManager(serviceProxy);
+
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Dependent Components</th><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Required Components</th></tr>");
+                    foreach (var comDependency in componentDependency)
+                    {
+                        foreach (Entity dependency in comDependency.Entities)
+                        {
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");
+                            sol.GetComponentDetails(null, null, dependency, ((OptionSetValue)dependency.Attributes["dependentcomponenttype"]).Value, (Guid)dependency.Attributes["dependentcomponentobjectid"], "dependentcomponenttype");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");
+                            sol.GetComponentDetails(null, null, dependency, ((OptionSetValue)dependency.Attributes["requiredcomponenttype"]).Value, (Guid)dependency.Attributes["requiredcomponentobjectid"], "requiredcomponenttype");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
+                        }
+                    }
+
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Dependent Components required in Target Instance</th></tr>");
+                    foreach (var comDependency in componentDependency)
+                    {
+                        this.CheckDependency(targetserviceProxy, comDependency, sol);
+                    }
+
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
+                    this.ImportSolution(targetserviceProxy, solutionFile, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
                 }
             }
         }
@@ -605,6 +637,85 @@ namespace CrmSolution
             Console.WriteLine("Fetching Solutions to be copied to Repository ");
             EntityCollection querySampleSolutionResults = serviceProxy.RetrieveMultiple(querySampleSolution);
             return querySampleSolutionResults;
+        }
+
+        /// <summary>
+        /// Method gets solution components dependency
+        /// </summary>
+        /// <param name="serviceProxy">service proxy</param>
+        /// <param name="masterSolutionId">master solution id</param>
+        /// <returns>returns components dependency entity collection</returns>
+        private List<EntityCollection> GetDependentComponents(OrganizationServiceProxy serviceProxy, Guid masterSolutionId)
+        {
+            List<EntityCollection> dependencyComponents = new List<EntityCollection>();
+            var solutionComponents = this.RetrieveComponentsFromSolutions(serviceProxy, masterSolutionId);
+
+            foreach (var component in solutionComponents)
+            {
+                RetrieveDependentComponentsRequest dependentComponentsRequest =
+                             new RetrieveDependentComponentsRequest
+                             {
+                                 ComponentType = component.GetAttributeValue<OptionSetValue>("componenttype").Value,
+                                 ObjectId = component.GetAttributeValue<Guid>("objectid")
+                             };
+                RetrieveDependentComponentsResponse dependentComponentsResponse =
+                    (RetrieveDependentComponentsResponse)serviceProxy.Execute(dependentComponentsRequest);
+                Console.WriteLine("Found {0} dependencies for Component {1} of type {2}", dependentComponentsResponse.EntityCollection.Entities.Count, component.GetAttributeValue<OptionSetValue>("componenttype").Value, component.GetAttributeValue<Guid>("objectid"));
+                dependencyComponents.Add(dependentComponentsResponse.EntityCollection);
+            }
+
+            return dependencyComponents;
+        }
+
+        /// <summary>
+        /// Method retrieves components from the solution
+        /// </summary>
+        /// <param name="serviceProxy">service proxy</param>
+        /// <param name="masterSolutionId">master solution id</param>
+        /// <returns>returns entity components</returns>
+        private DataCollection<Entity> RetrieveComponentsFromSolutions(OrganizationServiceProxy serviceProxy, Guid masterSolutionId)
+        {
+            var qe = new QueryExpression("solutioncomponent")
+            {
+                ColumnSet = new ColumnSet(true),
+                Criteria = new FilterExpression
+                {
+                    Conditions =
+                    {
+                        new ConditionExpression("solutionid", ConditionOperator.Equal, masterSolutionId)
+                    }
+                }
+            };
+
+            return serviceProxy.RetrieveMultiple(qe).Entities;
+        }
+
+        /// <summary>
+        /// Method checks dependency components present in target instance
+        /// </summary>
+        /// <param name="serviceProxy">service proxy</param>
+        /// <param name="dependencyComponents">dependency components</param>
+        /// <param name="sol">Solution Manager</param>
+        private void CheckDependency(OrganizationServiceProxy serviceProxy, EntityCollection dependencyComponents, SolutionManager sol)
+        {
+            QueryExpression retrieveSolutionsQuery = new QueryExpression("solution");
+            retrieveSolutionsQuery.ColumnSet = new ColumnSet("friendlyname", "solutionid");
+            retrieveSolutionsQuery.Criteria.AddCondition("friendlyname", ConditionOperator.Equal, "Default Solution");
+            EntityCollection solutions = serviceProxy.RetrieveMultiple(retrieveSolutionsQuery);
+            var solution = solutions[0];
+
+            QueryExpression retrieveSolutionComponentsQuery = new QueryExpression("solutioncomponent");
+            retrieveSolutionComponentsQuery.ColumnSet = new ColumnSet("componenttype", "objectid");
+            retrieveSolutionComponentsQuery.Criteria.AddCondition("solutionid", ConditionOperator.Equal, solution.Attributes["solutionid"]);
+            EntityCollection solutionComponents = serviceProxy.RetrieveMultiple(retrieveSolutionComponentsQuery);
+
+            foreach (var component in dependencyComponents.Entities.Except(solutionComponents.Entities))
+            {
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:pink;border: 1px solid #ccc'>");
+                sol.GetComponentDetails(null, null, component, ((OptionSetValue)component.Attributes["dependentcomponenttype"]).Value, (Guid)component.Attributes["dependentcomponentobjectid"], "dependentcomponenttype");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+            }
         }
     }
 }

@@ -516,6 +516,7 @@ namespace CrmSolution
             {
                 foreach (Entity instance in deploymentInstance.Entities)
                 {
+                    var CheckTarget = false;
                     ClientCredentials clientCredentials = new ClientCredentials();
                     clientCredentials.UserName.UserName = instance.Attributes["syed_name"].ToString();
                     clientCredentials.UserName.Password = this.DecryptString(instance.Attributes["syed_password"].ToString());
@@ -544,15 +545,22 @@ namespace CrmSolution
                         }
                     }
 
+
+
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Dependent Components required in Target Instance</th></tr>");
                     foreach (var comDependency in componentDependency)
                     {
-                        this.CheckDependency(targetserviceProxy, comDependency, sol);
+                        CheckTarget = this.CheckDependency(targetserviceProxy, comDependency, sol, CheckTarget);
                     }
 
+
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
-                    this.ImportSolution(targetserviceProxy, solutionFile, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
+
+                    if (!CheckTarget)
+                    {
+                        this.ImportSolution(targetserviceProxy, solutionFile, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
+                    }
                 }
             }
         }
@@ -647,9 +655,7 @@ namespace CrmSolution
         /// <returns>returns components dependency entity collection</returns>
         private List<EntityCollection> GetDependentComponents(OrganizationServiceProxy serviceProxy, Guid masterSolutionId)
         {
-            DependentSolutionCom dependent = new DependentSolutionCom();
-            dependent.sourceSolutions = new List<EntityCollection>();
-            List<EntityCollection> dependencyComponents = new List<EntityCollection>();
+            List<EntityCollection> dependentDetails = new List<EntityCollection>();
             var solutionComponents = this.RetrieveComponentsFromSolutions(serviceProxy, masterSolutionId);
 
             foreach (var component in solutionComponents)
@@ -660,30 +666,34 @@ namespace CrmSolution
                                  ComponentType = component.GetAttributeValue<OptionSetValue>("componenttype").Value,
                                  ObjectId = component.GetAttributeValue<Guid>("objectid")
                              };
-                RetrieveDependentComponentsResponse dependentComponentsResponse =
-                    (RetrieveDependentComponentsResponse)serviceProxy.Execute(dependentComponentsRequest);
-                Console.WriteLine("Found {0} dependencies for Component {1} of type {2}", dependentComponentsResponse.EntityCollection.Entities.Count, component.GetAttributeValue<OptionSetValue>("componenttype").Value, component.GetAttributeValue<Guid>("objectid"));
-                dependencyComponents.Add(dependentComponentsResponse.EntityCollection);
-            }
-
-            if (dependencyComponents.Count == 0)
-            {
-                foreach (var component in solutionComponents)
+                RetrieveDependentComponentsResponse dependentComponentsResponse = (RetrieveDependentComponentsResponse)serviceProxy.Execute(dependentComponentsRequest);
+                if (dependentComponentsResponse != null && dependentComponentsResponse.EntityCollection != null && dependentComponentsResponse.EntityCollection.Entities.Count > 0)
                 {
-                    RetrieveRequiredComponentsRequest requiredComponentsRequest =
-                                 new RetrieveRequiredComponentsRequest
-                                 {
-                                     ComponentType = component.GetAttributeValue<OptionSetValue>("componenttype").Value,
-                                     ObjectId = component.GetAttributeValue<Guid>("objectid")
-                                 };
-                    RetrieveRequiredComponentsResponse requiredComponentsResponse =
-                        (RetrieveRequiredComponentsResponse)serviceProxy.Execute(requiredComponentsRequest);
-                    Console.WriteLine("Found {0} required dependencies for Component {1} of type {2}", requiredComponentsResponse.EntityCollection.Entities.Count, component.GetAttributeValue<OptionSetValue>("componenttype").Value, component.GetAttributeValue<Guid>("objectid"));
-                    dependencyComponents.Add(requiredComponentsResponse.EntityCollection);
+                    //Console.WriteLine("Found {0} dependencies for Component {1} of type {2}",
+                    //    dependentComponentsResponse.EntityCollection.Entities.Count,
+                    //    component.GetAttributeValue<OptionSetValue>("dependentcomponenttype").Value,
+                    //    component.GetAttributeValue<Guid>("dependentcomponentobjectid"));
+                    dependentDetails.Add(dependentComponentsResponse.EntityCollection);
+
+                }
+
+                RetrieveRequiredComponentsRequest requiredComponentsRequest =
+                                new RetrieveRequiredComponentsRequest
+                                {
+                                    ComponentType = component.GetAttributeValue<OptionSetValue>("componenttype").Value,
+                                    ObjectId = component.GetAttributeValue<Guid>("objectid")
+                                };
+                RetrieveRequiredComponentsResponse requiredComponentsResponse = (RetrieveRequiredComponentsResponse)serviceProxy.Execute(requiredComponentsRequest);
+                if (requiredComponentsResponse != null && requiredComponentsResponse.EntityCollection != null && requiredComponentsResponse.EntityCollection.Entities.Count > 0)
+                {
+                    //Console.WriteLine("Found {0} required dependencies for Component {1} of type {2}",
+                    //    requiredComponentsResponse.EntityCollection.Entities.Count, component.GetAttributeValue<OptionSetValue>("dependentcomponenttype").Value,
+                    //    component.GetAttributeValue<Guid>("dependentcomponentobjectid"));
+                    dependentDetails.Add(requiredComponentsResponse.EntityCollection);
                 }
             }
 
-            return dependencyComponents;
+            return dependentDetails;
         }
 
         /// <summary>
@@ -715,31 +725,34 @@ namespace CrmSolution
         /// <param name="serviceProxy">service proxy</param>
         /// <param name="dependencyComponents">dependency components</param>
         /// <param name="sol">Solution Manager</param>
-        private void CheckDependency(OrganizationServiceProxy serviceProxy, EntityCollection dependencyComponents, SolutionManager sol)
+        private bool CheckDependency(OrganizationServiceProxy serviceProxy, EntityCollection dependencyComponents, SolutionManager sol, bool checkTarget)
         {
-            QueryExpression retrieveSolutionsQuery = new QueryExpression("solution");
-            retrieveSolutionsQuery.ColumnSet = new ColumnSet("friendlyname", "solutionid");
-            retrieveSolutionsQuery.Criteria.AddCondition("friendlyname", ConditionOperator.Equal, "Default Solution");
-            EntityCollection solutions = serviceProxy.RetrieveMultiple(retrieveSolutionsQuery);
-            var solution = solutions[0];
 
-            QueryExpression retrieveSolutionComponentsQuery = new QueryExpression("solutioncomponent");
-            retrieveSolutionComponentsQuery.ColumnSet = new ColumnSet("componenttype", "objectid");
-            retrieveSolutionComponentsQuery.Criteria.AddCondition("solutionid", ConditionOperator.Equal, solution.Attributes["solutionid"]);
-            EntityCollection solutionComponents = serviceProxy.RetrieveMultiple(retrieveSolutionComponentsQuery);
-
-            var t = dependencyComponents.Entities.Select(x => x.Attributes["dependentcomponentobjectid"].ToString()).ToList();
-            var u = solutionComponents.Entities.Select(x => x.Attributes["objectid"].ToString()).ToList();
-
-            var y = t.Except(u).ToList();
-
-            foreach (var component in dependencyComponents.Entities.Except(solutionComponents.Entities))
+            foreach (var component in dependencyComponents.Entities)
             {
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:pink;border: 1px solid #ccc'>");
-                sol.GetComponentDetails(null, null, component, ((OptionSetValue)component.Attributes["dependentcomponenttype"]).Value, (Guid)component.Attributes["dependentcomponentobjectid"], "dependentcomponenttype");
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                QueryExpression retrieveTargetDependency = new QueryExpression("dependency");
+                retrieveTargetDependency.ColumnSet = new ColumnSet(true);
+                retrieveTargetDependency.Criteria.AddCondition("dependentcomponentobjectid", ConditionOperator.Equal, component.Attributes["dependentcomponentobjectid"]);
+                EntityCollection retrievedTargetDependecy = serviceProxy.RetrieveMultiple(retrieveTargetDependency);
+                if (retrievedTargetDependecy.Entities.Count == 0)
+                {
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:pink;border: 1px solid #ccc'>");
+                    Console.WriteLine("The below component was not present in Target");
+                    sol.GetComponentDetails(null, null, component, ((OptionSetValue)component.Attributes["dependentcomponenttype"]).Value, (Guid)component.Attributes["dependentcomponentobjectid"], "dependentcomponenttype");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                    checkTarget = true;
+                }
+                else
+                {
+                    //foreach (var retrievedEntity in retrievedTargetDependecy.Entities)
+                    //{
+                    //  sol.GetComponentDetails(null, null, retrievedEntity, ((OptionSetValue)retrievedEntity.Attributes["dependentcomponenttype"]).Value, (Guid)retrievedEntity.Attributes["dependentcomponentobjectid"], "dependentcomponenttype");
+
+                    //}
+                }
             }
+            return checkTarget;
         }
     }
 }

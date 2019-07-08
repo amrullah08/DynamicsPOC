@@ -15,7 +15,7 @@ namespace CrmSolution
     using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Client;
-    using Microsoft.Xrm.Sdk.Messages;    
+    using Microsoft.Xrm.Sdk.Messages;
     using Microsoft.Xrm.Sdk.Query;
     using MsCrmTools.SolutionComponentsMover.AppCode;
 
@@ -647,6 +647,8 @@ namespace CrmSolution
         /// <returns>returns components dependency entity collection</returns>
         private List<EntityCollection> GetDependentComponents(OrganizationServiceProxy serviceProxy, Guid masterSolutionId)
         {
+            DependentSolutionCom dependent = new DependentSolutionCom();
+            dependent.sourceSolutions = new List<EntityCollection>();
             List<EntityCollection> dependencyComponents = new List<EntityCollection>();
             var solutionComponents = this.RetrieveComponentsFromSolutions(serviceProxy, masterSolutionId);
 
@@ -662,6 +664,23 @@ namespace CrmSolution
                     (RetrieveDependentComponentsResponse)serviceProxy.Execute(dependentComponentsRequest);
                 Console.WriteLine("Found {0} dependencies for Component {1} of type {2}", dependentComponentsResponse.EntityCollection.Entities.Count, component.GetAttributeValue<OptionSetValue>("componenttype").Value, component.GetAttributeValue<Guid>("objectid"));
                 dependencyComponents.Add(dependentComponentsResponse.EntityCollection);
+            }
+
+            if (dependencyComponents.Count == 0)
+            {
+                foreach (var component in solutionComponents)
+                {
+                    RetrieveRequiredComponentsRequest requiredComponentsRequest =
+                                 new RetrieveRequiredComponentsRequest
+                                 {
+                                     ComponentType = component.GetAttributeValue<OptionSetValue>("componenttype").Value,
+                                     ObjectId = component.GetAttributeValue<Guid>("objectid")
+                                 };
+                    RetrieveRequiredComponentsResponse requiredComponentsResponse =
+                        (RetrieveRequiredComponentsResponse)serviceProxy.Execute(requiredComponentsRequest);
+                    Console.WriteLine("Found {0} required dependencies for Component {1} of type {2}", requiredComponentsResponse.EntityCollection.Entities.Count, component.GetAttributeValue<OptionSetValue>("componenttype").Value, component.GetAttributeValue<Guid>("objectid"));
+                    dependencyComponents.Add(requiredComponentsResponse.EntityCollection);
+                }
             }
 
             return dependencyComponents;
@@ -708,6 +727,11 @@ namespace CrmSolution
             retrieveSolutionComponentsQuery.ColumnSet = new ColumnSet("componenttype", "objectid");
             retrieveSolutionComponentsQuery.Criteria.AddCondition("solutionid", ConditionOperator.Equal, solution.Attributes["solutionid"]);
             EntityCollection solutionComponents = serviceProxy.RetrieveMultiple(retrieveSolutionComponentsQuery);
+
+            var t = dependencyComponents.Entities.Select(x => x.Attributes["dependentcomponentobjectid"].ToString()).ToList();
+            var u = solutionComponents.Entities.Select(x => x.Attributes["objectid"].ToString()).ToList();
+
+            var y = t.Except(u).ToList();
 
             foreach (var component in dependencyComponents.Entities.Except(solutionComponents.Entities))
             {

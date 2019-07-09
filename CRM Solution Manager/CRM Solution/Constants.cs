@@ -75,6 +75,11 @@ namespace CrmSolution
         public const string SourceControlQueuemPushToRepositorySuccessStatus = "Successfully Pushed To Repository";
 
         /// <summary>
+        /// Value for Missing Components in Target
+        /// </summary>
+        public const string SourceControlQueueMissingComponents = "Target Instance missing required components";
+
+        /// <summary>
         /// Overwrite Solutions.txt column name
         /// </summary>
         public const string SourceControlQueueAttributeNameForOverwriteSolutionsTxt = "syed_overwritesolutionstxt";

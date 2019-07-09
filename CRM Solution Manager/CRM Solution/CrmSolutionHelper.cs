@@ -511,12 +511,12 @@ namespace CrmSolution
         {
             Entity sourceControl = solutionFile.Solution;
             EntityCollection deploymentInstance = this.FetchDeplopymentInstance(serviceProxy, sourceControl.Id);
-
+            var CheckTarget = false;
             if (deploymentInstance.Entities.Count > 0)
             {
                 foreach (Entity instance in deploymentInstance.Entities)
                 {
-                    var CheckTarget = false;
+
                     ClientCredentials clientCredentials = new ClientCredentials();
                     clientCredentials.UserName.UserName = instance.Attributes["syed_name"].ToString();
                     clientCredentials.UserName.Password = this.DecryptString(instance.Attributes["syed_password"].ToString());
@@ -529,7 +529,7 @@ namespace CrmSolution
 
                     SolutionManager sol = new SolutionManager(serviceProxy);
 
-                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Dependent Components</th><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Required Components</th></tr>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Dependent Components in Source Instance</th><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Required Components</th></tr>");
                     foreach (var comDependency in componentDependency)
                     {
                         foreach (Entity dependency in comDependency.Entities)
@@ -545,10 +545,8 @@ namespace CrmSolution
                         }
                     }
 
-
-
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
-                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Dependent Components required in Target Instance</th></tr>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'> Missing Dependent Components in Target Instance</th></tr>");
                     foreach (var comDependency in componentDependency)
                     {
                         CheckTarget = this.CheckDependency(targetserviceProxy, comDependency, sol, CheckTarget);
@@ -560,6 +558,14 @@ namespace CrmSolution
                     if (!CheckTarget)
                     {
                         this.ImportSolution(targetserviceProxy, solutionFile, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
+                    }
+                    else
+                    {
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Target Instance missing Required components.  <br> ");
+                        solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueMissingComponents;
+                        solutionFile.Solution["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
+                        Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(serviceProxy, solutionFile.Solution);
+                        solutionFile.Update();
                     }
                 }
             }
@@ -727,12 +733,19 @@ namespace CrmSolution
         /// <param name="sol">Solution Manager</param>
         private bool CheckDependency(OrganizationServiceProxy serviceProxy, EntityCollection dependencyComponents, SolutionManager sol, bool checkTarget)
         {
-
             foreach (var component in dependencyComponents.Entities)
             {
                 QueryExpression retrieveTargetDependency = new QueryExpression("dependency");
                 retrieveTargetDependency.ColumnSet = new ColumnSet(true);
-                retrieveTargetDependency.Criteria.AddCondition("dependentcomponentobjectid", ConditionOperator.Equal, component.Attributes["dependentcomponentobjectid"]);
+                retrieveTargetDependency.Criteria = new FilterExpression
+                {
+                    FilterOperator = LogicalOperator.Or,
+                    Conditions =
+                            {
+                                new ConditionExpression("dependentcomponentobjectid", ConditionOperator.Equal, component.Attributes["dependentcomponentobjectid"]),
+                                new ConditionExpression("requiredcomponentobjectid", ConditionOperator.Equal, component.Attributes["requiredcomponentobjectid"]),
+                            }
+                };
                 EntityCollection retrievedTargetDependecy = serviceProxy.RetrieveMultiple(retrieveTargetDependency);
                 if (retrievedTargetDependecy.Entities.Count == 0)
                 {
@@ -745,11 +758,6 @@ namespace CrmSolution
                 }
                 else
                 {
-                    //foreach (var retrievedEntity in retrievedTargetDependecy.Entities)
-                    //{
-                    //  sol.GetComponentDetails(null, null, retrievedEntity, ((OptionSetValue)retrievedEntity.Attributes["dependentcomponenttype"]).Value, (Guid)retrievedEntity.Attributes["dependentcomponentobjectid"], "dependentcomponenttype");
-
-                    //}
                 }
             }
             return checkTarget;

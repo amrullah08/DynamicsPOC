@@ -99,22 +99,33 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                 }
             }
 
-            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copying components into Master Solution.");
             Console.WriteLine("Copying components into Master Solution.");
+            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Copying components into Master Solution</th></tr>");
+
             var components = this.CopyComponents(copySettings);
+            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
+
             var componentsMaster = this.RetrieveComponentsFromSolutions(copySettings.TargetSolutions.Select(T => T.Id).ToList(), copySettings.ComponentsTypes);
             var differentComponents = (from cm in componentsMaster where !components.Any(list => list.GetAttributeValue<Guid>("objectid") == cm.GetAttributeValue<Guid>("objectid")) select cm).ToList();
             if (differentComponents != null)
             {
-                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Displaying different(additional) components after merging");
                 Console.WriteLine("Displaying different(additional) components after merging");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Displaying different(additional) components after merging</th></tr>");
+
                 foreach (var target in copySettings.TargetSolutions)
                 {
                     foreach (var componentdetails in differentComponents)
                     {
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:white;border: 1px solid #ccc'>");
+
                         this.GetComponentDetails(copySettings, target, componentdetails, componentdetails.GetAttributeValue<OptionSetValue>("componenttype").Value, componentdetails.GetAttributeValue<Guid>("objectid"), "componenttype");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
                     }
                 }
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
+
             }
             else
             {
@@ -230,6 +241,15 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedPluginAssembly = (RetrieveResponse)this.service.Execute(pluginAssemblyRequest);
                     this.PrintLog(retrievedPluginAssembly.Entity.Contains("name") ? retrievedPluginAssembly.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     break;
+
+                case Constants.PluginType:
+                    var pluginTypeRequest = new RetrieveRequest();
+                    pluginTypeRequest.Target = new EntityReference("plugintype", componentId);
+                    pluginTypeRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedPluginTypeRequest = (RetrieveResponse)this.service.Execute(pluginTypeRequest);
+                    this.PrintLog(retrievedPluginTypeRequest.Entity.Contains("name") ? retrievedPluginTypeRequest.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                    break;
+
 
                 case Constants.SDKMessageProcessingStep:
                     var sdkMessageProcessingStepRequest = new RetrieveRequest();
@@ -401,12 +421,14 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                         ComponentType = component.GetAttributeValue<OptionSetValue>("componenttype").Value,
                         SolutionUniqueName = target.GetAttributeValue<string>("uniquename"),
                     };
-
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:powderblue;border: 1px solid #ccc'>");
                     this.GetComponentDetails(settings, target, component, component.GetAttributeValue<OptionSetValue>("componenttype").Value, component.GetAttributeValue<Guid>("objectid"), "componenttype");
-
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
                     request.DoNotIncludeSubcomponents =
-                        component.GetAttributeValue<OptionSetValue>("rootcomponentbehavior")?.Value == 1 ||
-                        component.GetAttributeValue<OptionSetValue>("rootcomponentbehavior")?.Value == 2;
+    component.GetAttributeValue<OptionSetValue>("rootcomponentbehavior")?.Value == 1 ||
+    component.GetAttributeValue<OptionSetValue>("rootcomponentbehavior")?.Value == 2;
 
                     this.service.Execute(request);
                 }
@@ -427,7 +449,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
         {
             Console.WriteLine("Component Name: " + componentName);
             Console.WriteLine("Component Type: " + componentType);
-            Console.WriteLine("Component Id: " + componentId);
+            if (componentId != Guid.Empty)
+            {
+                Console.WriteLine("Component Id: " + componentId);
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Component Id: " + componentId + "<br>");
+            }
             if (!string.IsNullOrEmpty(sourceSolution))
             {
                 Console.WriteLine("Source Solution: " + sourceSolution);
@@ -439,10 +465,10 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                 Console.WriteLine("Target Solution: " + targetSolution);
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Target Solution: " + targetSolution + "<br>");
             }
-
-            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Component Name: " + componentName + "<br>");
             Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Component Type: " + componentType + "<br>");
-            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Component Id: " + componentId + "<br>");
+            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Component Name: " + componentName + "<br>");
+
+
         }
 
         /// <summary>

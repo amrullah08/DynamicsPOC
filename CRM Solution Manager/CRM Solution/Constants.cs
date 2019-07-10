@@ -330,6 +330,11 @@ namespace CrmSolution
         public const int SLA = 152;
 
         /// <summary>
+        /// Plugin Type value
+        /// </summary>
+        public const int PluginType = 90;
+
+        /// <summary>
         /// Convert Rule value
         /// </summary>
         public const int ConvertRule = 154;

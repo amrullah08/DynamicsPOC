@@ -117,7 +117,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     foreach (var componentdetails in differentComponents)
                     {
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
-                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:white;border: 1px solid #ccc'>");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:LightCyan;border: 1px solid #ccc'>");
 
                         this.GetComponentDetails(copySettings, target, componentdetails, componentdetails.GetAttributeValue<OptionSetValue>("componenttype").Value, componentdetails.GetAttributeValue<Guid>("objectid"), "componenttype");
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");

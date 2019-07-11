@@ -535,7 +535,7 @@ namespace CrmSolution
                         foreach (Entity dependency in comDependency.Entities)
                         {
                             Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
-                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:#FFCCCC;border: 1px solid #ccc'>");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:#FFCC99;border: 1px solid #ccc'>");
                             sol.GetComponentDetails(null, null, dependency, ((OptionSetValue)dependency.Attributes["dependentcomponenttype"]).Value, (Guid)dependency.Attributes["dependentcomponentobjectid"], "dependentcomponenttype");
                             Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
                             Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:#FFCC99;border: 1px solid #ccc'>");
@@ -720,7 +720,7 @@ namespace CrmSolution
                 catch (Exception ex)
                 {
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
-                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:DarkSalmon;border: 1px solid #ccc'>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");
                     Console.WriteLine("The below component was not present in Target");
                     sol.GetComponentDetails(null, null, component, ((OptionSetValue)component.Attributes["dependentcomponenttype"]).Value, (Guid)component.Attributes["dependentcomponentobjectid"], "dependentcomponenttype");
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");

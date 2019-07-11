@@ -535,10 +535,10 @@ namespace CrmSolution
                         foreach (Entity dependency in comDependency.Entities)
                         {
                             Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
-                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:#FFCCCC;border: 1px solid #ccc'>");
                             sol.GetComponentDetails(null, null, dependency, ((OptionSetValue)dependency.Attributes["dependentcomponenttype"]).Value, (Guid)dependency.Attributes["dependentcomponentobjectid"], "dependentcomponenttype");
                             Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
-                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:#FFCC99;border: 1px solid #ccc'>");
                             sol.GetComponentDetails(null, null, dependency, ((OptionSetValue)dependency.Attributes["requiredcomponenttype"]).Value, (Guid)dependency.Attributes["requiredcomponentobjectid"], "requiredcomponenttype");
                             Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
                             Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
@@ -546,7 +546,7 @@ namespace CrmSolution
                     }
 
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
-                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'> Missing Dependent Components in Target Instance</th></tr>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'> Missing Dependent Components in Target Instance</th><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Components Details</th></tr>");
                     foreach (var comDependency in componentDependency)
                     {
                         CheckTarget = this.CheckDependency(targetserviceProxy, comDependency, sol, CheckTarget, serviceProxy);
@@ -676,38 +676,6 @@ namespace CrmSolution
 
             }
 
-            #region
-            //var solutionComponents = this.RetrieveComponentsFromSolutions(serviceProxy, masterSolutionId);
-
-            //foreach (var component in solutionComponents)
-            //{
-
-            //    //RetrieveDependentComponentsRequest dependentComponentsRequest =
-            //    //             new RetrieveDependentComponentsRequest
-            //    //             {
-            //    //                 ComponentType = component.GetAttributeValue<OptionSetValue>("componenttype").Value,
-            //    //                 ObjectId = component.GetAttributeValue<Guid>("objectid")
-            //    //             };
-            //    //RetrieveDependentComponentsResponse dependentComponentsResponse = (RetrieveDependentComponentsResponse)serviceProxy.Execute(dependentComponentsRequest);
-            //    //if (dependentComponentsResponse != null && dependentComponentsResponse.EntityCollection != null && dependentComponentsResponse.EntityCollection.Entities.Count > 0)
-            //    //{
-            //    //    dependentDetails.Add(dependentComponentsResponse.EntityCollection);
-
-            //    //}
-
-            //    //RetrieveRequiredComponentsRequest requiredComponentsRequest =
-            //    //                new RetrieveRequiredComponentsRequest
-            //    //                {
-            //    //                    ComponentType = component.GetAttributeValue<OptionSetValue>("componenttype").Value,
-            //    //                    ObjectId = component.GetAttributeValue<Guid>("objectid")
-            //    //                };
-            //    //RetrieveRequiredComponentsResponse requiredComponentsResponse = (RetrieveRequiredComponentsResponse)serviceProxy.Execute(requiredComponentsRequest);
-            //    //if (requiredComponentsResponse != null && requiredComponentsResponse.EntityCollection != null && requiredComponentsResponse.EntityCollection.Entities.Count > 0)
-            //    //{
-            //    //    dependentDetails.Add(requiredComponentsResponse.EntityCollection);
-            //    //}
-            //}
-            #endregion
             return dependentDetails;
         }
 
@@ -752,11 +720,11 @@ namespace CrmSolution
                 catch (Exception ex)
                 {
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
-                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:pink;border: 1px solid #ccc'>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:DarkSalmon;border: 1px solid #ccc'>");
                     Console.WriteLine("The below component was not present in Target");
                     sol.GetComponentDetails(null, null, component, ((OptionSetValue)component.Attributes["dependentcomponenttype"]).Value, (Guid)component.Attributes["dependentcomponentobjectid"], "dependentcomponenttype");
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
-                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:pink;border: 1px solid #ccc'>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");
                     sol.GetComponentDetails(null, null, component, ((OptionSetValue)component.Attributes["requiredcomponenttype"]).Value, (Guid)component.Attributes["requiredcomponentobjectid"], "requiredcomponenttype");
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");

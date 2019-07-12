@@ -246,16 +246,20 @@ namespace CrmSolution
                 switch (key)
                 {
                     case Constants.RepositorySolutionFolder:
-                        this.solutionFolder = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
+                        if (!string.IsNullOrEmpty(setting.GetAttributeValue<string>("syed_value")))
+                            this.solutionFolder = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
                         break;
                     case Constants.RepositoryJsDirectory:
-                        this.javaScriptDirectory = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
+                        if (!string.IsNullOrEmpty(setting.GetAttributeValue<string>("syed_value")))
+                            this.javaScriptDirectory = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
                         break;
                     case Constants.RepositoryHtmlDirectory:
-                        this.htmlDirectory = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
+                        if (!string.IsNullOrEmpty(setting.GetAttributeValue<string>("syed_value")))
+                            this.htmlDirectory = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
                         break;
                     case Constants.RepositoryImagesDirectory:
-                        this.imagesDirectory = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
+                        if (!string.IsNullOrEmpty(setting.GetAttributeValue<string>("syed_value")))
+                            this.imagesDirectory = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
                         break;
                     case Constants.RepositoryUrl:
                         this.repositoryUrl = setting.GetAttributeValue<string>("syed_value");

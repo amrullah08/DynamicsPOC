@@ -15,7 +15,7 @@ namespace CrmSolution
     using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Client;
-    using Microsoft.Xrm.Sdk.Messages;    
+    using Microsoft.Xrm.Sdk.Messages;
     using Microsoft.Xrm.Sdk.Query;
     using MsCrmTools.SolutionComponentsMover.AppCode;
 
@@ -511,11 +511,12 @@ namespace CrmSolution
         {
             Entity sourceControl = solutionFile.Solution;
             EntityCollection deploymentInstance = this.FetchDeplopymentInstance(serviceProxy, sourceControl.Id);
-
+            var CheckTarget = false;
             if (deploymentInstance.Entities.Count > 0)
             {
                 foreach (Entity instance in deploymentInstance.Entities)
                 {
+
                     ClientCredentials clientCredentials = new ClientCredentials();
                     clientCredentials.UserName.UserName = instance.Attributes["syed_name"].ToString();
                     clientCredentials.UserName.Password = this.DecryptString(instance.Attributes["syed_password"].ToString());
@@ -524,35 +525,81 @@ namespace CrmSolution
                     serviceProxy.Update(instance);
                     OrganizationServiceProxy targetserviceProxy = new OrganizationServiceProxy(new Uri(instance.Attributes["syed_instanceurl"].ToString()), null, clientCredentials, null);
                     targetserviceProxy.EnableProxyTypes();
-                    List<EntityCollection> componentDependency = this.GetDependentComponents(serviceProxy, new Guid(solutionFile.MasterSolutionId));
+                    List<EntityCollection> componentDependency = this.GetDependentComponents(serviceProxy, new Guid(solutionFile.MasterSolutionId), solutionFile.SolutionUniqueName);
+
 
                     SolutionManager sol = new SolutionManager(serviceProxy);
 
-                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Dependent Components</th><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Required Components</th></tr>");
-                    foreach (var comDependency in componentDependency)
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Dependent Components in Source Instance</th><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Required Components</th></tr>");
+
+                    if (componentDependency.Count > 0)
                     {
-                        foreach (Entity dependency in comDependency.Entities)
+                        foreach (var comDependency in componentDependency)
                         {
-                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
-                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");
-                            sol.GetComponentDetails(null, null, dependency, ((OptionSetValue)dependency.Attributes["dependentcomponenttype"]).Value, (Guid)dependency.Attributes["dependentcomponentobjectid"], "dependentcomponenttype");
-                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
-                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");
-                            sol.GetComponentDetails(null, null, dependency, ((OptionSetValue)dependency.Attributes["requiredcomponenttype"]).Value, (Guid)dependency.Attributes["requiredcomponentobjectid"], "requiredcomponenttype");
-                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
-                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
+                            if (comDependency != null && comDependency.Entities != null && comDependency.Entities.Count > 0)
+                            {
+                                foreach (Entity dependency in comDependency.Entities)
+                                {
+                                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
+                                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:#FFCC99;border: 1px solid #ccc'>");
+                                    sol.GetComponentDetails(null, null, dependency, ((OptionSetValue)dependency.Attributes["dependentcomponenttype"]).Value, (Guid)dependency.Attributes["dependentcomponentobjectid"], "dependentcomponenttype");
+                                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:#FFCC99;border: 1px solid #ccc'>");
+                                    sol.GetComponentDetails(null, null, dependency, ((OptionSetValue)dependency.Attributes["requiredcomponenttype"]).Value, (Guid)dependency.Attributes["requiredcomponentobjectid"], "requiredcomponenttype");
+                                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
+                                }
+                            }
+
                         }
                     }
-
-                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
-                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Dependent Components required in Target Instance</th></tr>");
-                    foreach (var comDependency in componentDependency)
+                    else
                     {
-                        this.CheckDependency(targetserviceProxy, comDependency, sol);
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:#FFCC99;border: 1px solid #ccc'>");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("There is no missing dependent component to display");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:#FFCC99;border: 1px solid #ccc'>");                        
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("----");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
+                    }
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'> Missing Dependent Components in Target Instance</th><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Components Details</th></tr>");
+
+                    if (componentDependency.Count > 0)
+                    {
+                        foreach (var comDependency in componentDependency)
+                        {
+                            CheckTarget = this.CheckDependency(targetserviceProxy, comDependency, sol, CheckTarget, serviceProxy);
+                        }
+                    }
+                    else
+                    {
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");                       
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("All dependent components are present in target instance");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");                       
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");                      
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("----");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
                     }
 
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
-                    this.ImportSolution(targetserviceProxy, solutionFile, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
+
+                    if (!CheckTarget)
+                    {
+                        this.ImportSolution(targetserviceProxy, solutionFile, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
+                    }
+                    else
+                    {
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Target Instance missing Required components.  <br> ");
+                        solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueMissingComponents;
+                        solutionFile.Solution["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
+                        Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(serviceProxy, solutionFile.Solution);
+                        solutionFile.Update();
+                    }
                 }
             }
         }
@@ -645,26 +692,24 @@ namespace CrmSolution
         /// <param name="serviceProxy">service proxy</param>
         /// <param name="masterSolutionId">master solution id</param>
         /// <returns>returns components dependency entity collection</returns>
-        private List<EntityCollection> GetDependentComponents(OrganizationServiceProxy serviceProxy, Guid masterSolutionId)
+        private List<EntityCollection> GetDependentComponents(OrganizationServiceProxy serviceProxy, Guid masterSolutionId, string solutionUniqueName)
         {
-            List<EntityCollection> dependencyComponents = new List<EntityCollection>();
-            var solutionComponents = this.RetrieveComponentsFromSolutions(serviceProxy, masterSolutionId);
+            List<EntityCollection> dependentDetails = new List<EntityCollection>();
 
-            foreach (var component in solutionComponents)
+            RetrieveMissingDependenciesRequest missingDependenciesRequest = new RetrieveMissingDependenciesRequest
             {
-                RetrieveDependentComponentsRequest dependentComponentsRequest =
-                             new RetrieveDependentComponentsRequest
-                             {
-                                 ComponentType = component.GetAttributeValue<OptionSetValue>("componenttype").Value,
-                                 ObjectId = component.GetAttributeValue<Guid>("objectid")
-                             };
-                RetrieveDependentComponentsResponse dependentComponentsResponse =
-                    (RetrieveDependentComponentsResponse)serviceProxy.Execute(dependentComponentsRequest);
-                Console.WriteLine("Found {0} dependencies for Component {1} of type {2}", dependentComponentsResponse.EntityCollection.Entities.Count, component.GetAttributeValue<OptionSetValue>("componenttype").Value, component.GetAttributeValue<Guid>("objectid"));
-                dependencyComponents.Add(dependentComponentsResponse.EntityCollection);
+                SolutionUniqueName = solutionUniqueName
+            };
+
+            RetrieveMissingDependenciesResponse missingDependenciesResponse = (RetrieveMissingDependenciesResponse)serviceProxy.Execute(missingDependenciesRequest);
+
+            if (missingDependenciesResponse != null && missingDependenciesResponse.EntityCollection != null && missingDependenciesResponse.EntityCollection.Entities.Count > 0)
+            {
+                dependentDetails.Add(missingDependenciesResponse.EntityCollection);
+
             }
 
-            return dependencyComponents;
+            return dependentDetails;
         }
 
         /// <summary>
@@ -696,26 +741,265 @@ namespace CrmSolution
         /// <param name="serviceProxy">service proxy</param>
         /// <param name="dependencyComponents">dependency components</param>
         /// <param name="sol">Solution Manager</param>
-        private void CheckDependency(OrganizationServiceProxy serviceProxy, EntityCollection dependencyComponents, SolutionManager sol)
+        private bool CheckDependency(OrganizationServiceProxy serviceProxy, EntityCollection dependencyComponents, SolutionManager sol, bool checkTarget, OrganizationServiceProxy sourceServiceProxy)
         {
-            QueryExpression retrieveSolutionsQuery = new QueryExpression("solution");
-            retrieveSolutionsQuery.ColumnSet = new ColumnSet("friendlyname", "solutionid");
-            retrieveSolutionsQuery.Criteria.AddCondition("friendlyname", ConditionOperator.Equal, "Default Solution");
-            EntityCollection solutions = serviceProxy.RetrieveMultiple(retrieveSolutionsQuery);
-            var solution = solutions[0];
 
-            QueryExpression retrieveSolutionComponentsQuery = new QueryExpression("solutioncomponent");
-            retrieveSolutionComponentsQuery.ColumnSet = new ColumnSet("componenttype", "objectid");
-            retrieveSolutionComponentsQuery.Criteria.AddCondition("solutionid", ConditionOperator.Equal, solution.Attributes["solutionid"]);
-            EntityCollection solutionComponents = serviceProxy.RetrieveMultiple(retrieveSolutionComponentsQuery);
-
-            foreach (var component in dependencyComponents.Entities.Except(solutionComponents.Entities))
+            foreach (Entity component in dependencyComponents.Entities)
             {
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:pink;border: 1px solid #ccc'>");
-                sol.GetComponentDetails(null, null, component, ((OptionSetValue)component.Attributes["dependentcomponenttype"]).Value, (Guid)component.Attributes["dependentcomponentobjectid"], "dependentcomponenttype");
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                try
+                {
+                    GetComponentDetails(component, ((OptionSetValue)component.Attributes["requiredcomponenttype"]).Value, (Guid)component.Attributes["requiredcomponentobjectid"], "requiredcomponenttype", serviceProxy, sourceServiceProxy);
+                }
+                catch (Exception ex)
+                {
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");
+                    Console.WriteLine("The below component was not present in Target");
+                    sol.GetComponentDetails(null, null, component, ((OptionSetValue)component.Attributes["dependentcomponenttype"]).Value, (Guid)component.Attributes["dependentcomponentobjectid"], "dependentcomponenttype");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");
+                    sol.GetComponentDetails(null, null, component, ((OptionSetValue)component.Attributes["requiredcomponenttype"]).Value, (Guid)component.Attributes["requiredcomponentobjectid"], "requiredcomponenttype");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
+                    checkTarget = true;
+                }
+
+            }
+            return checkTarget;
+        }
+
+        public void QueryTargetComponents(OrganizationServiceProxy serviceProxy, RetrieveResponse retrieveResponse, string type)
+        {
+            var qe = new QueryExpression("plugintype")
+            {
+                ColumnSet = new ColumnSet(true),
+                Criteria = new FilterExpression
+                {
+                    Conditions =
+                                {
+                                    new ConditionExpression("name", ConditionOperator.Equal, retrieveResponse.Entity.Attributes["name"].ToString()),
+                                }
+                }
+            };
+            EntityCollection solutionComponents = serviceProxy.RetrieveMultiple(qe);
+            Entity solutionCom = solutionComponents.Entities[0];
+
+        }
+        public void GetComponentDetails(Entity component, int componentType, Guid componentId, string componentDetails, OrganizationServiceProxy serviceProxy, OrganizationServiceProxy sourceServiceProxy)
+        {
+            switch (componentType)
+            {
+                case Constants.Entity:
+                    var entityReq = new RetrieveEntityRequest();
+                    entityReq.MetadataId = componentId;
+                    var retrievedEntity = (RetrieveEntityResponse)sourceServiceProxy.Execute(entityReq);
+
+                    var targetEntityReq = new RetrieveEntityRequest();
+                    targetEntityReq.LogicalName = retrievedEntity.EntityMetadata.LogicalName;
+                    var targetRetrievedEntity = (RetrieveEntityResponse)serviceProxy.Execute(targetEntityReq);
+                    break;
+
+                case Constants.WebResources:
+                    var webresource = new RetrieveRequest();
+                    webresource.Target = new EntityReference("webresource", componentId);
+                    webresource.ColumnSet = new ColumnSet(true);
+                    var retrievedWebresource = (RetrieveResponse)sourceServiceProxy.Execute(webresource);
+                    QueryTargetComponents(serviceProxy, retrievedWebresource, "webresource");
+                    break;
+
+                case Constants.Attribute:
+                    var attributeReq = new RetrieveAttributeRequest();
+                    attributeReq.MetadataId = componentId;
+                    var retrievedAttribute = (RetrieveAttributeResponse)sourceServiceProxy.Execute(attributeReq);
+                    var targetAttributeReq = new RetrieveAttributeRequest();
+                    targetAttributeReq.EntityLogicalName = retrievedAttribute.AttributeMetadata.EntityLogicalName;
+                    targetAttributeReq.LogicalName = retrievedAttribute.AttributeMetadata.LogicalName;
+                    var targetRetrievedAttribute = (RetrieveAttributeResponse)serviceProxy.Execute(targetAttributeReq);
+                    break;
+
+                case Constants.Relationship:
+                    var relationshipReq = new RetrieveRelationshipRequest();
+                    relationshipReq.MetadataId = componentId;
+                    var retrievedrelationshipReq = (RetrieveRelationshipResponse)sourceServiceProxy.Execute(relationshipReq);
+
+                    var targetRelationshipReq = new RetrieveRelationshipRequest();
+                    targetRelationshipReq.Name = retrievedrelationshipReq.RelationshipMetadata.SchemaName;
+                    var targetRetrievedrelationshipReq = (RetrieveRelationshipResponse)serviceProxy.Execute(targetRelationshipReq);
+                    break;
+
+                case Constants.DisplayString:
+                    var displayStringRequest = new RetrieveRequest();
+                    displayStringRequest.Target = new EntityReference("displaystring", componentId);
+                    displayStringRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedDisplayString = (RetrieveResponse)sourceServiceProxy.Execute(displayStringRequest);
+                    QueryTargetComponents(serviceProxy, retrievedDisplayString, "displaystring");
+                    break;
+
+                case Constants.SavedQuery:
+                    var savedQueryRequest = new RetrieveRequest();
+                    savedQueryRequest.Target = new EntityReference("savedquery", componentId);
+                    savedQueryRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedSavedQuery = (RetrieveResponse)sourceServiceProxy.Execute(savedQueryRequest);
+                    QueryTargetComponents(serviceProxy, retrievedSavedQuery, "savedquery");
+                    break;
+
+                case Constants.SavedQueryVisualization:
+                    var savedQueryVisualizationRequest = new RetrieveRequest();
+                    savedQueryVisualizationRequest.Target = new EntityReference("savedqueryvisualization", componentId);
+                    savedQueryVisualizationRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedSavedQueryVisualization = (RetrieveResponse)sourceServiceProxy.Execute(savedQueryVisualizationRequest);
+                    QueryTargetComponents(serviceProxy, retrievedSavedQueryVisualization, "savedqueryvisualization");
+                    break;
+
+                case Constants.SystemForm:
+                    var systemFormRequest = new RetrieveRequest();
+                    systemFormRequest.Target = new EntityReference("systemform", componentId);
+                    systemFormRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedSystemForm = (RetrieveResponse)sourceServiceProxy.Execute(systemFormRequest);
+                    QueryTargetComponents(serviceProxy, retrievedSystemForm, "systemform");
+                    break;
+
+                case Constants.HierarchyRule:
+                    var hierarchyRuleRequest = new RetrieveRequest();
+                    hierarchyRuleRequest.Target = new EntityReference("hierarchyrule", componentId);
+                    hierarchyRuleRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedHierarchyRule = (RetrieveResponse)sourceServiceProxy.Execute(hierarchyRuleRequest);
+                    QueryTargetComponents(serviceProxy, retrievedHierarchyRule, "hierarchyrule");
+                    break;
+
+                case Constants.SiteMap:
+                    var siteMapRequest = new RetrieveRequest();
+                    siteMapRequest.Target = new EntityReference("sitemap", componentId);
+                    siteMapRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedSiteMap = (RetrieveResponse)sourceServiceProxy.Execute(siteMapRequest);
+                    QueryTargetComponents(serviceProxy, retrievedSiteMap, "sitemap");
+                    break;
+
+                case Constants.PluginAssembly:
+                    var pluginAssemblyRequest = new RetrieveRequest();
+                    pluginAssemblyRequest.Target = new EntityReference("pluginassembly", componentId);
+                    pluginAssemblyRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedPluginAssembly = (RetrieveResponse)sourceServiceProxy.Execute(pluginAssemblyRequest);
+                    QueryTargetComponents(serviceProxy, retrievedPluginAssembly, "pluginassembly");
+                    break;
+
+                case Constants.PluginType:
+                    var pluginTypeRequest = new RetrieveRequest();
+                    pluginTypeRequest.Target = new EntityReference("plugintype", componentId);
+                    pluginTypeRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedPluginTypeRequest = (RetrieveResponse)sourceServiceProxy.Execute(pluginTypeRequest);
+                    QueryTargetComponents(serviceProxy, retrievedPluginTypeRequest, "plugintype");
+                    break;
+
+                case Constants.SDKMessageProcessingStep:
+                    var sdkMessageProcessingStepRequest = new RetrieveRequest();
+                    sdkMessageProcessingStepRequest.Target = new EntityReference("sdkmessageprocessingstep", componentId);
+                    sdkMessageProcessingStepRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedSDKMessageProcessingStep = (RetrieveResponse)sourceServiceProxy.Execute(sdkMessageProcessingStepRequest);
+                    QueryTargetComponents(serviceProxy, retrievedSDKMessageProcessingStep, "sdkmessageprocessingstep");
+                    break;
+
+                case Constants.ServiceEndpoint:
+                    var serviceEndpointRequest = new RetrieveRequest();
+                    serviceEndpointRequest.Target = new EntityReference("serviceendpoint", componentId);
+                    serviceEndpointRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedServiceEndpoint = (RetrieveResponse)sourceServiceProxy.Execute(serviceEndpointRequest);
+                    QueryTargetComponents(serviceProxy, retrievedServiceEndpoint, "serviceendpoint");
+                    break;
+
+                case Constants.Report:
+                    var reportRequest = new RetrieveRequest();
+                    reportRequest.Target = new EntityReference("report", componentId);
+                    reportRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedReport = (RetrieveResponse)sourceServiceProxy.Execute(reportRequest);
+                    QueryTargetComponents(serviceProxy, retrievedReport, "report");
+                    break;
+
+                case Constants.Role:
+                    var roleRequest = new RetrieveRequest();
+                    roleRequest.Target = new EntityReference("role", componentId);
+                    roleRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedRole = (RetrieveResponse)sourceServiceProxy.Execute(roleRequest);
+                    QueryTargetComponents(serviceProxy, retrievedRole, "role");
+                    break;
+
+                case Constants.FieldSecurityProfile:
+                    var fieldSecurityProfileRequest = new RetrieveRequest();
+                    fieldSecurityProfileRequest.Target = new EntityReference("fieldsecurityprofile", componentId);
+                    fieldSecurityProfileRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedFieldSecurityProfile = (RetrieveResponse)sourceServiceProxy.Execute(fieldSecurityProfileRequest);
+                    QueryTargetComponents(serviceProxy, retrievedFieldSecurityProfile, "fieldsecurityprofile");
+                    break;
+
+                case Constants.ConnectionRole:
+                    var connectionRoleRequest = new RetrieveRequest();
+                    connectionRoleRequest.Target = new EntityReference("connectionrole", componentId);
+                    connectionRoleRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedConnectionRole = (RetrieveResponse)sourceServiceProxy.Execute(connectionRoleRequest);
+                    QueryTargetComponents(serviceProxy, retrievedConnectionRole, "connectionrole");
+                    break;
+
+                case Constants.Workflow:
+                    var workflowRequest = new RetrieveRequest();
+                    workflowRequest.Target = new EntityReference("workflow", componentId);
+                    workflowRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedWorkflow = (RetrieveResponse)sourceServiceProxy.Execute(workflowRequest);
+                    QueryTargetComponents(serviceProxy, retrievedWorkflow, "workflow");
+                    break;
+
+                case Constants.KBArticleTemplate:
+                    var articleTemplateRequest = new RetrieveRequest();
+                    articleTemplateRequest.Target = new EntityReference("kbarticletemplate", componentId);
+                    articleTemplateRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedKBArticleTemplate = (RetrieveResponse)sourceServiceProxy.Execute(articleTemplateRequest);
+                    QueryTargetComponents(serviceProxy, retrievedKBArticleTemplate, "kbarticletemplate");
+                    break;
+
+                case Constants.MailMergeTemplate:
+                    var mailMergeTemplateRequest = new RetrieveRequest();
+                    mailMergeTemplateRequest.Target = new EntityReference("mailmergetemplate", componentId);
+                    mailMergeTemplateRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedMailMergeTemplate = (RetrieveResponse)sourceServiceProxy.Execute(mailMergeTemplateRequest);
+                    QueryTargetComponents(serviceProxy, retrievedMailMergeTemplate, "mailmergetemplate");
+                    break;
+
+                case Constants.ContractTemplate:
+                    var contractTemplateRequest = new RetrieveRequest();
+                    contractTemplateRequest.Target = new EntityReference("contracttemplate", componentId);
+                    contractTemplateRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedContractTemplate = (RetrieveResponse)sourceServiceProxy.Execute(contractTemplateRequest);
+                    QueryTargetComponents(serviceProxy, retrievedContractTemplate, "contracttemplate");
+                    break;
+
+                case Constants.EmailTemplate:
+                    var emailTemplateRequest = new RetrieveRequest();
+                    emailTemplateRequest.Target = new EntityReference("template", componentId);
+                    emailTemplateRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedEmailTemplate = (RetrieveResponse)sourceServiceProxy.Execute(emailTemplateRequest);
+                    QueryTargetComponents(serviceProxy, retrievedEmailTemplate, "template");
+                    break;
+
+                case Constants.SLA:
+                    var slaRequest = new RetrieveRequest();
+                    slaRequest.Target = new EntityReference("sla", componentId);
+                    slaRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedSLA = (RetrieveResponse)sourceServiceProxy.Execute(slaRequest);
+                    QueryTargetComponents(serviceProxy, retrievedSLA, "sla");
+                    break;
+
+                case Constants.ConvertRule:
+                    var convertRuleRequest = new RetrieveRequest();
+                    convertRuleRequest.Target = new EntityReference("convertrule", componentId);
+                    convertRuleRequest.ColumnSet = new ColumnSet(true);
+                    var retrievedConvertRule = (RetrieveResponse)sourceServiceProxy.Execute(convertRuleRequest);
+                    QueryTargetComponents(serviceProxy, retrievedConvertRule, "convertrule");
+                    break;
+
+                default:
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Unable to copy component type: " + component.FormattedValues[componentDetails] + " and objectID: " + componentId.ToString());
+                    break;
             }
         }
+
     }
 }

@@ -195,12 +195,12 @@ namespace CrmSolution
         public const string BranchName = "BranchName";
 
         /// <summary>
-        ///  powerapps checker azure client appid
+        ///  power apps checker azure client app id
         /// </summary>
         public const string PowerAppsCheckerAzureClientAppId = "PowerAppsCheckerAzureClientAppId";
 
         /// <summary>
-        ///  power apps checker azure tenantid
+        ///  power apps checker azure tenant id
         /// </summary>
         public const string PowerAppsCheckerAzureTenantId = "PowerAppsCheckerAzureTenantId";
 

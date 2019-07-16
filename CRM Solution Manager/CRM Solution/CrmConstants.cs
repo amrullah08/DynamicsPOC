@@ -55,12 +55,12 @@ namespace CrmSolution
         private OrganizationServiceProxy serviceProxy;
 
         /// <summary>
-        /// powerapps checker azure client appid
+        /// power apps checker azure client app id
         /// </summary>
         private string powerAppsCheckerAzureClientAppId;
 
         /// <summary>
-        /// powerapps checker azure tenantid
+        /// power apps checker azure tenant id
         /// </summary>
         private string powerAppsCheckerAzureTenantId;
 
@@ -188,7 +188,7 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Gets or sets powerapps checker azure client appid
+        /// Gets or sets power apps checker azure client app id
         /// </summary>
         public string PowerAppsCheckerAzureClientAppId
         {
@@ -203,7 +203,7 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Gets or sets power apps checker azure tenantid
+        /// Gets or sets power apps checker azure tenant id
         /// </summary>
         public string PowerAppsCheckerAzureTenantId
         {

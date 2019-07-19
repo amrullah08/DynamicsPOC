@@ -113,7 +113,6 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
 
             if (differentComponents != null)
             {
-
                 foreach (var target in copySettings.TargetSolutions)
                 {
                     foreach (var componentdetails in differentComponents)
@@ -126,8 +125,6 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
                     }
                 }
-
-
             }
             else
             {
@@ -138,6 +135,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                 Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
             }
+
             Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
             solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemMergingSuccessfulStatus;
             solutionFileInfo.Update();
@@ -255,7 +253,6 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedPluginTypeRequest = (RetrieveResponse)this.service.Execute(pluginTypeRequest);
                     this.PrintLog(retrievedPluginTypeRequest.Entity.Contains("name") ? retrievedPluginTypeRequest.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     break;
-
 
                 case Constants.SDKMessageProcessingStep:
                     var sdkMessageProcessingStepRequest = new RetrieveRequest();
@@ -450,6 +447,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                 Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
             }
+
             return components;
         }
 
@@ -470,6 +468,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                 Console.WriteLine("Component Id: " + componentId);
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Component Id: " + componentId + "<br>");
             }
+
             if (!string.IsNullOrEmpty(sourceSolution))
             {
                 Console.WriteLine("Source Solution: " + sourceSolution);
@@ -481,10 +480,9 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                 Console.WriteLine("Target Solution: " + targetSolution);
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Target Solution: " + targetSolution + "<br>");
             }
+
             Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Component Type: " + componentType + "<br>");
             Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Component Name: " + componentName + "<br>");
-
-
         }
 
         /// <summary>

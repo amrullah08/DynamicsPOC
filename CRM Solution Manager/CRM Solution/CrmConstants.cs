@@ -55,6 +55,16 @@ namespace CrmSolution
         private OrganizationServiceProxy serviceProxy;
 
         /// <summary>
+        /// power apps checker azure client app id
+        /// </summary>
+        private string powerAppsCheckerAzureClientAppId;
+
+        /// <summary>
+        /// power apps checker azure tenant id
+        /// </summary>
+        private string powerAppsCheckerAzureTenantId;
+
+        /// <summary>
         /// Gets organization service url
         /// </summary>
         public string OrgServiceUrl
@@ -178,6 +188,36 @@ namespace CrmSolution
         }
 
         /// <summary>
+        /// Gets or sets power apps checker azure client app id
+        /// </summary>
+        public string PowerAppsCheckerAzureClientAppId
+        {
+            get
+            {
+                return this.powerAppsCheckerAzureClientAppId;
+            }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets power apps checker azure tenant id
+        /// </summary>
+        public string PowerAppsCheckerAzureTenantId
+        {
+            get
+            {
+                return this.powerAppsCheckerAzureTenantId;
+            }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
         /// Method returns configuration settings entity collection list
         /// </summary>
         /// <returns>returns entity collection</returns>
@@ -218,6 +258,12 @@ namespace CrmSolution
                         break;
                     case Constants.SleepTimeoutInMillis:
                         this.sleepTimeoutInMillis = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.PowerAppsCheckerAzureClientAppId:
+                        this.powerAppsCheckerAzureClientAppId = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.PowerAppsCheckerAzureTenantId:
+                        this.powerAppsCheckerAzureTenantId = setting.GetAttributeValue<string>("syed_value");
                         break;
                     default:
                         break;

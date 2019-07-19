@@ -10,8 +10,9 @@ namespace CrmSolution
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
+    using System.Management.Automation;
     using System.ServiceModel.Description;
+    using System.Text;
     using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Client;
@@ -452,6 +453,15 @@ namespace CrmSolution
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportSuccessful;
             solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
             solutionFile.Update();
+            if (!string.IsNullOrEmpty(Singleton.CrmConstantsInstance.PowerAppsCheckerAzureClientAppId) && !string.IsNullOrEmpty(Singleton.CrmConstantsInstance.PowerAppsCheckerAzureTenantId))
+            {
+                this.SolutionChecker(solutionFile);
+            }
+            else
+            {
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("Please provide azure client app id and tenant id to analyze solution");
+            }
+
             this.ImportSolutionToTargetInstance(serviceProxy, solutionFile);
 
             if (solutionFile.CheckInSolution)
@@ -511,12 +521,11 @@ namespace CrmSolution
         {
             Entity sourceControl = solutionFile.Solution;
             EntityCollection deploymentInstance = this.FetchDeplopymentInstance(serviceProxy, sourceControl.Id);
-            var CheckTarget = false;
+            var checkTarget = false;
             if (deploymentInstance.Entities.Count > 0)
             {
                 foreach (Entity instance in deploymentInstance.Entities)
                 {
-
                     ClientCredentials clientCredentials = new ClientCredentials();
                     clientCredentials.UserName.UserName = instance.Attributes["syed_name"].ToString();
                     clientCredentials.UserName.Password = this.DecryptString(instance.Attributes["syed_password"].ToString());
@@ -526,7 +535,6 @@ namespace CrmSolution
                     OrganizationServiceProxy targetserviceProxy = new OrganizationServiceProxy(new Uri(instance.Attributes["syed_instanceurl"].ToString()), null, clientCredentials, null);
                     targetserviceProxy.EnableProxyTypes();
                     List<EntityCollection> componentDependency = this.GetDependentComponents(serviceProxy, new Guid(solutionFile.MasterSolutionId), solutionFile.SolutionUniqueName);
-
 
                     SolutionManager sol = new SolutionManager(serviceProxy);
 
@@ -550,7 +558,6 @@ namespace CrmSolution
                                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
                                 }
                             }
-
                         }
                     }
                     else
@@ -559,11 +566,12 @@ namespace CrmSolution
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:#FFCC99;border: 1px solid #ccc'>");
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("There is no missing dependent component to display");
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
-                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:#FFCC99;border: 1px solid #ccc'>");                        
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:#FFCC99;border: 1px solid #ccc'>");
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("----");
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
                     }
+
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'> Missing Dependent Components in Target Instance</th><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Components Details</th></tr>");
 
@@ -571,16 +579,16 @@ namespace CrmSolution
                     {
                         foreach (var comDependency in componentDependency)
                         {
-                            CheckTarget = this.CheckDependency(targetserviceProxy, comDependency, sol, CheckTarget, serviceProxy);
+                            checkTarget = this.CheckDependency(targetserviceProxy, comDependency, sol, checkTarget, serviceProxy);
                         }
                     }
                     else
                     {
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
-                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");                       
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("All dependent components are present in target instance");
-                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");                       
-                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");                      
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("----");
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
@@ -588,7 +596,7 @@ namespace CrmSolution
 
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
 
-                    if (!CheckTarget)
+                    if (!checkTarget)
                     {
                         this.ImportSolution(targetserviceProxy, solutionFile, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
                     }
@@ -691,6 +699,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">service proxy</param>
         /// <param name="masterSolutionId">master solution id</param>
+        /// <param name="solutionUniqueName">solution unique name</param>
         /// <returns>returns components dependency entity collection</returns>
         private List<EntityCollection> GetDependentComponents(OrganizationServiceProxy serviceProxy, Guid masterSolutionId, string solutionUniqueName)
         {
@@ -706,7 +715,6 @@ namespace CrmSolution
             if (missingDependenciesResponse != null && missingDependenciesResponse.EntityCollection != null && missingDependenciesResponse.EntityCollection.Entities.Count > 0)
             {
                 dependentDetails.Add(missingDependenciesResponse.EntityCollection);
-
             }
 
             return dependentDetails;
@@ -740,35 +748,44 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">service proxy</param>
         /// <param name="dependencyComponents">dependency components</param>
-        /// <param name="sol">Solution Manager</param>
-        private bool CheckDependency(OrganizationServiceProxy serviceProxy, EntityCollection dependencyComponents, SolutionManager sol, bool checkTarget, OrganizationServiceProxy sourceServiceProxy)
+        /// <param name="solutionManager">solution manager</param>
+        /// <param name="checkTarget">check target</param>
+        /// <param name="sourceServiceProxy">source service proxy</param>
+        /// <returns>returns boolean value</returns>
+        private bool CheckDependency(OrganizationServiceProxy serviceProxy, EntityCollection dependencyComponents, SolutionManager solutionManager, bool checkTarget, OrganizationServiceProxy sourceServiceProxy)
         {
-
             foreach (Entity component in dependencyComponents.Entities)
             {
                 try
                 {
-                    GetComponentDetails(component, ((OptionSetValue)component.Attributes["requiredcomponenttype"]).Value, (Guid)component.Attributes["requiredcomponentobjectid"], "requiredcomponenttype", serviceProxy, sourceServiceProxy);
+                    this.GetComponentDetails(component, ((OptionSetValue)component.Attributes["requiredcomponenttype"]).Value, (Guid)component.Attributes["requiredcomponentobjectid"], "requiredcomponenttype", serviceProxy, sourceServiceProxy);
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");
                     Console.WriteLine("The below component was not present in Target");
-                    sol.GetComponentDetails(null, null, component, ((OptionSetValue)component.Attributes["dependentcomponenttype"]).Value, (Guid)component.Attributes["dependentcomponentobjectid"], "dependentcomponenttype");
+                    solutionManager.GetComponentDetails(null, null, component, ((OptionSetValue)component.Attributes["dependentcomponenttype"]).Value, (Guid)component.Attributes["dependentcomponentobjectid"], "dependentcomponenttype");
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");
-                    sol.GetComponentDetails(null, null, component, ((OptionSetValue)component.Attributes["requiredcomponenttype"]).Value, (Guid)component.Attributes["requiredcomponentobjectid"], "requiredcomponenttype");
+                    solutionManager.GetComponentDetails(null, null, component, ((OptionSetValue)component.Attributes["requiredcomponenttype"]).Value, (Guid)component.Attributes["requiredcomponentobjectid"], "requiredcomponenttype");
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
                     checkTarget = true;
                 }
-
             }
+
             return checkTarget;
         }
 
-        public void QueryTargetComponents(OrganizationServiceProxy serviceProxy, RetrieveResponse retrieveResponse, string type)
+        /// <summary>
+        /// Method retrieves target components
+        /// </summary>
+        /// <param name="serviceProxy">service proxy</param>
+        /// <param name="retrieveResponse">retrieve response</param>
+        /// <param name="type">type</param>
+        private void QueryTargetComponents(OrganizationServiceProxy serviceProxy, RetrieveResponse retrieveResponse, string type)
         {
             var qe = new QueryExpression("plugintype")
             {
@@ -783,9 +800,18 @@ namespace CrmSolution
             };
             EntityCollection solutionComponents = serviceProxy.RetrieveMultiple(qe);
             Entity solutionCom = solutionComponents.Entities[0];
-
         }
-        public void GetComponentDetails(Entity component, int componentType, Guid componentId, string componentDetails, OrganizationServiceProxy serviceProxy, OrganizationServiceProxy sourceServiceProxy)
+
+        /// <summary>
+        /// Method gets component details
+        /// </summary>
+        /// <param name="component">component</param>
+        /// <param name="componentType">component type</param>
+        /// <param name="componentId">component id</param>
+        /// <param name="componentDetails">component details</param>
+        /// <param name="serviceProxy">service proxy</param>
+        /// <param name="sourceServiceProxy">source service proxy</param>
+        private void GetComponentDetails(Entity component, int componentType, Guid componentId, string componentDetails, OrganizationServiceProxy serviceProxy, OrganizationServiceProxy sourceServiceProxy)
         {
             switch (componentType)
             {
@@ -804,7 +830,7 @@ namespace CrmSolution
                     webresource.Target = new EntityReference("webresource", componentId);
                     webresource.ColumnSet = new ColumnSet(true);
                     var retrievedWebresource = (RetrieveResponse)sourceServiceProxy.Execute(webresource);
-                    QueryTargetComponents(serviceProxy, retrievedWebresource, "webresource");
+                    this.QueryTargetComponents(serviceProxy, retrievedWebresource, "webresource");
                     break;
 
                 case Constants.Attribute:
@@ -832,7 +858,7 @@ namespace CrmSolution
                     displayStringRequest.Target = new EntityReference("displaystring", componentId);
                     displayStringRequest.ColumnSet = new ColumnSet(true);
                     var retrievedDisplayString = (RetrieveResponse)sourceServiceProxy.Execute(displayStringRequest);
-                    QueryTargetComponents(serviceProxy, retrievedDisplayString, "displaystring");
+                    this.QueryTargetComponents(serviceProxy, retrievedDisplayString, "displaystring");
                     break;
 
                 case Constants.SavedQuery:
@@ -840,7 +866,7 @@ namespace CrmSolution
                     savedQueryRequest.Target = new EntityReference("savedquery", componentId);
                     savedQueryRequest.ColumnSet = new ColumnSet(true);
                     var retrievedSavedQuery = (RetrieveResponse)sourceServiceProxy.Execute(savedQueryRequest);
-                    QueryTargetComponents(serviceProxy, retrievedSavedQuery, "savedquery");
+                    this.QueryTargetComponents(serviceProxy, retrievedSavedQuery, "savedquery");
                     break;
 
                 case Constants.SavedQueryVisualization:
@@ -848,7 +874,7 @@ namespace CrmSolution
                     savedQueryVisualizationRequest.Target = new EntityReference("savedqueryvisualization", componentId);
                     savedQueryVisualizationRequest.ColumnSet = new ColumnSet(true);
                     var retrievedSavedQueryVisualization = (RetrieveResponse)sourceServiceProxy.Execute(savedQueryVisualizationRequest);
-                    QueryTargetComponents(serviceProxy, retrievedSavedQueryVisualization, "savedqueryvisualization");
+                    this.QueryTargetComponents(serviceProxy, retrievedSavedQueryVisualization, "savedqueryvisualization");
                     break;
 
                 case Constants.SystemForm:
@@ -856,7 +882,7 @@ namespace CrmSolution
                     systemFormRequest.Target = new EntityReference("systemform", componentId);
                     systemFormRequest.ColumnSet = new ColumnSet(true);
                     var retrievedSystemForm = (RetrieveResponse)sourceServiceProxy.Execute(systemFormRequest);
-                    QueryTargetComponents(serviceProxy, retrievedSystemForm, "systemform");
+                    this.QueryTargetComponents(serviceProxy, retrievedSystemForm, "systemform");
                     break;
 
                 case Constants.HierarchyRule:
@@ -864,7 +890,7 @@ namespace CrmSolution
                     hierarchyRuleRequest.Target = new EntityReference("hierarchyrule", componentId);
                     hierarchyRuleRequest.ColumnSet = new ColumnSet(true);
                     var retrievedHierarchyRule = (RetrieveResponse)sourceServiceProxy.Execute(hierarchyRuleRequest);
-                    QueryTargetComponents(serviceProxy, retrievedHierarchyRule, "hierarchyrule");
+                    this.QueryTargetComponents(serviceProxy, retrievedHierarchyRule, "hierarchyrule");
                     break;
 
                 case Constants.SiteMap:
@@ -872,7 +898,7 @@ namespace CrmSolution
                     siteMapRequest.Target = new EntityReference("sitemap", componentId);
                     siteMapRequest.ColumnSet = new ColumnSet(true);
                     var retrievedSiteMap = (RetrieveResponse)sourceServiceProxy.Execute(siteMapRequest);
-                    QueryTargetComponents(serviceProxy, retrievedSiteMap, "sitemap");
+                    this.QueryTargetComponents(serviceProxy, retrievedSiteMap, "sitemap");
                     break;
 
                 case Constants.PluginAssembly:
@@ -880,7 +906,7 @@ namespace CrmSolution
                     pluginAssemblyRequest.Target = new EntityReference("pluginassembly", componentId);
                     pluginAssemblyRequest.ColumnSet = new ColumnSet(true);
                     var retrievedPluginAssembly = (RetrieveResponse)sourceServiceProxy.Execute(pluginAssemblyRequest);
-                    QueryTargetComponents(serviceProxy, retrievedPluginAssembly, "pluginassembly");
+                    this.QueryTargetComponents(serviceProxy, retrievedPluginAssembly, "pluginassembly");
                     break;
 
                 case Constants.PluginType:
@@ -888,7 +914,7 @@ namespace CrmSolution
                     pluginTypeRequest.Target = new EntityReference("plugintype", componentId);
                     pluginTypeRequest.ColumnSet = new ColumnSet(true);
                     var retrievedPluginTypeRequest = (RetrieveResponse)sourceServiceProxy.Execute(pluginTypeRequest);
-                    QueryTargetComponents(serviceProxy, retrievedPluginTypeRequest, "plugintype");
+                    this.QueryTargetComponents(serviceProxy, retrievedPluginTypeRequest, "plugintype");
                     break;
 
                 case Constants.SDKMessageProcessingStep:
@@ -896,7 +922,7 @@ namespace CrmSolution
                     sdkMessageProcessingStepRequest.Target = new EntityReference("sdkmessageprocessingstep", componentId);
                     sdkMessageProcessingStepRequest.ColumnSet = new ColumnSet(true);
                     var retrievedSDKMessageProcessingStep = (RetrieveResponse)sourceServiceProxy.Execute(sdkMessageProcessingStepRequest);
-                    QueryTargetComponents(serviceProxy, retrievedSDKMessageProcessingStep, "sdkmessageprocessingstep");
+                    this.QueryTargetComponents(serviceProxy, retrievedSDKMessageProcessingStep, "sdkmessageprocessingstep");
                     break;
 
                 case Constants.ServiceEndpoint:
@@ -904,7 +930,7 @@ namespace CrmSolution
                     serviceEndpointRequest.Target = new EntityReference("serviceendpoint", componentId);
                     serviceEndpointRequest.ColumnSet = new ColumnSet(true);
                     var retrievedServiceEndpoint = (RetrieveResponse)sourceServiceProxy.Execute(serviceEndpointRequest);
-                    QueryTargetComponents(serviceProxy, retrievedServiceEndpoint, "serviceendpoint");
+                    this.QueryTargetComponents(serviceProxy, retrievedServiceEndpoint, "serviceendpoint");
                     break;
 
                 case Constants.Report:
@@ -912,7 +938,7 @@ namespace CrmSolution
                     reportRequest.Target = new EntityReference("report", componentId);
                     reportRequest.ColumnSet = new ColumnSet(true);
                     var retrievedReport = (RetrieveResponse)sourceServiceProxy.Execute(reportRequest);
-                    QueryTargetComponents(serviceProxy, retrievedReport, "report");
+                    this.QueryTargetComponents(serviceProxy, retrievedReport, "report");
                     break;
 
                 case Constants.Role:
@@ -920,7 +946,7 @@ namespace CrmSolution
                     roleRequest.Target = new EntityReference("role", componentId);
                     roleRequest.ColumnSet = new ColumnSet(true);
                     var retrievedRole = (RetrieveResponse)sourceServiceProxy.Execute(roleRequest);
-                    QueryTargetComponents(serviceProxy, retrievedRole, "role");
+                    this.QueryTargetComponents(serviceProxy, retrievedRole, "role");
                     break;
 
                 case Constants.FieldSecurityProfile:
@@ -928,7 +954,7 @@ namespace CrmSolution
                     fieldSecurityProfileRequest.Target = new EntityReference("fieldsecurityprofile", componentId);
                     fieldSecurityProfileRequest.ColumnSet = new ColumnSet(true);
                     var retrievedFieldSecurityProfile = (RetrieveResponse)sourceServiceProxy.Execute(fieldSecurityProfileRequest);
-                    QueryTargetComponents(serviceProxy, retrievedFieldSecurityProfile, "fieldsecurityprofile");
+                    this.QueryTargetComponents(serviceProxy, retrievedFieldSecurityProfile, "fieldsecurityprofile");
                     break;
 
                 case Constants.ConnectionRole:
@@ -936,7 +962,7 @@ namespace CrmSolution
                     connectionRoleRequest.Target = new EntityReference("connectionrole", componentId);
                     connectionRoleRequest.ColumnSet = new ColumnSet(true);
                     var retrievedConnectionRole = (RetrieveResponse)sourceServiceProxy.Execute(connectionRoleRequest);
-                    QueryTargetComponents(serviceProxy, retrievedConnectionRole, "connectionrole");
+                    this.QueryTargetComponents(serviceProxy, retrievedConnectionRole, "connectionrole");
                     break;
 
                 case Constants.Workflow:
@@ -944,7 +970,7 @@ namespace CrmSolution
                     workflowRequest.Target = new EntityReference("workflow", componentId);
                     workflowRequest.ColumnSet = new ColumnSet(true);
                     var retrievedWorkflow = (RetrieveResponse)sourceServiceProxy.Execute(workflowRequest);
-                    QueryTargetComponents(serviceProxy, retrievedWorkflow, "workflow");
+                    this.QueryTargetComponents(serviceProxy, retrievedWorkflow, "workflow");
                     break;
 
                 case Constants.KBArticleTemplate:
@@ -952,7 +978,7 @@ namespace CrmSolution
                     articleTemplateRequest.Target = new EntityReference("kbarticletemplate", componentId);
                     articleTemplateRequest.ColumnSet = new ColumnSet(true);
                     var retrievedKBArticleTemplate = (RetrieveResponse)sourceServiceProxy.Execute(articleTemplateRequest);
-                    QueryTargetComponents(serviceProxy, retrievedKBArticleTemplate, "kbarticletemplate");
+                    this.QueryTargetComponents(serviceProxy, retrievedKBArticleTemplate, "kbarticletemplate");
                     break;
 
                 case Constants.MailMergeTemplate:
@@ -960,7 +986,7 @@ namespace CrmSolution
                     mailMergeTemplateRequest.Target = new EntityReference("mailmergetemplate", componentId);
                     mailMergeTemplateRequest.ColumnSet = new ColumnSet(true);
                     var retrievedMailMergeTemplate = (RetrieveResponse)sourceServiceProxy.Execute(mailMergeTemplateRequest);
-                    QueryTargetComponents(serviceProxy, retrievedMailMergeTemplate, "mailmergetemplate");
+                    this.QueryTargetComponents(serviceProxy, retrievedMailMergeTemplate, "mailmergetemplate");
                     break;
 
                 case Constants.ContractTemplate:
@@ -968,7 +994,7 @@ namespace CrmSolution
                     contractTemplateRequest.Target = new EntityReference("contracttemplate", componentId);
                     contractTemplateRequest.ColumnSet = new ColumnSet(true);
                     var retrievedContractTemplate = (RetrieveResponse)sourceServiceProxy.Execute(contractTemplateRequest);
-                    QueryTargetComponents(serviceProxy, retrievedContractTemplate, "contracttemplate");
+                    this.QueryTargetComponents(serviceProxy, retrievedContractTemplate, "contracttemplate");
                     break;
 
                 case Constants.EmailTemplate:
@@ -976,7 +1002,7 @@ namespace CrmSolution
                     emailTemplateRequest.Target = new EntityReference("template", componentId);
                     emailTemplateRequest.ColumnSet = new ColumnSet(true);
                     var retrievedEmailTemplate = (RetrieveResponse)sourceServiceProxy.Execute(emailTemplateRequest);
-                    QueryTargetComponents(serviceProxy, retrievedEmailTemplate, "template");
+                    this.QueryTargetComponents(serviceProxy, retrievedEmailTemplate, "template");
                     break;
 
                 case Constants.SLA:
@@ -984,7 +1010,7 @@ namespace CrmSolution
                     slaRequest.Target = new EntityReference("sla", componentId);
                     slaRequest.ColumnSet = new ColumnSet(true);
                     var retrievedSLA = (RetrieveResponse)sourceServiceProxy.Execute(slaRequest);
-                    QueryTargetComponents(serviceProxy, retrievedSLA, "sla");
+                    this.QueryTargetComponents(serviceProxy, retrievedSLA, "sla");
                     break;
 
                 case Constants.ConvertRule:
@@ -992,7 +1018,7 @@ namespace CrmSolution
                     convertRuleRequest.Target = new EntityReference("convertrule", componentId);
                     convertRuleRequest.ColumnSet = new ColumnSet(true);
                     var retrievedConvertRule = (RetrieveResponse)sourceServiceProxy.Execute(convertRuleRequest);
-                    QueryTargetComponents(serviceProxy, retrievedConvertRule, "convertrule");
+                    this.QueryTargetComponents(serviceProxy, retrievedConvertRule, "convertrule");
                     break;
 
                 default:
@@ -1001,5 +1027,72 @@ namespace CrmSolution
             }
         }
 
+        /// <summary>
+        /// Method checks master solution and analyze result using PowerApps solution checker PowerShell script before importing to target instance.
+        /// Necessary azure web app client id and tenant id needs to be provided in order to execute Invoke-PowerAppsChecker command.
+        /// </summary>
+        /// <param name="solutionFileInfo">solution file info</param>
+        private void SolutionChecker(SolutionFileInfo solutionFileInfo)
+        {
+            string solutionImportTempFilePath = solutionFileInfo.SolutionFilePathManaged ?? solutionFileInfo.SolutionFilePath;
+            string managedOrUnmanaged = !string.IsNullOrEmpty(solutionFileInfo.SolutionFilePathManaged) ? "_managed_.zip" : "_.zip";
+            string solutionPath = Path.GetTempPath() + solutionFileInfo.SolutionUniqueName + managedOrUnmanaged;
+            File.Copy(solutionImportTempFilePath, solutionPath, true);
+            string resultOutputDirectory = Path.GetTempPath();
+
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine(@"Param(
+                                [string]
+                                $clientAppId,
+                                [string]
+                                $tenantId,
+                                [string]
+                                $solutionFileDirectory,
+                                [string]
+                                $resultOutputDirectory
+                                )");
+            stringBuilder.AppendLine(@"$clientAppId = '" + Singleton.CrmConstantsInstance.PowerAppsCheckerAzureClientAppId + "'");
+            stringBuilder.AppendLine(@"$tenantId = '" + Singleton.CrmConstantsInstance.PowerAppsCheckerAzureTenantId + "'");
+            stringBuilder.AppendLine(@"$solutionFileDirectory = '" + solutionPath + "'");
+            stringBuilder.AppendLine(@"$resultOutputDirectory = '" + resultOutputDirectory + "'");
+            stringBuilder.AppendLine(@"if (Get-Module -ListAvailable -Name Microsoft.PowerApps.Checker.PowerShell)
+                                {
+                                Write - Output 'Microsoft.PowerApps.Checker.PowerShell Module exists'
+                                } 
+                                else {
+                                Write-Output 'Microsoft.PowerApps.Checker.PowerShell Module not exists'
+                                Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
+                                Write-Output('Installing Microsoft.PowerApps.Checker.PowerShell module')
+                                Install-Module Microsoft.PowerApps.Checker.PowerShell -Scope CurrentUser
+                                Write-Output('Module installed successfully');
+                                }
+                                if (-not([string]::IsNullOrEmpty($clientAppId)) -and -not([string]::IsNullOrEmpty($tenantId)) -and -not([string]::IsNullOrEmpty($solutionFileDirectory)) -and -not([string]::IsNullOrEmpty($resultOutputDirectory)))
+                                {
+                                $ruleSet = Get-PowerAppsCheckerRulesets -Geography India
+                                $ruleSetToUse = $ruleSet | where Name -EQ 'Solution Checker'
+                                Write-Output('Started analysing solution results')
+                                $result = Invoke-PowerAppsChecker -ClientApplicationId $clientAppId -FileUnderAnalysis $solutionFileDirectory -OutputDirectory $resultOutputDirectory -Ruleset $ruleSetToUse -TenantId $tenantId -Verbose
+                                Write-Output($result)
+                                Write-Output($result.IssueSummary)
+                                }
+                                else
+                                {
+                                Write-Output('Please fill all the required fields')
+                                }");
+
+            foreach (string analysedResult in PowerShell.Create().AddScript(stringBuilder.ToString()).AddCommand("Out-String").Invoke<string>())
+            {
+                Console.WriteLine(analysedResult);
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("Solution check starts");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append(analysedResult);
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br>");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("Solution check completed");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br>");
+            }
+
+            File.Delete(solutionPath);
+        }
     }
 }

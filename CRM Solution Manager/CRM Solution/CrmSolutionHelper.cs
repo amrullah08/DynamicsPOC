@@ -453,14 +453,6 @@ namespace CrmSolution
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportSuccessful;
             solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
             solutionFile.Update();
-            if (!string.IsNullOrEmpty(Singleton.CrmConstantsInstance.PowerAppsCheckerAzureClientAppId) && !string.IsNullOrEmpty(Singleton.CrmConstantsInstance.PowerAppsCheckerAzureTenantId))
-            {
-                this.SolutionChecker(solutionFile);
-            }
-            else
-            {
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("Please provide azure client app id and tenant id to analyze solution");
-            }
 
             this.ImportSolutionToTargetInstance(serviceProxy, solutionFile);
 
@@ -777,74 +769,6 @@ namespace CrmSolution
             }
 
             return checkTarget;
-        }
-
-        /// <summary>
-        /// Method checks master solution and analyze result using PowerApps solution checker PowerShell script before importing to target instance.
-        /// Necessary azure web app client id and tenant id needs to be provided in order to execute Invoke-PowerAppsChecker command.
-        /// </summary>
-        /// <param name="solutionFileInfo">solution file info</param>
-        private void SolutionChecker(SolutionFileInfo solutionFileInfo)
-        {
-            string solutionImportTempFilePath = solutionFileInfo.SolutionFilePathManaged ?? solutionFileInfo.SolutionFilePath;
-            string managedOrUnmanaged = !string.IsNullOrEmpty(solutionFileInfo.SolutionFilePathManaged) ? "_managed_.zip" : "_.zip";
-            string solutionPath = Path.GetTempPath() + solutionFileInfo.SolutionUniqueName + managedOrUnmanaged;
-            File.Copy(solutionImportTempFilePath, solutionPath, true);
-            string resultOutputDirectory = Path.GetTempPath();
-
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine(@"Param(
-                                [string]
-                                $clientAppId,
-                                [string]
-                                $tenantId,
-                                [string]
-                                $solutionFileDirectory,
-                                [string]
-                                $resultOutputDirectory
-                                )");
-            stringBuilder.AppendLine(@"$clientAppId = '" + Singleton.CrmConstantsInstance.PowerAppsCheckerAzureClientAppId + "'");
-            stringBuilder.AppendLine(@"$tenantId = '" + Singleton.CrmConstantsInstance.PowerAppsCheckerAzureTenantId + "'");
-            stringBuilder.AppendLine(@"$solutionFileDirectory = '" + solutionPath + "'");
-            stringBuilder.AppendLine(@"$resultOutputDirectory = '" + resultOutputDirectory + "'");
-            stringBuilder.AppendLine(@"if (Get-Module -ListAvailable -Name Microsoft.PowerApps.Checker.PowerShell)
-                                {
-                                Write - Output 'Microsoft.PowerApps.Checker.PowerShell Module exists'
-                                } 
-                                else {
-                                Write-Output 'Microsoft.PowerApps.Checker.PowerShell Module not exists'
-                                Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
-                                Write-Output('Installing Microsoft.PowerApps.Checker.PowerShell module')
-                                Install-Module Microsoft.PowerApps.Checker.PowerShell -Scope CurrentUser
-                                Write-Output('Module installed successfully');
-                                }
-                                if (-not([string]::IsNullOrEmpty($clientAppId)) -and -not([string]::IsNullOrEmpty($tenantId)) -and -not([string]::IsNullOrEmpty($solutionFileDirectory)) -and -not([string]::IsNullOrEmpty($resultOutputDirectory)))
-                                {
-                                $ruleSet = Get-PowerAppsCheckerRulesets -Geography India
-                                $ruleSetToUse = $ruleSet | where Name -EQ 'Solution Checker'
-                                Write-Output('Started analysing solution results')
-                                $result = Invoke-PowerAppsChecker -ClientApplicationId $clientAppId -FileUnderAnalysis $solutionFileDirectory -OutputDirectory $resultOutputDirectory -Ruleset $ruleSetToUse -TenantId $tenantId -Verbose
-                                Write-Output($result)
-                                Write-Output($result.IssueSummary)
-                                }
-                                else
-                                {
-                                Write-Output('Please fill all the required fields')
-                                }");
-
-            foreach (string analysedResult in PowerShell.Create().AddScript(stringBuilder.ToString()).AddCommand("Out-String").Invoke<string>())
-            {
-                Console.WriteLine(analysedResult);
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br>");
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("Solution check starts");
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br>");
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append(analysedResult);
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br>");
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("Solution check completed");
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br>");
-            }
-
-            File.Delete(solutionPath);
         }
     }
 }

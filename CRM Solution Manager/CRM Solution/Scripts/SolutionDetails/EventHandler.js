@@ -51,22 +51,22 @@ SYED.SolutionDetail.EventHandler =
                     );
                 }
                 else {
-                    formContext.getAttribute("syed_friendlyname").setValue("");
-                    formContext.getAttribute("syed_ismanaged").setValue("");
-                    formContext.getAttribute("syed_name").setValue("");
-                    formContext.getAttribute("syed_name").setValue("");
-                    formContext.getAttribute("syed_publisher").setValue("");
-                    formContext.getAttribute("syed_solutioninstalledon").setValue("");
-                    formContext.getAttribute("syed_listofsolutions").setValue("");
-                    formContext.getAttribute("syed_version").setValue("");
-                    formContext.getAttribute("syed_solutionid").setValue("");
+                    if (!Xrm.Internal.isUci()) {
+                        formContext.getAttribute("syed_friendlyname").setValue("");
+                        formContext.getAttribute("syed_ismanaged").setValue("");
+                        formContext.getAttribute("syed_name").setValue("");
+                        formContext.getAttribute("syed_name").setValue("");
+                        formContext.getAttribute("syed_publisher").setValue("");
+                        formContext.getAttribute("syed_solutioninstalledon").setValue("");
+                        formContext.getAttribute("syed_listofsolutions").setValue("");
+                        formContext.getAttribute("syed_version").setValue("");
+                        formContext.getAttribute("syed_solutionid").setValue("");
+                    }
                 }
-
             }
             catch (ex) {
                 console.log("Error at SYED.SolutionDetail.EventHandler.SetSourcecontrolValues function: " + ex.message + "|" + "Stack: " + ex.stack);
                 throw ex;
             }
-        },
-
+        }
     }

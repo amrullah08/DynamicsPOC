@@ -564,6 +564,21 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     }
                     break;
 
+                case Constants.SDKMessageProcessingStepImage:
+                    var sdkmessageprocessingstepimage = new RetrieveRequest();
+                    sdkmessageprocessingstepimage.Target = new EntityReference("sdkmessageprocessingstepimage", componentId);
+                    sdkmessageprocessingstepimage.ColumnSet = new ColumnSet(true);
+                    var retrievedSdkmessageprocessingstepimage = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(sdkmessageprocessingstepimage);
+                    if (targetService == null)
+                    {
+                        this.PrintLog(retrievedSdkmessageprocessingstepimage.Entity.Contains("name") ? retrievedSdkmessageprocessingstepimage.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                    }
+                    else
+                    {
+                        this.QueryTargetComponents(targetService, retrievedSdkmessageprocessingstepimage, "sdkmessageprocessingstepimage");
+                    }
+                    break;
+
                 default:
                     Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Unable to copy component type: " + component.FormattedValues[componentDetails] + " and objectID: " + componentId.ToString());
                     Console.WriteLine("Unable to copy component type: " + component.FormattedValues[componentDetails] + " and objectID: " + componentId.ToString());

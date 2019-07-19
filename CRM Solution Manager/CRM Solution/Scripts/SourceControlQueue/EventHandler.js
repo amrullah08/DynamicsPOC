@@ -11,7 +11,7 @@ SYED.SourceControlQueue.EventHandler =
         ShowHideSolutionDetailsSections: function (executionContext) {
             try {
                 var formContext = executionContext.getFormContext();
-                var HTMLSection = formContext.ui.tabs.get("MergeSolutions").sections.get("HTMLSection");
+                var HTMLSection = formContext.ui.tabs.get("Reference");
 
                 var formType = formContext.ui.getFormType();
                 if (formType != "1") {
@@ -22,6 +22,7 @@ SYED.SourceControlQueue.EventHandler =
                 }
                 else {
                     formContext.ui.tabs.get("MergeSolutions").setVisible(false);
+                    formContext.ui.tabs.get("Reference").setVisible(false);
                     formContext.ui.tabs.get("General").setVisible(false);
                     formContext.ui.tabs.get("Deployment_Details").sections.get("InstanceDetails").setVisible(false);
                     formContext.getAttribute("syed_name").setValue("SOL-" + new Date().toLocaleString());
@@ -62,8 +63,8 @@ SYED.SourceControlQueue.EventHandler =
                 var entityFormOptions = {};
                 entityFormOptions["entityName"] = formContext.data.entity.getEntityName();
                 entityFormOptions["entityId"] = formContext.data.entity.getId();
-                formContext.data.refresh();
-                //Xrm.Navigation.openForm(entityFormOptions);
+
+                Xrm.Navigation.openForm(entityFormOptions);
             }
             catch (ex) {
                 console.log("Error at SYED.SourceControlQueue.EventHandler.RefreshPage function: " + ex.message + "|" + "Stack: " + ex.stack);

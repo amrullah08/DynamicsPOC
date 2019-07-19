@@ -275,11 +275,6 @@ namespace CrmSolution
         public const int PluginAssembly = 91;
 
         /// <summary>
-        ///  SDK Message Processing Step value
-        /// </summary>
-        public const int SDKMessageProcessingStep = 92;
-
-        /// <summary>
         ///  Service End point value
         /// </summary>
         public const int ServiceEndpoint = 95;
@@ -348,6 +343,26 @@ namespace CrmSolution
         /// Convert Rule value
         /// </summary>
         public const int ConvertRule = 154;
+
+        /// <summary>
+        /// Attribute Picklist Value
+        /// </summary>
+        public const int AttributePicklistValue = 4;
+
+        /// <summary>
+        /// Attribute Lookup Value
+        /// </summary>
+        public const int AttributeLookupValue = 5;
+
+        /// <summary>
+        ///  SDK Message Processing Step value
+        /// </summary>
+        public const int SDKMessageProcessingStep = 92;
+
+        /// <summary>
+        ///  SDK Message Processing Step Image value
+        /// </summary>
+        public const int SDKMessageProcessingStepImage = 93;
 
         /// <summary>
         /// Gets the component types

@@ -574,7 +574,8 @@ namespace CrmSolution
                             checkTarget = this.CheckDependency(targetserviceProxy, comDependency, sol, checkTarget, serviceProxy);
                         }
                     }
-                    else
+
+                    if (!checkTarget)
                     {
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");
@@ -584,12 +585,7 @@ namespace CrmSolution
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("----");
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
-                    }
-
-                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
-
-                    if (!checkTarget)
-                    {
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
                         this.ImportSolution(targetserviceProxy, solutionFile, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
                     }
                     else

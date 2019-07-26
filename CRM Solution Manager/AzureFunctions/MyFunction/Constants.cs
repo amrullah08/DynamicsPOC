@@ -5,7 +5,7 @@
 // <author>Syed Amrullah Mazhar</author>
 //-----------------------------------------------------------------------
 
-namespace CrmSolution
+namespace MyFunction
 {
     using System.Collections.Generic;
 
@@ -345,7 +345,7 @@ namespace CrmSolution
         public const int ConvertRule = 154;
 
         /// <summary>
-        /// Attribute Picklist Value
+        /// Attribute PickList Value
         /// </summary>
         public const int AttributePicklistValue = 4;
 

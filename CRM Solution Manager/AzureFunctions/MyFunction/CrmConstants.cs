@@ -5,14 +5,17 @@
 // <author>Syed Amrullah Mazhar</author>
 //-----------------------------------------------------------------------
 
-namespace CrmSolution
+namespace MyFunction
 {
     using System;
-    using System.Configuration;
+    using System.Net;
     using System.ServiceModel.Description;
+    using System.Threading.Tasks;
+    using Microsoft.IdentityModel.Clients.ActiveDirectory;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Client;
     using Microsoft.Xrm.Sdk.Query;
+    using Microsoft.Xrm.Sdk.WebServiceClient;
 
     /// <summary>
     /// class contains constants for dynamics
@@ -45,55 +48,76 @@ namespace CrmSolution
         private string sleepTimeoutInMillis;
 
         /// <summary>
-        /// client credentials
+        /// Client Id
         /// </summary>
-        private ClientCredentials clientCredentials;
+        private string clientId;
 
         /// <summary>
-        /// service proxy
+        /// Client Secret
         /// </summary>
-        private OrganizationServiceProxy serviceProxy;
+        private string clientSecret;
 
         /// <summary>
-        /// power apps checker azure client app id
+        /// Tenant Id
         /// </summary>
-        private string powerAppsCheckerAzureClientAppId;
+        private string tenantId;
 
         /// <summary>
-        /// power apps checker azure tenant id
+        /// Org Url
         /// </summary>
-        private string powerAppsCheckerAzureTenantId;
+        private string orgUrl;
 
         /// <summary>
-        /// Gets organization service url
+        /// SDK Service
         /// </summary>
-        public string OrgServiceUrl
+        private OrganizationWebProxyClient sdkService;
+
+        /// <summary>
+        /// org service
+        /// </summary>
+        private IOrganizationService service;
+
+        /// <summary>
+        /// Gets client id
+        /// </summary>
+        public string ClientId
         {
             get
             {
-                return ConfigurationManager.AppSettings["OrgServiceUrl"];
+                return this.clientId;
             }
         }
 
         /// <summary>
-        /// Gets Dynamics User Name
+        /// Gets client secret
         /// </summary>
-        public string DynamicsUserName
+        public string ClientSecret
         {
             get
             {
-                return ConfigurationManager.AppSettings["DynamicsUserName"];
+                return this.clientSecret;
             }
         }
 
         /// <summary>
-        /// Gets or Sets Dynamics password
+        /// Gets tenant id
         /// </summary>
-        public string DynamicsPassword
+        public string TenantId
         {
             get
             {
-                return ConfigurationManager.AppSettings["DynamicsPassword"];
+                return this.tenantId;
+            }
+        }
+
+        /// <summary>
+        /// Gets org url
+        /// </summary>
+        public string OrgUrl
+        {
+            get
+            {
+                return this.orgUrl;
             }
         }
 
@@ -175,41 +199,11 @@ namespace CrmSolution
         /// <summary>
         /// Gets or sets Organization Service Proxy
         /// </summary>
-        public OrganizationServiceProxy ServiceProxy
+        public IOrganizationService ServiceProxy
         {
             get
             {
-                return this.serviceProxy;
-            }
-
-            set
-            {
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets power apps checker azure client app id
-        /// </summary>
-        public string PowerAppsCheckerAzureClientAppId
-        {
-            get
-            {
-                return this.powerAppsCheckerAzureClientAppId;
-            }
-
-            set
-            {
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets power apps checker azure tenant id
-        /// </summary>
-        public string PowerAppsCheckerAzureTenantId
-        {
-            get
-            {
-                return this.powerAppsCheckerAzureTenantId;
+                return this.service;
             }
 
             set
@@ -220,20 +214,37 @@ namespace CrmSolution
         /// <summary>
         /// Method returns configuration settings entity collection list
         /// </summary>
+        /// <param name="orgUrl">org url</param>
+        /// <param name="clientId">client id</param>
+        /// <param name="clientSecret">client secret</param>
+        /// <param name="tenantId">tenant id</param>
         /// <returns>returns entity collection</returns>
-        public override EntityCollection GetConfigurationSettings()
+        public override EntityCollection GetConfigurationSettings(string orgUrl, string clientId, string clientSecret, string tenantId)
         {
-            this.clientCredentials = new ClientCredentials();
-            this.clientCredentials.UserName.UserName = this.DynamicsUserName;
-            this.clientCredentials.UserName.Password = this.DynamicsPassword;
-            this.serviceProxy = this.InitializeOrganizationService();
-            EntityCollection retrievedConfigurationSettingsList = this.RetrieveConfigurationSettings(this.serviceProxy);
+            this.clientId = clientId;
+            this.clientSecret = clientSecret;
+            this.tenantId = tenantId;
+            this.orgUrl = orgUrl;
+
+            Task<string> callTask = Task.Run(() => this.AccessTokenGenerator());
+            callTask.Wait();
+            string token = callTask.Result;
+            Uri serviceUrl = new Uri(this.orgUrl + @"/xrmservices/2011/organization.svc/web?SdkClientVersion=8.2");
+
+            using (this.sdkService = new OrganizationWebProxyClient(serviceUrl, false))
+            {
+                this.sdkService.HeaderToken = token;
+                System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                this.service = (IOrganizationService)this.sdkService != null ? (IOrganizationService)this.sdkService : null;
+            }
+            
+            EntityCollection retrievedConfigurationSettingsList = this.RetrieveConfigurationSettings(this.service);
 
             return retrievedConfigurationSettingsList;
-        }
+        }       
 
         /// <summary>
-        /// Method sets crm constant property values
+        /// Method sets CRM constant property values
         /// </summary>
         /// <param name="retrievedConfigurationSettingsList">entity collection</param>
         public override void SetCrmProperties(EntityCollection retrievedConfigurationSettingsList)
@@ -259,12 +270,6 @@ namespace CrmSolution
                     case Constants.SleepTimeoutInMillis:
                         this.sleepTimeoutInMillis = setting.GetAttributeValue<string>("syed_value");
                         break;
-                    case Constants.PowerAppsCheckerAzureClientAppId:
-                        this.powerAppsCheckerAzureClientAppId = setting.GetAttributeValue<string>("syed_value");
-                        break;
-                    case Constants.PowerAppsCheckerAzureTenantId:
-                        this.powerAppsCheckerAzureTenantId = setting.GetAttributeValue<string>("syed_value");
-                        break;
                     default:
                         break;
                 }
@@ -272,11 +277,25 @@ namespace CrmSolution
         }
 
         /// <summary>
+        /// Method generated access token to authenticate dynamics CRM
+        /// </summary>
+        /// <returns>returns access token</returns>
+        private async Task<string> AccessTokenGenerator()
+        {
+            string authority = "https://login.microsoftonline.com/" + this.tenantId;
+
+            var credentials = new ClientCredential(this.clientId, this.clientSecret);
+            var authContext = new AuthenticationContext(authority);
+            var result = await authContext.AcquireTokenAsync(this.orgUrl, credentials);
+            return result.AccessToken;
+        }
+
+        /// <summary>
         /// Method retrieves active configuration settings record
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <returns>returns entity collection</returns>
-        private EntityCollection RetrieveConfigurationSettings(OrganizationServiceProxy serviceProxy)
+        private EntityCollection RetrieveConfigurationSettings(IOrganizationService serviceProxy)
         {
             try
             {
@@ -299,15 +318,6 @@ namespace CrmSolution
             {
                 throw new Exception(ex.Message.ToString(), ex);
             }
-        }
-
-        /// <summary>
-        /// Method returns new instance of organization service
-        /// </summary>
-        /// <returns>returns organization service proxy</returns>
-        private OrganizationServiceProxy InitializeOrganizationService()
-        {
-            return new OrganizationServiceProxy(new Uri(this.OrgServiceUrl), null, this.clientCredentials, null);
-        }
+        }      
     }
 }

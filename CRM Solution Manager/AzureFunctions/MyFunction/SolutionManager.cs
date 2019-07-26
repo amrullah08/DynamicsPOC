@@ -9,14 +9,13 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using CrmSolution;
+    using System.Linq;   
     using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Xrm.Sdk;
-    using Microsoft.Xrm.Sdk.Client;
     using Microsoft.Xrm.Sdk.Messages;
     using Microsoft.Xrm.Sdk.Metadata;
     using Microsoft.Xrm.Sdk.Query;
+    using MyFunction;
 
     /// <summary>
     /// Class merges components of solution to specified solution
@@ -71,7 +70,6 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
             catch (Exception ex)
             {
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + "Error for solution " + solutionUniqueName + " " + ex.Message);
-                Console.WriteLine("Error for solution " + solutionUniqueName + " " + ex.Message);
             }
 
             // Join entities Id and solution Components Id
@@ -100,7 +98,6 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                 }
             }
 
-            Console.WriteLine("Copying components into Master Solution.");
             Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Copying components into Master Solution</th></tr>");
 
             var components = this.CopyComponents(copySettings);
@@ -109,7 +106,6 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
             var componentsMaster = this.RetrieveComponentsFromSolutions(copySettings.TargetSolutions.Select(T => T.Id).ToList(), copySettings.ComponentsTypes);
             var differentComponents = (from cm in componentsMaster where !components.Any(list => list.GetAttributeValue<Guid>("objectid") == cm.GetAttributeValue<Guid>("objectid")) select cm).ToList();
 
-            Console.WriteLine("Displaying different(additional) components after merging");
             Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Displaying different(additional) components after merging</th></tr>");
 
             if (differentComponents != null)
@@ -132,7 +128,6 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                 Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:LightCyan;border: 1px solid #ccc'>");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" No different(additional components found after Merging)");
-                Console.WriteLine("No different(additional components found after Merging)");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
             }
@@ -140,29 +135,6 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
             Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
             solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemMergingSuccessfulStatus;
             solutionFileInfo.Update();
-        }
-
-        /// <summary>
-        /// Method retrieves target components
-        /// </summary>
-        /// <param name="serviceProxy">service proxy</param>
-        /// <param name="retrieveResponse">retrieve response</param>
-        /// <param name="type">type</param>
-        private void QueryTargetComponents(OrganizationServiceProxy serviceProxy, RetrieveResponse retrieveResponse, string type)
-        {
-            var qe = new QueryExpression(type)
-            {
-                ColumnSet = new ColumnSet(true),
-                Criteria = new FilterExpression
-                {
-                    Conditions =
-                                {
-                                    new ConditionExpression("name", ConditionOperator.Equal, retrieveResponse.Entity.Attributes["name"].ToString()),
-                                }
-                }
-            };
-            EntityCollection solutionComponents = serviceProxy.RetrieveMultiple(qe);
-            Entity solutionCom = solutionComponents.Entities[0];
         }
 
         /// <summary>
@@ -174,7 +146,8 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
         /// <param name="componentType">component Type</param>
         /// <param name="componentId">component Id</param>
         /// <param name="componentDetails">component Details</param>
-        public void GetComponentDetails(CopySettings settings, Entity target, Entity component, int componentType, Guid componentId, string componentDetails, OrganizationServiceProxy targetService)
+        /// <param name="targetService">target service proxy</param>
+        public void GetComponentDetails(CopySettings settings, Entity target, Entity component, int componentType, Guid componentId, string componentDetails, IOrganizationService targetService)
         {
             Entity sourceSolution = null;
 
@@ -199,6 +172,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                         targetEntityReq.LogicalName = retrievedEntity.EntityMetadata.LogicalName;
                         var targetRetrievedEntity = (RetrieveEntityResponse)targetService.Execute(targetEntityReq);
                     }
+
                     break;
 
                 case Constants.WebResources:
@@ -214,6 +188,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedWebresource, "webresource");
                     }
+
                     break;
 
                 case Constants.Attribute:
@@ -231,6 +206,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                         targetAttributeReq.LogicalName = retrievedAttribute.AttributeMetadata.LogicalName;
                         var targetRetrievedAttribute = (RetrieveAttributeResponse)targetService.Execute(targetAttributeReq);
                     }
+
                     break;
 
                 case Constants.Relationship:
@@ -247,6 +223,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                         targetRelationshipReq.Name = retrievedrelationshipReq.RelationshipMetadata.SchemaName;
                         var targetRetrievedrelationshipReq = (RetrieveRelationshipResponse)targetService.Execute(targetRelationshipReq);
                     }
+
                     break;
 
                 case Constants.DisplayString:
@@ -262,6 +239,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedDisplayString, "displaystring");
                     }
+
                     break;
 
                 case Constants.SavedQuery:
@@ -277,6 +255,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSavedQuery, "savedquery");
                     }
+
                     break;
 
                 case Constants.SavedQueryVisualization:
@@ -292,6 +271,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSavedQueryVisualization, "savedqueryvisualization");
                     }
+
                     break;
 
                 case Constants.SystemForm:
@@ -307,6 +287,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSystemForm, "systemform");
                     }
+
                     break;
 
                 case Constants.HierarchyRule:
@@ -322,6 +303,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedHierarchyRule, "hierarchyrule");
                     }
+
                     break;
 
                 case Constants.SiteMap:
@@ -337,6 +319,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSiteMap, "sitemap");
                     }
+
                     break;
 
                 case Constants.PluginAssembly:
@@ -352,6 +335,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedPluginAssembly, "pluginassembly");
                     }
+
                     break;
 
                 case Constants.PluginType:
@@ -367,6 +351,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedPluginTypeRequest, "plugintype");
                     }
+
                     break;
 
                 case Constants.SDKMessageProcessingStep:
@@ -382,6 +367,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSDKMessageProcessingStep, "sdkmessageprocessingstep");
                     }
+
                     break;
 
                 case Constants.ServiceEndpoint:
@@ -397,6 +383,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedServiceEndpoint, "serviceendpoint");
                     }
+
                     break;
 
                 case Constants.Report:
@@ -412,6 +399,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedReport, "report");
                     }
+
                     break;
 
                 case Constants.Role:
@@ -427,6 +415,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedRole, "role");
                     }
+
                     break;
 
                 case Constants.FieldSecurityProfile:
@@ -442,6 +431,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedFieldSecurityProfile, "fieldsecurityprofile");
                     }
+
                     break;
 
                 case Constants.ConnectionRole:
@@ -457,6 +447,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedConnectionRole, "connectionrole");
                     }
+
                     break;
 
                 case Constants.Workflow:
@@ -472,6 +463,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedWorkflow, "workflow");
                     }
+
                     break;
 
                 case Constants.KBArticleTemplate:
@@ -487,6 +479,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedKBArticleTemplate, "kbarticletemplate");
                     }
+
                     break;
 
                 case Constants.MailMergeTemplate:
@@ -502,6 +495,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedMailMergeTemplate, "mailmergetemplate");
                     }
+
                     break;
 
                 case Constants.ContractTemplate:
@@ -517,6 +511,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedContractTemplate, "contracttemplate");
                     }
+
                     break;
 
                 case Constants.EmailTemplate:
@@ -532,6 +527,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedEmailTemplate, "template");
                     }
+
                     break;
 
                 case Constants.SLA:
@@ -547,6 +543,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSLA, "sla");
                     }
+
                     break;
 
                 case Constants.ConvertRule:
@@ -562,6 +559,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedConvertRule, "convertrule");
                     }
+
                     break;
 
                 case Constants.SDKMessageProcessingStepImage:
@@ -577,13 +575,36 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSdkmessageprocessingstepimage, "sdkmessageprocessingstepimage");
                     }
+
                     break;
 
                 default:
                     Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Unable to copy component type: " + component.FormattedValues[componentDetails] + " and objectID: " + componentId.ToString());
-                    Console.WriteLine("Unable to copy component type: " + component.FormattedValues[componentDetails] + " and objectID: " + componentId.ToString());
                     break;
             }
+        }
+
+        /// <summary>
+        /// Method retrieves target components
+        /// </summary>
+        /// <param name="serviceProxy">service proxy</param>
+        /// <param name="retrieveResponse">retrieve response</param>
+        /// <param name="queryExpressionType">query expression type</param>
+        private void QueryTargetComponents(IOrganizationService serviceProxy, RetrieveResponse retrieveResponse, string queryExpressionType)
+        {
+            var qe = new QueryExpression(queryExpressionType)
+            {
+                ColumnSet = new ColumnSet(true),
+                Criteria = new FilterExpression
+                {
+                    Conditions =
+                                {
+                                    new ConditionExpression("name", ConditionOperator.Equal, retrieveResponse.Entity.Attributes["name"].ToString()),
+                                }
+                }
+            };
+            EntityCollection solutionComponents = serviceProxy.RetrieveMultiple(qe);
+            Entity solutionCom = solutionComponents.Entities[0];
         }
 
         /// <summary>
@@ -682,23 +703,18 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
         /// <param name="targetSolution">target Solution</param>
         private void PrintLog(string componentName, string componentType, Guid componentId, string sourceSolution, string targetSolution)
         {
-            Console.WriteLine("Component Name: " + componentName);
-            Console.WriteLine("Component Type: " + componentType);
             if (componentId != Guid.Empty)
             {
-                Console.WriteLine("Component Id: " + componentId);
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Component Id: " + componentId + "<br>");
             }
 
             if (!string.IsNullOrEmpty(sourceSolution))
             {
-                Console.WriteLine("Source Solution: " + sourceSolution);
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Source Solution: " + sourceSolution + "<br>");
             }
 
             if (!string.IsNullOrEmpty(targetSolution))
             {
-                Console.WriteLine("Target Solution: " + targetSolution);
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Target Solution: " + targetSolution + "<br>");
             }
 

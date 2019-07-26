@@ -32,21 +32,20 @@ SYED.MergeSolution.EventHandler =
                     );
                 }
                 else {
-                    formContext.getAttribute("syed_syed_friendlyname").setValue("");
-                    formContext.getAttribute("syed_ismanaged").setValue("");
-                    formContext.getAttribute("syed_name").setValue("");
-                    formContext.getAttribute("syed_publisher").setValue("");
-                    formContext.getAttribute("syed_solutioninstalledon").setValue("");
-                    formContext.getAttribute("syed_uniquename").setValue("");
-                    formContext.getAttribute("syed_version").setValue("");
-
+                    if (!Xrm.Internal.isUci()) {
+                        formContext.getAttribute("syed_syed_friendlyname").setValue("");
+                        formContext.getAttribute("syed_ismanaged").setValue(false);
+                        formContext.getAttribute("syed_name").setValue("");
+                        formContext.getAttribute("syed_publisher").setValue("");
+                        formContext.getAttribute("syed_solutioninstalledon").setValue("");
+                        formContext.getAttribute("syed_uniquename").setValue("");
+                        formContext.getAttribute("syed_version").setValue("");
+                    }
                 }
-
             }
             catch (ex) {
                 console.log("Error at SYED.MergeSolution.EventHandler.SetCRMSolutionValues function: " + ex.message + "|" + "Stack: " + ex.stack);
                 throw ex;
             }
-        },
-       
+        }
     }

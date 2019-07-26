@@ -72,6 +72,9 @@
     <Reference Include="System.DirectoryServices" />
     <Reference Include="System.DirectoryServices.AccountManagement" />
     <Reference Include="System.IdentityModel" />
+    <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.PowerShell.5.ReferenceAssemblies.1.1.0\lib\net4\System.Management.Automation.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
     <Reference Include="System.ServiceModel" />
@@ -122,6 +125,7 @@
     <None Include="DevOps_1_0_0_0.zip" />
     <None Include="packages.config">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+      <SubType>Designer</SubType>
     </None>
     <None Include="Properties\PublishProfiles\CRMSolution20190523100130 - Web Deploy.pubxml" />
     <None Include="Properties\webjob-publish-settings.json" />

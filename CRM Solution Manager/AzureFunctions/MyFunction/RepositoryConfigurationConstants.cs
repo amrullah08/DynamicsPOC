@@ -5,7 +5,7 @@
 // <author>Syed Amrullah Mazhar</author>
 //-----------------------------------------------------------------------
 
-namespace CrmSolution
+namespace MyFunction
 {
     using System;
     using System.Configuration;
@@ -79,7 +79,7 @@ namespace CrmSolution
         {
             get
             {
-                return ConfigurationManager.AppSettings["GitUserName"];
+                return "v-prkali";
             }
 
             set
@@ -94,7 +94,7 @@ namespace CrmSolution
         {
             get
             {
-                return ConfigurationManager.AppSettings["GitPassword"];
+                return "Shahidkapoor12#";
             }
 
             set
@@ -320,10 +320,8 @@ namespace CrmSolution
 
                 string output = process.StandardOutput.ReadToEnd();
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + output + "<br>");
-                Console.WriteLine(output);
                 string err = process.StandardError.ReadToEnd();
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + err + "<br>");
-                Console.WriteLine(err);
                 process.WaitForExit();
 
                 Directory.CreateDirectory(SubstDrive + ":\\1\\");
@@ -332,7 +330,6 @@ namespace CrmSolution
             catch (Exception ex)
             {
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
-                Console.WriteLine(ex.Message);
             }
         }
 
@@ -358,17 +355,14 @@ namespace CrmSolution
                 process.StartInfo.RedirectStandardError = true;
                 process.Start();
                 string output = process.StandardOutput.ReadToEnd();
-                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + output + "<br>");
-                Console.WriteLine(output);
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + output + "<br>");                
                 string err = process.StandardError.ReadToEnd();
-                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + err + "<br>");
-                Console.WriteLine(err);
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + err + "<br>");               
                 process.WaitForExit();
             }
             catch (Exception ex)
             {
-                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(ex.Message + "<br>");
-                Console.WriteLine(ex.Message);
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(ex.Message + "<br>");               
             }
         }
     }

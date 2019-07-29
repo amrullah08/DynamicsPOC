@@ -34,60 +34,73 @@ namespace SolutionManagement
         /// <param name="service">Organization service</param>
         /// <param name="sourceControlQueue">Dynamic Source Control entity GUID</param>
         /// <param name="tracingService">Tracing Service to trace error</param>
-        public static void DeleteSolutionDetail(IOrganizationService service, syed_sourcecontrolqueue sourceControlQueue, ITracingService tracingService)
+        public static void CreateSolutionDetail(IOrganizationService service, syed_sourcecontrolqueue sourceControlQueue, ITracingService tracingService)
         {
-            if (sourceControlQueue.syed_CheckInBySolution != null && sourceControlQueue.syed_CheckInBySolutionId != null)
+
+            EntityCollection crmSolution = SolutionHelper.RetrieveMasterSolutionById(service, sourceControlQueue.syed_CheckInBySolutionId, tracingService);
+            if (crmSolution.Entities.Count > 0)
             {
-                bool checkInBySolution = sourceControlQueue.syed_CheckInBySolution.Value;
-                string checkSolutionId = sourceControlQueue.syed_CheckInBySolutionId.ToString();
-                if (checkInBySolution == true && checkSolutionId != string.Empty)
+                foreach (syed_mastersolutions mastersolutions in crmSolution.Entities)
                 {
-                    EntityCollection crmSolution = SolutionHelper.RetrieveMasterSolutionById(service, checkSolutionId, tracingService);
-                    if (crmSolution.Entities.Count > 0)
-                    {
-                        foreach (syed_mastersolutions mastersolutions in crmSolution.Entities)
-                        {
-                            ExecuteOperations.CreateSolutionDetail(service, mastersolutions, sourceControlQueue);
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        EntityCollection solutionCollection = SolutionHelper.RetrieveSolutionById(service, new Guid(checkSolutionId), tracingService);
-                        foreach (Solution sol in solutionCollection.Entities)
-                        {
-                            Guid Id = ExecuteOperations.CreateMasterSolution(service, sol);
-                            syed_mastersolutions syed_Mastersolutions = service.Retrieve(syed_mastersolutions.EntityLogicalName.ToString(), Id, new ColumnSet(true)).ToEntity<syed_mastersolutions>(); ;
-                            ExecuteOperations.CreateSolutionDetail(service, syed_Mastersolutions, sourceControlQueue);
-                            break;
-                        }
-                    }
+                    ExecuteOperations.CreateSolutionDetail(service, mastersolutions, sourceControlQueue);
+                    break;
+                }
+            }
+            else
+            {
+                EntityCollection solutionCollection = SolutionHelper.RetrieveSolutionById(service, new Guid(sourceControlQueue.syed_CheckInBySolutionId), tracingService);
+                foreach (Solution sol in solutionCollection.Entities)
+                {
+                    Guid Id = ExecuteOperations.CreateMasterSolution(service, sol);
+                    syed_mastersolutions syed_Mastersolutions = service.Retrieve(syed_mastersolutions.EntityLogicalName.ToString(), Id, new ColumnSet(true)).ToEntity<syed_mastersolutions>(); ;
+                    ExecuteOperations.CreateSolutionDetail(service, syed_Mastersolutions, sourceControlQueue);
+                    break;
                 }
             }
         }
+
+        /// <summary>
+        /// To delete Merge Solution records.
+        /// </summary>
+        /// <param name="service">Organization service</param>
+        /// <param name="sourceControlQueue">Dynamic Source Control entity GUID</param>
+        /// <param name="tracingService">Tracing Service to trace error</param>
+        public static void CreateDynmicsSourceControl(IOrganizationService service, string SolutionId, string CheckIn, ITracingService tracingService)
+        {
+            Guid Id = ExecuteOperations.CreateDynamicsSourceControl(service, SolutionId, CheckIn);
+            syed_sourcecontrolqueue syed_Sourcecontrolqueue = service.Retrieve(syed_sourcecontrolqueue.EntityLogicalName.ToString(), Id, new ColumnSet(true)).ToEntity<syed_sourcecontrolqueue>();
+            CreateSolutionDetail(service, syed_Sourcecontrolqueue, tracingService);
+        }
+
 
         /// <summary>
         ///  Dynamics Source Control Operations
         /// </summary>
         public void Plugin()
         {
-            syed_sourcecontrolqueue postSourceControlQueue = null;
+            object objSolutionId = null;
+            object objCheckIn = null;
+
             if (CrmContext.InputParameters != null)
             {
-
-
-                if (CrmContext.MessageName.ToLower() == CRMConstant.PluginCreate)
+                if (!CrmContext.InputParameters.TryGetValue("SolutionId", out objSolutionId))
                 {
-                    if (CrmContext.PostEntityImages != null && CrmContext.PostEntityImages.Contains(CRMConstant.PluginPostImage))
-                    {
-                        postSourceControlQueue = CrmContext.PostEntityImages[CRMConstant.PluginPostImage].ToEntity<syed_sourcecontrolqueue>();
-                    }
-
-                    if (postSourceControlQueue.LogicalName == syed_sourcecontrolqueue.EntityLogicalName)
-                    {
-                        DeleteSolutionDetail(this.CrmService, postSourceControlQueue, this.CrmTracingService);
-                    }
+                    CrmTracingService.Trace("SolutionId- Missing");
+                    CrmContext.OutputParameters["success"] = false;
+                    throw new InvalidPluginExecutionException("SolutionId- Missing");
                 }
+
+                if (!CrmContext.InputParameters.TryGetValue("CheckIn", out objCheckIn))
+                {
+                    CrmTracingService.Trace("CheckIn/Release - Missing");
+                    CrmContext.OutputParameters["success"] = false;
+                    throw new InvalidPluginExecutionException("SolutionId- Missing");
+                }
+
+                string solutionId = (string)objSolutionId;
+                string checkIn = (string)objCheckIn;
+                CreateDynmicsSourceControl(this.CrmService, solutionId, checkIn, this.CrmTracingService);
+                CrmContext.OutputParameters["success"] = true;
             }
         }
     }

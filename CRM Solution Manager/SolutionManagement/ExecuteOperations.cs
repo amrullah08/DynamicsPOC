@@ -64,5 +64,33 @@ namespace SolutionManagement
             sourcecontrolqueue.syed_Status = "Queued";
             service.Update(sourcecontrolqueue);
         }
+
+        /// <summary>
+        /// Method creates Master Solution Record
+        /// </summary>
+        /// <param name="service">Organization service</param>
+        /// <param name="solution">CRM Solution</param>
+        public static Guid CreateDynamicsSourceControl(IOrganizationService service, string solutionId, string mode)
+        {
+            syed_sourcecontrolqueue sourcecontrolqueue = new syed_sourcecontrolqueue();
+            sourcecontrolqueue.syed_Status = "Draft";
+            sourcecontrolqueue.syed_CheckInBySolution = true;
+            sourcecontrolqueue.syed_CheckInBySolutionId = solutionId;
+            sourcecontrolqueue.syed_name = "SOL-" + DateTime.Now.ToString();
+            sourcecontrolqueue.syed_Comment = mode + DateTime.Now.ToString();
+            sourcecontrolqueue.syed_overwritesolutionstxt = new OptionSetValue(433710000);
+            sourcecontrolqueue.syed_CheckIn = true;
+            if (mode == "Release")
+            {
+                sourcecontrolqueue.syed_IncludeInRelease = true;
+            }
+            else
+            {
+                sourcecontrolqueue.syed_IncludeInRelease = false;
+            }
+
+            Guid Id = service.Create(sourcecontrolqueue);
+            return Id;
+        }
     }
 }

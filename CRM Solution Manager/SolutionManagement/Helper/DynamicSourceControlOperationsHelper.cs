@@ -74,6 +74,8 @@ namespace SolutionManagement
             syed_sourcecontrolqueue postSourceControlQueue = null;
             if (CrmContext.InputParameters != null)
             {
+
+
                 if (CrmContext.MessageName.ToLower() == CRMConstant.PluginCreate)
                 {
                     if (CrmContext.PostEntityImages != null && CrmContext.PostEntityImages.Contains(CRMConstant.PluginPostImage))

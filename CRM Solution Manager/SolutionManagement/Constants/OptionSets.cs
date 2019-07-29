@@ -5,7 +5,7 @@
 //     Changes to this file may cause incorrect behavior and will be lost if
 //     the code is regenerated.
 // </auto-generated>
-// Created via this command line: "C:\Users\jkrishnan\AppData\Roaming\MscrmTools\XrmToolBox\Plugins\DLaB.EarlyBoundGenerator\crmsvcutil.exe" /url:"https://winpilot.api.crm8.dynamics.com/XRMServices/2011/Organization.svc" /namespace:"SolutionConstants" /out:"C:\Users\jkrishnan\AppData\Roaming\MscrmTools\XrmToolBox\Settings\EBG\OptionSets.cs" /codecustomization:"DLaB.CrmSvcUtilExtensions.OptionSet.CustomizeCodeDomService,DLaB.CrmSvcUtilExtensions" /codegenerationservice:"DLaB.CrmSvcUtilExtensions.OptionSet.CustomCodeGenerationService,DLaB.CrmSvcUtilExtensions" /codewriterfilter:"DLaB.CrmSvcUtilExtensions.OptionSet.CodeWriterFilterService,DLaB.CrmSvcUtilExtensions" /namingservice:"DLaB.CrmSvcUtilExtensions.NamingService,DLaB.CrmSvcUtilExtensions" /metadataproviderservice:"DLaB.CrmSvcUtilExtensions.BaseMetadataProviderService,DLaB.CrmSvcUtilExtensions" /username:"Pilot@WinPilot.onmicrosoft.com" /password:"********" 
+// Created via this command line: "C:\Users\m-jkrishnan\AppData\Roaming\MscrmTools\XrmToolBox\Plugins\DLaB.EarlyBoundGenerator\crmsvcutil.exe" /url:"https://winpilot.api.crm8.dynamics.com/XRMServices/2011/Organization.svc" /namespace:"SolutionConstants" /out:"C:\Users\m-jkrishnan\AppData\Roaming\MscrmTools\XrmToolBox\Settings\EBG\OptionSets.cs" /codecustomization:"DLaB.CrmSvcUtilExtensions.OptionSet.CustomizeCodeDomService,DLaB.CrmSvcUtilExtensions" /codegenerationservice:"DLaB.CrmSvcUtilExtensions.OptionSet.CustomCodeGenerationService,DLaB.CrmSvcUtilExtensions" /codewriterfilter:"DLaB.CrmSvcUtilExtensions.OptionSet.CodeWriterFilterService,DLaB.CrmSvcUtilExtensions" /namingservice:"DLaB.CrmSvcUtilExtensions.NamingService,DLaB.CrmSvcUtilExtensions" /metadataproviderservice:"DLaB.CrmSvcUtilExtensions.BaseMetadataProviderService,DLaB.CrmSvcUtilExtensions" /username:"Pilot@WinPilot.onmicrosoft.com" /password:"********" 
 //------------------------------------------------------------------------------
 
 namespace SolutionConstants
@@ -25,6 +25,18 @@ namespace SolutionConstants
 		
 		[System.Runtime.Serialization.EnumMemberAttribute()]
 		Snapshot = 1,
+	}
+	
+	[System.Runtime.Serialization.DataContractAttribute()]
+	[System.CodeDom.Compiler.GeneratedCodeAttribute("CrmSvcUtil", "9.0.0.9479")]
+	public enum syed_configurationsettings_StatusCode
+	{
+		
+		[System.Runtime.Serialization.EnumMemberAttribute()]
+		Active = 1,
+		
+		[System.Runtime.Serialization.EnumMemberAttribute()]
+		Inactive = 2,
 	}
 	
 	[System.Runtime.Serialization.DataContractAttribute()]

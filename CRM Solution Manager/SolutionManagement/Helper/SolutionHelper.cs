@@ -54,21 +54,30 @@ namespace SolutionManagement
         /// <param name="solutionId">CRM Solution GUID</param>
         /// <param name="tracingService">Tracing Service to trace error</param>
         /// <returns>returns Master solutions as entity collection</returns>
-        public static EntityCollection RetrieveMasterSolutionById(IOrganizationService service, Guid solutionId, ITracingService tracingService)
+        public static EntityCollection RetrieveMasterSolutionById(IOrganizationService service, string solutionId, ITracingService tracingService)
         {
             try
             {
                 string fetchXML = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
-                                      <entity name='syed_mastersolutions'>
-                                        <attribute name='syed_mastersolutionsid' />
-                                        <attribute name='syed_name' />
-                                        <attribute name='syed_solutionid' />
-                                        <order attribute='syed_name' descending='false' />
-                                        <filter type='and'>
-                                          <condition attribute='syed_solutionid' operator='eq' value='" + solutionId + @"' />
-                                       </filter>
-                                      </entity>
-                                   </fetch>";
+  <entity name='syed_mastersolutions'>
+    <attribute name='syed_mastersolutionsid' />
+    <attribute name='syed_name' />
+    <attribute name='syed_versionnumber' />
+    <attribute name='syed_version' />
+    <attribute name='syed_listofsolutions' />
+    <attribute name='syed_order' />
+    <attribute name='syed_solutionid' />
+    <attribute name='syed_publisher' />
+    <attribute name='syed_ismanaged' />
+    <attribute name='syed_installedon' />
+    <attribute name='syed_solutioninstalledon' />
+    <attribute name='syed_friendlyname' />
+    <order attribute='syed_name' descending='false' />
+    <filter type='and'>
+      <condition attribute='syed_solutionid' operator='eq' value='" + solutionId + @"' />
+    </filter>
+  </entity>
+</fetch>";
 
                 EntityCollection masterSolution = service.RetrieveMultiple(new FetchExpression(fetchXML));
                 return masterSolution;
@@ -210,5 +219,42 @@ namespace SolutionManagement
                 throw new InvalidPluginExecutionException(ex.Message.ToString(), ex);
             }
         }
+
+        /// <summary>
+        /// Method retrieves Master Solutions.
+        /// </summary>
+        /// <param name="service">Organization service</param>
+        /// <param name="sourceControlId">Dynamic Source Control GUID</param>
+        /// <param name="tracingService">Tracing Service to trace error</param>
+        /// <returns>returns Solution Details as entity collection</returns>
+        public static EntityCollection CRMSolutionById(IOrganizationService service, Guid sourceControlId, ITracingService tracingService)
+        {
+            try
+            {
+                string fetchXML = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+                                      <entity name='syed_solutiondetail'>
+                                        <attribute name='syed_solutiondetailid' />
+                                        <attribute name='syed_name' />
+                                        <attribute name='createdon' />
+                                        <attribute name='syed_order' />
+                                        <attribute name='syed_solutionid' />
+                                        <attribute name='syed_ismaster' />
+                                        <attribute name='syed_listofsolutions' />
+                                        <order attribute='syed_order' descending='false' />
+                                        <filter type='and'>
+                                          <condition attribute='syed_listofsolutionid' operator='eq'  uitype='syed_sourcecontrolqueue'  value='" + sourceControlId + @"' />
+                                        </filter>
+                                      </entity>
+                                    </fetch>";
+                EntityCollection associatedRecordList = service.RetrieveMultiple(new FetchExpression(fetchXML));
+                return associatedRecordList;
+            }
+            catch (Exception ex)
+            {
+                tracingService.Trace(ex.ToString());
+                throw new InvalidPluginExecutionException(ex.Message.ToString(), ex);
+            }
+        }
+
     }
 }

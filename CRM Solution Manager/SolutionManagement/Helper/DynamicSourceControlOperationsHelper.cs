@@ -9,6 +9,7 @@ namespace SolutionManagement
 {
     using System;
     using Microsoft.Xrm.Sdk;
+    using Microsoft.Xrm.Sdk.Query;
     using SolutionConstants;
 
     /// <summary>
@@ -26,7 +27,7 @@ namespace SolutionManagement
         public DynamicSourceControlOperationsHelper(IOrganizationService crmService, IOrganizationService crmInitiatingUserService, IPluginExecutionContext crmContext, ITracingService crmTracingService) : base(crmService, crmInitiatingUserService, crmContext, crmTracingService)
         {
         }
-        
+
         /// <summary>
         /// To delete Merge Solution records.
         /// </summary>
@@ -35,17 +36,30 @@ namespace SolutionManagement
         /// <param name="tracingService">Tracing Service to trace error</param>
         public static void DeleteSolutionDetail(IOrganizationService service, syed_sourcecontrolqueue sourceControlQueue, ITracingService tracingService)
         {
-            if (sourceControlQueue.syed_MergeSolutions != null)
+            if (sourceControlQueue.syed_CheckInBySolution != null && sourceControlQueue.syed_CheckInBySolutionId != null)
             {
-                bool mergeSolutions = sourceControlQueue.syed_MergeSolutions.Value;
-                if (mergeSolutions == false)
+                bool checkInBySolution = sourceControlQueue.syed_CheckInBySolution.Value;
+                string checkSolutionId = sourceControlQueue.syed_CheckInBySolutionId.ToString();
+                if (checkInBySolution == true && checkSolutionId != string.Empty)
                 {
-                    EntityCollection associatedRecordList = SolutionHelper.RetrieveSolutionDetailsToBeMergedByListOfSolutionId(service, sourceControlQueue.Id, tracingService);
-                    if (associatedRecordList.Entities.Count > 0)
+                    EntityCollection crmSolution = SolutionHelper.RetrieveMasterSolutionById(service, checkSolutionId, tracingService);
+                    if (crmSolution.Entities.Count > 0)
                     {
-                        foreach (syed_mergesolutions syed_Mergesolutions in associatedRecordList.Entities)
+                        foreach (syed_mastersolutions mastersolutions in crmSolution.Entities)
                         {
-                            service.Delete(syed_Mergesolutions.LogicalName, syed_Mergesolutions.Id);
+                            ExecuteOperations.CreateSolutionDetail(service, mastersolutions, sourceControlQueue);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        EntityCollection solutionCollection = SolutionHelper.RetrieveSolutionById(service, new Guid(checkSolutionId), tracingService);
+                        foreach (Solution sol in solutionCollection.Entities)
+                        {
+                            Guid Id = ExecuteOperations.CreateMasterSolution(service, sol);
+                            syed_mastersolutions syed_Mastersolutions = service.Retrieve(syed_mastersolutions.EntityLogicalName.ToString(), Id, new ColumnSet(true)).ToEntity<syed_mastersolutions>(); ;
+                            ExecuteOperations.CreateSolutionDetail(service, syed_Mastersolutions, sourceControlQueue);
+                            break;
                         }
                     }
                 }
@@ -60,7 +74,7 @@ namespace SolutionManagement
             syed_sourcecontrolqueue postSourceControlQueue = null;
             if (CrmContext.InputParameters != null)
             {
-                if (CrmContext.MessageName.ToLower() == CRMConstant.PluginUpdate)
+                if (CrmContext.MessageName.ToLower() == CRMConstant.PluginCreate)
                 {
                     if (CrmContext.PostEntityImages != null && CrmContext.PostEntityImages.Contains(CRMConstant.PluginPostImage))
                     {

@@ -72,7 +72,7 @@ namespace SolutionManagement
         {
             bool isAvailable = false;
 
-            EntityCollection masterRecords = SolutionHelper.RetrieveMasterSolutionById(service, solutionId, tracingService);
+            EntityCollection masterRecords = SolutionHelper.RetrieveMasterSolutionById(service, solutionId.ToString(), tracingService);
             if (masterRecords.Entities.Count > 0)
             {
                 isAvailable = true;

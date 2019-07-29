@@ -1,7 +1,7 @@
 if (typeof (SYED) === "undefined") {
     SYED = { __namespace: true };
 }
-if (typeof (SYED.SolutionDetail) === "undefined") {
+if (typeof (SYED.MergeSolution) === "undefined") {
     SYED.MergeSolution = { __namespace: true };
 }
 
@@ -24,7 +24,8 @@ SYED.MergeSolution.EventHandler =
                             formContext.getAttribute("syed_solutioninstalledon").setValue(new Date(result["syed_solutioninstalledon"]));
                             formContext.getAttribute("syed_uniquename").setValue(result["syed_listofsolutions"]);
                             formContext.getAttribute("syed_version").setValue(result["syed_version"]);
-
+                            
+                            formContext.getAttribute("syed_order").setValue(0);
                         },
                         function (error) {
                             Xrm.Utility.alertDialog(error.message);
@@ -40,6 +41,7 @@ SYED.MergeSolution.EventHandler =
                         formContext.getAttribute("syed_solutioninstalledon").setValue("");
                         formContext.getAttribute("syed_uniquename").setValue("");
                         formContext.getAttribute("syed_version").setValue("");
+                        formContext.getAttribute("syed_order").setValue(0);
                     }
                 }
             }

@@ -24,6 +24,23 @@ SYED.SolutionDetail.EventHandler =
             }
         },
 
+        Execute: function (executionContext) {
+            try {
+                var formContext = executionContext.getFormContext();
+                var formType = formContext.ui.getFormType();
+
+                if (formType == "1") {
+                    formContext.ui.tabs.get("MergeSolution").setVisible(false);
+                }
+                else {
+                    formContext.ui.tabs.get("MergeSolution").setVisible(true);
+                }
+            }
+            catch (ex) {
+                console.log("Error at SYED.SolutionDetail.EventHandler.Execute function: " + ex.message + "|" + "Stack: " + ex.stack);
+                throw ex;
+            }
+        },
 
         SetSourcecontrolValues: function (executionContext) {
             try {
@@ -37,12 +54,13 @@ SYED.SolutionDetail.EventHandler =
                             formContext.getAttribute("syed_friendlyname").setValue(result["syed_friendlyname"]);
                             formContext.getAttribute("syed_ismanaged").setValue(result["syed_ismanaged"]);
                             formContext.getAttribute("syed_name").setValue(result["syed_name"]);
-                            formContext.getAttribute("syed_name").setValue(result["syed_name"]);
                             formContext.getAttribute("syed_publisher").setValue(result["syed_publisher"]);
                             formContext.getAttribute("syed_solutioninstalledon").setValue(new Date(result["syed_solutioninstalledon"]));
                             formContext.getAttribute("syed_listofsolutions").setValue(result["syed_listofsolutions"]);
                             formContext.getAttribute("syed_version").setValue(result["syed_version"]);
                             formContext.getAttribute("syed_solutionid").setValue(result["syed_solutionid"]);
+                            formContext.getAttribute("syed_name").setValue("SOL-" + new Date().toLocaleString());
+                            formContext.getAttribute("syed_order").setValue(0);
 
                         },
                         function (error) {
@@ -55,12 +73,12 @@ SYED.SolutionDetail.EventHandler =
                         formContext.getAttribute("syed_friendlyname").setValue("");
                         formContext.getAttribute("syed_ismanaged").setValue("");
                         formContext.getAttribute("syed_name").setValue("");
-                        formContext.getAttribute("syed_name").setValue("");
                         formContext.getAttribute("syed_publisher").setValue("");
                         formContext.getAttribute("syed_solutioninstalledon").setValue("");
                         formContext.getAttribute("syed_listofsolutions").setValue("");
                         formContext.getAttribute("syed_version").setValue("");
                         formContext.getAttribute("syed_solutionid").setValue("");
+                        formContext.getAttribute("syed_order").setValue(0);
                     }
                 }
             }

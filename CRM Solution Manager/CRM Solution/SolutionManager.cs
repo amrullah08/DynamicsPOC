@@ -94,9 +94,12 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                 {
                     copySettings.TargetSolutions.Add(solution);
                 }
-                else if (solutionFileInfo.SolutionsToBeMerged.Any(cc => cc.ToString().ToLower().Equals(solution["uniquename"].ToString().ToLower())))
+                else if (solutionFileInfo.SolutionsToBeMerged.Count > 0)
                 {
-                    copySettings.SourceSolutions.Add(solution);
+                    if (solutionFileInfo.SolutionsToBeMerged.Any(cc => cc.ToString().ToLower().Equals(solution["uniquename"].ToString().ToLower())))
+                    {
+                        copySettings.SourceSolutions.Add(solution);
+                    }
                 }
             }
 

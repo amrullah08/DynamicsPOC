@@ -13,6 +13,7 @@ namespace CrmSolution
     using System.Management.Automation;
     using System.ServiceModel.Description;
     using System.Text;
+    using System.Threading.Tasks;
     using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Client;
@@ -333,7 +334,7 @@ namespace CrmSolution
 
             if (solutionImportResult == "success")
             {
-                this.PublishAllCustomizationChanges(serviceProxy);
+                this.CallPublishAllCustomizationChanges(serviceProxy, solutionFile);
                 solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuePublishSuccessfulStatus;
             }
 
@@ -342,15 +343,30 @@ namespace CrmSolution
         }
 
         /// <summary>
+        /// Method runs in different thread to publish all customization
+        /// </summary>
+        /// <param name="serviceProxy">service proxy</param>
+        /// <param name="solutionFile">solution file</param>
+        private async void CallPublishAllCustomizationChanges(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
+        {
+            await Task.Run(() => this.PublishAllCustomizationChanges(serviceProxy, solutionFile));
+        }
+
+        /// <summary>
         /// Method publish all the customization
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
-        public void PublishAllCustomizationChanges(OrganizationServiceProxy serviceProxy)
+        public void PublishAllCustomizationChanges(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
         {
+
             PublishAllXmlRequest publishAllXmlRequest = new PublishAllXmlRequest();
             serviceProxy.Execute(publishAllXmlRequest);
             Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Successfully published solution components." + "<br>");
-            Console.WriteLine("Successfully published solution components.");
+            solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuePublishSuccessfulStatus;
+            solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
+            solutionFile.Update();
+            Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(Singleton.CrmConstantsInstance.ServiceProxy, solutionFile.Solution);
+
         }
 
         /// <summary>

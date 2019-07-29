@@ -71,7 +71,7 @@ namespace CrmSolution
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append(solutionFile.Solution.GetAttributeValue<string>("syed_webjobs"));
                         HashSet<string> hashSet = new HashSet<string>();
                         this.TryPushToRepository(committerName, committerEmail, authorEmail, solutionFile, solutionFilePath, hashSet, gitRepositoryManager);
-                        Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(Singleton.CrmConstantsInstance.ServiceProxy, solutionFile.Solution);
+                        ////  Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(Singleton.CrmConstantsInstance.ServiceProxy, solutionFile.Solution);
                     }
                 }
                 catch (Exception ex)
@@ -125,6 +125,7 @@ namespace CrmSolution
             }
             catch (Exception ex)
             {
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(ex.Message);
                 Console.WriteLine(ex.Message);
             }
         }

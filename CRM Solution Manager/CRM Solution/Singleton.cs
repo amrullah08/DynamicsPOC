@@ -18,12 +18,12 @@ namespace CrmSolution
         private static RepositoryConfigurationConstants repositoryConfigurationConstantsInstance = null;
 
         /// <summary>
-        /// Crm Constants Instance
+        /// CRM Constants Instance
         /// </summary>
         private static CrmConstants crmConstantsInstance = null;
 
         /// <summary>
-        /// Crm Solution Helper Instance
+        /// CRM Solution Helper Instance
         /// </summary>
         private static CrmSolutionHelper crmSolutionHelperInstance = null;
 
@@ -59,7 +59,7 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Gets object of CrmConstants class
+        /// Gets object of CRM Constants class
         /// </summary>
         public static CrmConstants CrmConstantsInstance
         {
@@ -75,7 +75,7 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Gets object of CrmSolutionHelper class
+        /// Gets object of CRM SolutionHelper class
         /// </summary>
         public static CrmSolutionHelper CrmSolutionHelperInstance
         {

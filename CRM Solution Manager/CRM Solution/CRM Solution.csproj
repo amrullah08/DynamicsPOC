@@ -123,13 +123,20 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="DevOps_1_0_0_0.zip" />
+    <None Include="MultilpleSolutionsImport.ps1">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
       <SubType>Designer</SubType>
     </None>
     <None Include="Properties\PublishProfiles\CRMSolution20190523100130 - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\CRMSolutionWebJobs - Web Deploy.pubxml" />
     <None Include="Properties\webjob-publish-settings.json" />
     <None Include="Settings.StyleCop" />
+    <None Include="SolutionToBeImported.ps1">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="CoreTools\CrmSvcUtil.exe">

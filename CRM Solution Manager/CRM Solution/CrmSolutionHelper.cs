@@ -360,6 +360,7 @@ namespace CrmSolution
         {
 
             PublishAllXmlRequest publishAllXmlRequest = new PublishAllXmlRequest();
+            serviceProxy.Timeout = new TimeSpan(0, 10, 0);
             serviceProxy.Execute(publishAllXmlRequest);
             Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Successfully published solution components." + "<br>");
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuePublishSuccessfulStatus;
@@ -456,10 +457,8 @@ namespace CrmSolution
         /// <param name="solutionFile">solution file info</param>
         private void ExportMasterSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
         {
-            if (solutionFile.SolutionsToBeMerged.Count > 0)
-            {
-                this.MergeSolutions(solutionFile, serviceProxy);
-            }
+
+            this.MergeSolutions(solutionFile, serviceProxy);
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportStatus;
             solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
@@ -649,6 +648,7 @@ namespace CrmSolution
 
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + message + solutionName + "<br>");
                 Console.WriteLine(message + solutionName);
+                serviceProxy.Timeout = new TimeSpan(0, 10, 0);
                 ExportSolutionResponse exportResponse = (ExportSolutionResponse)serviceProxy.Execute(exportRequest);
 
                 // Handles the response

@@ -103,46 +103,77 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                 }
             }
 
-            Console.WriteLine("Copying components into Master Solution.");
-            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Copying components into Master Solution</th></tr>");
-
-            var components = this.CopyComponents(copySettings);
-            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
-
-            var componentsMaster = this.RetrieveComponentsFromSolutions(copySettings.TargetSolutions.Select(T => T.Id).ToList(), copySettings.ComponentsTypes);
-            var differentComponents = (from cm in componentsMaster where !components.Any(list => list.GetAttributeValue<Guid>("objectid") == cm.GetAttributeValue<Guid>("objectid")) select cm).ToList();
-
-            Console.WriteLine("Displaying different(additional) components after merging");
-            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Displaying different(additional) components after merging</th></tr>");
-
-            if (differentComponents != null)
+            if (solutionFileInfo.SolutionsToBeMerged.Count > 0)
             {
-                foreach (var target in copySettings.TargetSolutions)
-                {
-                    foreach (var componentdetails in differentComponents)
-                    {
-                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
-                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:LightCyan;border: 1px solid #ccc'>");
+                Console.WriteLine("Copying components into Master Solution.");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Copying components into Master Solution</th></tr>");
+                var components = this.CopyComponents(copySettings);
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
+                var componentsMaster = this.RetrieveComponentsFromSolutions(copySettings.TargetSolutions.Select(T => T.Id).ToList(), copySettings.ComponentsTypes);
+                var differentComponents = (from cm in componentsMaster where !components.Any(list => list.GetAttributeValue<Guid>("objectid") == cm.GetAttributeValue<Guid>("objectid")) select cm).ToList();
+                Console.WriteLine("Displaying different(additional) components after merging");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Displaying different(additional) components after merging</th></tr>");
 
-                        this.GetComponentDetails(copySettings, target, componentdetails, componentdetails.GetAttributeValue<OptionSetValue>("componenttype").Value, componentdetails.GetAttributeValue<Guid>("objectid"), "componenttype", null);
-                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
-                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
+                if (differentComponents != null)
+                {
+                    foreach (var target in copySettings.TargetSolutions)
+                    {
+                        foreach (var componentdetails in differentComponents)
+                        {
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:LightCyan;border: 1px solid #ccc'>");
+
+                            this.GetComponentDetails(copySettings, target, componentdetails, componentdetails.GetAttributeValue<OptionSetValue>("componenttype").Value, componentdetails.GetAttributeValue<Guid>("objectid"), "componenttype", null);
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
+                        }
                     }
                 }
+                else
+                {
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:LightCyan;border: 1px solid #ccc'>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" No different(additional components found after Merging)");
+                    Console.WriteLine("No different(additional components found after Merging)");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
+                }
+
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
+                solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemMergingSuccessfulStatus;
+                solutionFileInfo.Update();
             }
             else
             {
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:LightCyan;border: 1px solid #ccc'>");
-                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" No different(additional components found after Merging)");
-                Console.WriteLine("No different(additional components found after Merging)");
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
-            }
+                var componentsMaster = this.RetrieveComponentsFromSolutions(copySettings.TargetSolutions.Select(T => T.Id).ToList(), copySettings.ComponentsTypes);
 
-            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
-            solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemMergingSuccessfulStatus;
-            solutionFileInfo.Update();
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>List of components in Master Solution</th></tr>");
+
+                if (copySettings.TargetSolutions.Count > 0)
+                {
+                    foreach (var target in copySettings.TargetSolutions)
+                    {
+                        foreach (var component in componentsMaster)
+                        {
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:powderblue;border: 1px solid #ccc'>");
+                            this.GetComponentDetails(copySettings, target, component, component.GetAttributeValue<OptionSetValue>("componenttype").Value, component.GetAttributeValue<Guid>("objectid"), "componenttype", null);
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
+                        }
+                    }
+                }
+                if (componentsMaster.Count == 0)
+                {
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:powderblue;border: 1px solid #ccc'>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("No Components to Display");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
+                }
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
+
+            }
         }
 
         /// <summary>

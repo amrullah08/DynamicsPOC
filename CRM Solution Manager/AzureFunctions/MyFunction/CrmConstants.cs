@@ -235,6 +235,7 @@ namespace MyFunction
             {
                 this.sdkService.HeaderToken = token;
                 System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                this.sdkService.InnerChannel.OperationTimeout = new TimeSpan(1, 0, 0);
                 this.service = (IOrganizationService)this.sdkService != null ? (IOrganizationService)this.sdkService : null;
             }
             

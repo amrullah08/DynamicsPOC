@@ -181,6 +181,11 @@
     <Content Include="CoreTools\SolutionPackager.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Scripts\MergeSoluitons\EventHandler.js" />
+    <Content Include="Scripts\SolutionDetails\EventHandler.js" />
+    <Content Include="Scripts\Solution\JavaScript1.js" />
+    <Content Include="Scripts\Solution\Ribbon.js" />
+    <Content Include="Scripts\SourceControlQueue\EventHandler.js" />
     <Content Include="TextFile1.txt" />
   </ItemGroup>
   <ItemGroup>

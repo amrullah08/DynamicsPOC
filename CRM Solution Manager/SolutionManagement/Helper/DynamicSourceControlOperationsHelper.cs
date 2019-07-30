@@ -36,6 +36,12 @@ namespace SolutionManagement
         /// <param name="tracingService">Tracing Service to trace error</param>
         public static void CreateSolutionDetail(IOrganizationService service, syed_sourcecontrolqueue sourceControlQueue, ITracingService tracingService)
         {
+            EntityCollection copyTemplate = SolutionHelper.RetrieveDynamicsSourceControlTemplate(service, tracingService);
+            foreach (syed_solutiondetail solutionDetail in copyTemplate.Entities)
+            {
+                ExecuteOperations.CreateSolutionDetail(service, solutionDetail, sourceControlQueue);
+                break;
+            }
 
             EntityCollection crmSolution = SolutionHelper.RetrieveMasterSolutionById(service, sourceControlQueue.syed_CheckInBySolutionId, tracingService);
             if (crmSolution.Entities.Count > 0)

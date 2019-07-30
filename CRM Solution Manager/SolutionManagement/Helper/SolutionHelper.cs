@@ -256,5 +256,36 @@ namespace SolutionManagement
             }
         }
 
+        /// <summary>
+        /// Method retrieves Master Solutions.
+        /// </summary>
+        /// <param name="service">Organization service</param>
+        /// <param name="sourceControlId">Dynamic Source Control GUID</param>
+        /// <param name="tracingService">Tracing Service to trace error</param>
+        /// <returns>returns Solution Details as entity collection</returns>
+        public static EntityCollection RetrieveDynamicsSourceControlTemplate(IOrganizationService service, ITracingService tracingService)
+        {
+            try
+            {
+                string fetchXML = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+  <entity name='syed_solutiondetail'>
+     <all-attributes />
+    <order attribute='modifiedon' descending='true' />
+    <link-entity name='syed_sourcecontrolqueue' from='syed_sourcecontrolqueueid' to='syed_listofsolutionid' link-type='inner' alias='ae'>
+      <filter type='and'>
+        <condition attribute='syed_comment' operator='like' value='%Template%' />
+      </filter>
+    </link-entity>
+  </entity>
+</fetch>";
+                EntityCollection templateRecord = service.RetrieveMultiple(new FetchExpression(fetchXML));
+                return templateRecord;
+            }
+            catch (Exception ex)
+            {
+                tracingService.Trace(ex.ToString());
+                throw new InvalidPluginExecutionException(ex.Message.ToString(), ex);
+            }
+        }
     }
 }

@@ -70,6 +70,29 @@ namespace SolutionManagement
         /// </summary>
         /// <param name="service">Organization service</param>
         /// <param name="solution">CRM Solution</param>
+        public static void CreateSolutionDetail(IOrganizationService service, syed_solutiondetail syed_Solutiondetail, syed_sourcecontrolqueue syed_Sourcecontrolqueue)
+        {
+            syed_solutiondetail solutiondetail = new syed_solutiondetail();
+            solutiondetail.syed_CRMSolutionsId = syed_Solutiondetail.syed_CRMSolutionsId;
+            solutiondetail.syed_ListofSolutionId = new EntityReference(syed_Sourcecontrolqueue.LogicalName.ToString(), syed_Sourcecontrolqueue.Id);
+            solutiondetail.syed_friendlyname = syed_Solutiondetail.syed_friendlyname;
+            solutiondetail.syed_Publisher = syed_Solutiondetail.syed_Publisher;
+            solutiondetail.syed_SolutionInstalledOn = syed_Solutiondetail.syed_SolutionInstalledOn;
+            solutiondetail.syed_Version = syed_Solutiondetail.syed_Version;
+            solutiondetail.syed_IsManaged = syed_Solutiondetail.syed_IsManaged;
+            solutiondetail.syed_SolutionId = syed_Solutiondetail.syed_SolutionId;
+            solutiondetail.syed_ListofSolutions = syed_Solutiondetail.syed_ListofSolutions;
+            solutiondetail.syed_ExportAs = syed_Solutiondetail.syed_ExportAs;
+            solutiondetail.syed_Order = syed_Solutiondetail.syed_Order;
+            solutiondetail.syed_name = syed_Solutiondetail.syed_name;
+            service.Create(solutiondetail);
+        }
+
+        /// <summary>
+        /// Method creates Master Solution Record
+        /// </summary>
+        /// <param name="service">Organization service</param>
+        /// <param name="solution">CRM Solution</param>
         public static Guid CreateDynamicsSourceControl(IOrganizationService service, string solutionId, string mode)
         {
             syed_sourcecontrolqueue sourcecontrolqueue = new syed_sourcecontrolqueue();

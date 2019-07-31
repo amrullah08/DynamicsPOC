@@ -5,7 +5,6 @@
 // <author>Jaiyanthi</author>
 //-----------------------------------------------------------------------
 
-
 namespace SolutionManagement
 {
     using System;
@@ -18,7 +17,7 @@ namespace SolutionManagement
     public class EncryptPasswordHelper : DevOpsBusinessBase, IPluginHelper
     {
         /// <summary>
-        ///  Initializes a new instance of the <see cref="DynamicSourceControlOperationsHelper" /> class.
+        ///  Initializes a new instance of the <see cref="EncryptPasswordHelper" /> class.
         /// </summary>
         /// <param name="crmService">Organization service</param>
         /// <param name="crmInitiatingUserService">Initiating User Service</param>
@@ -37,7 +36,9 @@ namespace SolutionManagement
             if (CrmContext.InputParameters != null)
             {
                 if (CrmContext.Depth < 1)
+                {
                     return;
+                }
 
                 if (CrmContext.MessageName.ToLower() == CRMConstant.PluginCreate || CrmContext.MessageName.ToLower() == CRMConstant.PluginUpdate)
                 {

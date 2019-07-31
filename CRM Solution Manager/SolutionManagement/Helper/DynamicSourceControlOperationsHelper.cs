@@ -57,8 +57,8 @@ namespace SolutionManagement
                 EntityCollection solutionCollection = SolutionHelper.RetrieveSolutionById(service, new Guid(sourceControlQueue.syed_CheckInBySolutionId), tracingService);
                 foreach (Solution sol in solutionCollection.Entities)
                 {
-                    Guid Id = ExecuteOperations.CreateMasterSolution(service, sol);
-                    syed_mastersolutions syed_Mastersolutions = service.Retrieve(syed_mastersolutions.EntityLogicalName.ToString(), Id, new ColumnSet(true)).ToEntity<syed_mastersolutions>(); ;
+                    Guid id = ExecuteOperations.CreateMasterSolution(service, sol);
+                    syed_mastersolutions syed_Mastersolutions = service.Retrieve(syed_mastersolutions.EntityLogicalName.ToString(), id, new ColumnSet(true)).ToEntity<syed_mastersolutions>();
                     ExecuteOperations.CreateSolutionDetail(service, syed_Mastersolutions, sourceControlQueue);
                     break;
                 }
@@ -66,18 +66,18 @@ namespace SolutionManagement
         }
 
         /// <summary>
-        /// To delete Merge Solution records.
+        /// To create Dynamics source control and create associated solution details.
         /// </summary>
         /// <param name="service">Organization service</param>
-        /// <param name="sourceControlQueue">Dynamic Source Control entity GUID</param>
+        /// <param name="solutionId">CRM Solution id</param>
+        /// <param name="checkIn">check In</param>
         /// <param name="tracingService">Tracing Service to trace error</param>
-        public static void CreateDynmicsSourceControl(IOrganizationService service, string SolutionId, string CheckIn, ITracingService tracingService)
+        public static void CreateDynmicsSourceControl(IOrganizationService service, string solutionId, string checkIn, ITracingService tracingService)
         {
-            Guid Id = ExecuteOperations.CreateDynamicsSourceControl(service, SolutionId, CheckIn);
-            syed_sourcecontrolqueue syed_Sourcecontrolqueue = service.Retrieve(syed_sourcecontrolqueue.EntityLogicalName.ToString(), Id, new ColumnSet(true)).ToEntity<syed_sourcecontrolqueue>();
+            Guid id = ExecuteOperations.CreateDynamicsSourceControl(service, solutionId, checkIn);
+            syed_sourcecontrolqueue syed_Sourcecontrolqueue = service.Retrieve(syed_sourcecontrolqueue.EntityLogicalName.ToString(), id, new ColumnSet(true)).ToEntity<syed_sourcecontrolqueue>();
             CreateSolutionDetail(service, syed_Sourcecontrolqueue, tracingService);
         }
-
 
         /// <summary>
         ///  Dynamics Source Control Operations

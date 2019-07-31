@@ -343,30 +343,20 @@ namespace CrmSolution
         }
 
         /// <summary>
-        /// Method runs in different thread to publish all customization
-        /// </summary>
-        /// <param name="serviceProxy">service proxy</param>
-        /// <param name="solutionFile">solution file</param>
-        private async void CallPublishAllCustomizationChanges(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
-        {
-            await Task.Run(() => this.PublishAllCustomizationChanges(serviceProxy, solutionFile));
-        }
-
-        /// <summary>
         /// Method publish all the customization
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
+        /// <param name="solutionFile">solution File</param>
         public void PublishAllCustomizationChanges(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
         {
-
             PublishAllXmlRequest publishAllXmlRequest = new PublishAllXmlRequest();
+            serviceProxy.Timeout = new TimeSpan(0, 10, 0);
             serviceProxy.Execute(publishAllXmlRequest);
             Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Successfully published solution components." + "<br>");
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuePublishSuccessfulStatus;
             solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
             solutionFile.Update();
             Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(Singleton.CrmConstantsInstance.ServiceProxy, solutionFile.Solution);
-
         }
 
         /// <summary>
@@ -402,6 +392,16 @@ namespace CrmSolution
                 Console.WriteLine(ex.Message);
                 throw new Exception(ex.Message.ToString(), ex);
             }
+        }
+
+        /// <summary>
+        /// Method runs in different thread to publish all customization
+        /// </summary>
+        /// <param name="serviceProxy">service proxy</param>
+        /// <param name="solutionFile">solution file</param>
+        private async void CallPublishAllCustomizationChanges(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
+        {
+            await Task.Run(() => this.PublishAllCustomizationChanges(serviceProxy, solutionFile));
         }
 
         /// <summary>
@@ -456,10 +456,7 @@ namespace CrmSolution
         /// <param name="solutionFile">solution file info</param>
         private void ExportMasterSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
         {
-            if (solutionFile.SolutionsToBeMerged.Count > 0)
-            {
-                this.MergeSolutions(solutionFile, serviceProxy);
-            }
+            this.MergeSolutions(solutionFile, serviceProxy);
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueExportStatus;
             solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
@@ -649,6 +646,7 @@ namespace CrmSolution
 
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + message + solutionName + "<br>");
                 Console.WriteLine(message + solutionName);
+                serviceProxy.Timeout = new TimeSpan(0, 10, 0);
                 ExportSolutionResponse exportResponse = (ExportSolutionResponse)serviceProxy.Execute(exportRequest);
 
                 // Handles the response

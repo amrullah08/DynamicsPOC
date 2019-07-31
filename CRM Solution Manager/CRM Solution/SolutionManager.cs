@@ -103,69 +103,78 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                 }
             }
 
-            Console.WriteLine("Copying components into Master Solution.");
-            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Copying components into Master Solution</th></tr>");
-
-            var components = this.CopyComponents(copySettings);
-            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
-
-            var componentsMaster = this.RetrieveComponentsFromSolutions(copySettings.TargetSolutions.Select(T => T.Id).ToList(), copySettings.ComponentsTypes);
-            var differentComponents = (from cm in componentsMaster where !components.Any(list => list.GetAttributeValue<Guid>("objectid") == cm.GetAttributeValue<Guid>("objectid")) select cm).ToList();
-
-            Console.WriteLine("Displaying different(additional) components after merging");
-            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Displaying different(additional) components after merging</th></tr>");
-
-            if (differentComponents != null)
+            if (solutionFileInfo.SolutionsToBeMerged.Count > 0)
             {
-                foreach (var target in copySettings.TargetSolutions)
-                {
-                    foreach (var componentdetails in differentComponents)
-                    {
-                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
-                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:LightCyan;border: 1px solid #ccc'>");
+                Console.WriteLine("Copying components into Master Solution.");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Copying components into Master Solution</th></tr>");
+                var components = this.CopyComponents(copySettings);
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
+                var componentsMaster = this.RetrieveComponentsFromSolutions(copySettings.TargetSolutions.Select(T => T.Id).ToList(), copySettings.ComponentsTypes);
+                var differentComponents = (from cm in componentsMaster where !components.Any(list => list.GetAttributeValue<Guid>("objectid") == cm.GetAttributeValue<Guid>("objectid")) select cm).ToList();
+                Console.WriteLine("Displaying different(additional) components after merging");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Displaying different(additional) components after merging</th></tr>");
 
-                        this.GetComponentDetails(copySettings, target, componentdetails, componentdetails.GetAttributeValue<OptionSetValue>("componenttype").Value, componentdetails.GetAttributeValue<Guid>("objectid"), "componenttype", null);
-                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
-                        Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
+                if (differentComponents != null)
+                {
+                    foreach (var target in copySettings.TargetSolutions)
+                    {
+                        foreach (var componentdetails in differentComponents)
+                        {
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:LightCyan;border: 1px solid #ccc'>");
+
+                            this.GetComponentDetails(copySettings, target, componentdetails, componentdetails.GetAttributeValue<OptionSetValue>("componenttype").Value, componentdetails.GetAttributeValue<Guid>("objectid"), "componenttype", null);
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
+                        }
                     }
                 }
+                else
+                {
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:LightCyan;border: 1px solid #ccc'>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" No different(additional components found after Merging)");
+                    Console.WriteLine("No different(additional components found after Merging)");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
+                }
+
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
+                solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemMergingSuccessfulStatus;
+                solutionFileInfo.Update();
             }
             else
             {
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:LightCyan;border: 1px solid #ccc'>");
-                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" No different(additional components found after Merging)");
-                Console.WriteLine("No different(additional components found after Merging)");
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
-                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
-            }
+                var componentsMaster = this.RetrieveComponentsFromSolutions(copySettings.TargetSolutions.Select(T => T.Id).ToList(), copySettings.ComponentsTypes);
 
-            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
-            solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemMergingSuccessfulStatus;
-            solutionFileInfo.Update();
-        }
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>List of components in Master Solution</th></tr>");
 
-        /// <summary>
-        /// Method retrieves target components
-        /// </summary>
-        /// <param name="serviceProxy">service proxy</param>
-        /// <param name="retrieveResponse">retrieve response</param>
-        /// <param name="type">type</param>
-        private void QueryTargetComponents(OrganizationServiceProxy serviceProxy, RetrieveResponse retrieveResponse, string type)
-        {
-            var qe = new QueryExpression(type)
-            {
-                ColumnSet = new ColumnSet(true),
-                Criteria = new FilterExpression
+                if (copySettings.TargetSolutions.Count > 0)
                 {
-                    Conditions =
-                                {
-                                    new ConditionExpression("name", ConditionOperator.Equal, retrieveResponse.Entity.Attributes["name"].ToString()),
-                                }
+                    foreach (var target in copySettings.TargetSolutions)
+                    {
+                        foreach (var component in componentsMaster)
+                        {
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:powderblue;border: 1px solid #ccc'>");
+                            this.GetComponentDetails(copySettings, target, component, component.GetAttributeValue<OptionSetValue>("componenttype").Value, component.GetAttributeValue<Guid>("objectid"), "componenttype", null);
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
+                        }
+                    }
                 }
-            };
-            EntityCollection solutionComponents = serviceProxy.RetrieveMultiple(qe);
-            Entity solutionCom = solutionComponents.Entities[0];
+
+                if (componentsMaster.Count == 0)
+                {
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:powderblue;border: 1px solid #ccc'>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("No Components to Display");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
+                }
+
+                Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
+            }
         }
 
         /// <summary>
@@ -177,6 +186,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
         /// <param name="componentType">component Type</param>
         /// <param name="componentId">component Id</param>
         /// <param name="componentDetails">component Details</param>
+        /// <param name="targetService">target Instance Service</param>
         public void GetComponentDetails(CopySettings settings, Entity target, Entity component, int componentType, Guid componentId, string componentDetails, OrganizationServiceProxy targetService)
         {
             Entity sourceSolution = null;
@@ -202,6 +212,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                         targetEntityReq.LogicalName = retrievedEntity.EntityMetadata.LogicalName;
                         var targetRetrievedEntity = (RetrieveEntityResponse)targetService.Execute(targetEntityReq);
                     }
+
                     break;
 
                 case Constants.WebResources:
@@ -217,6 +228,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedWebresource, "webresource");
                     }
+
                     break;
 
                 case Constants.Attribute:
@@ -234,6 +246,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                         targetAttributeReq.LogicalName = retrievedAttribute.AttributeMetadata.LogicalName;
                         var targetRetrievedAttribute = (RetrieveAttributeResponse)targetService.Execute(targetAttributeReq);
                     }
+
                     break;
 
                 case Constants.Relationship:
@@ -250,6 +263,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                         targetRelationshipReq.Name = retrievedrelationshipReq.RelationshipMetadata.SchemaName;
                         var targetRetrievedrelationshipReq = (RetrieveRelationshipResponse)targetService.Execute(targetRelationshipReq);
                     }
+
                     break;
 
                 case Constants.DisplayString:
@@ -265,6 +279,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedDisplayString, "displaystring");
                     }
+
                     break;
 
                 case Constants.SavedQuery:
@@ -280,6 +295,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSavedQuery, "savedquery");
                     }
+
                     break;
 
                 case Constants.SavedQueryVisualization:
@@ -295,6 +311,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSavedQueryVisualization, "savedqueryvisualization");
                     }
+
                     break;
 
                 case Constants.SystemForm:
@@ -310,6 +327,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSystemForm, "systemform");
                     }
+
                     break;
 
                 case Constants.HierarchyRule:
@@ -325,6 +343,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedHierarchyRule, "hierarchyrule");
                     }
+
                     break;
 
                 case Constants.SiteMap:
@@ -340,6 +359,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSiteMap, "sitemap");
                     }
+
                     break;
 
                 case Constants.PluginAssembly:
@@ -355,6 +375,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedPluginAssembly, "pluginassembly");
                     }
+
                     break;
 
                 case Constants.PluginType:
@@ -370,6 +391,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedPluginTypeRequest, "plugintype");
                     }
+
                     break;
 
                 case Constants.SDKMessageProcessingStep:
@@ -385,6 +407,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSDKMessageProcessingStep, "sdkmessageprocessingstep");
                     }
+
                     break;
 
                 case Constants.ServiceEndpoint:
@@ -400,6 +423,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedServiceEndpoint, "serviceendpoint");
                     }
+
                     break;
 
                 case Constants.Report:
@@ -415,6 +439,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedReport, "report");
                     }
+
                     break;
 
                 case Constants.Role:
@@ -430,6 +455,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedRole, "role");
                     }
+
                     break;
 
                 case Constants.FieldSecurityProfile:
@@ -445,6 +471,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedFieldSecurityProfile, "fieldsecurityprofile");
                     }
+
                     break;
 
                 case Constants.ConnectionRole:
@@ -460,6 +487,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedConnectionRole, "connectionrole");
                     }
+
                     break;
 
                 case Constants.Workflow:
@@ -475,6 +503,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedWorkflow, "workflow");
                     }
+
                     break;
 
                 case Constants.KBArticleTemplate:
@@ -490,6 +519,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedKBArticleTemplate, "kbarticletemplate");
                     }
+
                     break;
 
                 case Constants.MailMergeTemplate:
@@ -505,6 +535,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedMailMergeTemplate, "mailmergetemplate");
                     }
+
                     break;
 
                 case Constants.ContractTemplate:
@@ -520,6 +551,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedContractTemplate, "contracttemplate");
                     }
+
                     break;
 
                 case Constants.EmailTemplate:
@@ -535,6 +567,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedEmailTemplate, "template");
                     }
+
                     break;
 
                 case Constants.SLA:
@@ -550,6 +583,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSLA, "sla");
                     }
+
                     break;
 
                 case Constants.ConvertRule:
@@ -565,6 +599,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedConvertRule, "convertrule");
                     }
+
                     break;
 
                 case Constants.SDKMessageProcessingStepImage:
@@ -580,6 +615,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSdkmessageprocessingstepimage, "sdkmessageprocessingstepimage");
                     }
+
                     break;
 
                 default:
@@ -587,6 +623,29 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     Console.WriteLine("Unable to copy component type: " + component.FormattedValues[componentDetails] + " and objectID: " + componentId.ToString());
                     break;
             }
+        }
+
+        /// <summary>
+        /// Method retrieves target components
+        /// </summary>
+        /// <param name="serviceProxy">service proxy</param>
+        /// <param name="retrieveResponse">retrieve response</param>
+        /// <param name="type">type of component </param>
+        private void QueryTargetComponents(OrganizationServiceProxy serviceProxy, RetrieveResponse retrieveResponse, string type)
+        {
+            var qe = new QueryExpression(type)
+            {
+                ColumnSet = new ColumnSet(true),
+                Criteria = new FilterExpression
+                {
+                    Conditions =
+                                {
+                                    new ConditionExpression("name", ConditionOperator.Equal, retrieveResponse.Entity.Attributes["name"].ToString()),
+                                }
+                }
+            };
+            EntityCollection solutionComponents = serviceProxy.RetrieveMultiple(qe);
+            Entity solutionCom = solutionComponents.Entities[0];
         }
 
         /// <summary>

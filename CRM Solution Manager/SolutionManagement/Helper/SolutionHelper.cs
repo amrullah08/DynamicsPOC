@@ -257,12 +257,11 @@ namespace SolutionManagement
         }
 
         /// <summary>
-        /// Method retrieves Master Solutions.
+        /// Method retrieves Dynamics Source Control Template.
         /// </summary>
         /// <param name="service">Organization service</param>
-        /// <param name="sourceControlId">Dynamic Source Control GUID</param>
         /// <param name="tracingService">Tracing Service to trace error</param>
-        /// <returns>returns Solution Details as entity collection</returns>
+        /// <returns>returns Dynamics Source Control Template</returns>
         public static EntityCollection RetrieveDynamicsSourceControlTemplate(IOrganizationService service, ITracingService tracingService)
         {
             try

@@ -227,6 +227,7 @@ namespace CrmSolution
             this.clientCredentials.UserName.UserName = this.DynamicsUserName;
             this.clientCredentials.UserName.Password = this.DynamicsPassword;
             this.serviceProxy = this.InitializeOrganizationService();
+
             EntityCollection retrievedConfigurationSettingsList = this.RetrieveConfigurationSettings(this.serviceProxy);
 
             return retrievedConfigurationSettingsList;
@@ -307,7 +308,9 @@ namespace CrmSolution
         /// <returns>returns organization service proxy</returns>
         private OrganizationServiceProxy InitializeOrganizationService()
         {
-            return new OrganizationServiceProxy(new Uri(this.OrgServiceUrl), null, this.clientCredentials, null);
+            OrganizationServiceProxy organizationServiceProxy = new OrganizationServiceProxy(new Uri(this.OrgServiceUrl), null, this.clientCredentials, null);
+            organizationServiceProxy.Timeout = new TimeSpan(0, 30, 0);
+            return organizationServiceProxy;
         }
     }
 }

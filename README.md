@@ -18,9 +18,10 @@ This Repository helps you to connect and build CICD Automation Tool for Dynamics
 •	Check the status of deployment in CRM record (Dynamic Source Control) itself or download log file.
 •	Success/failure of deployment status get logged and displayed in dynamics source control.
 
-## Tool Configuration
-click this [link]( https://github.com/amrullah08/DynamicsPOC/blob/master/CRM%20Solution%20Manager/Documents/Work%20Instructions%20for%20Direct%20Deployment%20UCI.docx) to navigate setup document for Direct Deployment.
-click this [link]( https://github.com/amrullah08/DynamicsPOC/blob/master/CRM%20Solution%20Manager/Documents/Work%20Instructions%20for%20GitHub%20commit%20and%20Deployment%20via%20DevOps%20in%20UCI.docx) to navigate setup document for GitHub commit and Deployment via Dynamics 365.
+# Tool Configuration
+• click this [link]( https://github.com/amrullah08/DynamicsPOC/blob/master/CRM%20Solution%20Manager/Documents/Work%20Instructions%20for%20Direct%20Deployment%20UCI.docx) to navigate setup document for Direct Deployment.
+
+• click this [link]( https://github.com/amrullah08/DynamicsPOC/blob/master/CRM%20Solution%20Manager/Documents/Work%20Instructions%20for%20GitHub%20commit%20and%20Deployment%20via%20DevOps%20in%20UCI.docx) to navigate setup document for GitHub commit and Deployment via Dynamics 365.
 
 
 

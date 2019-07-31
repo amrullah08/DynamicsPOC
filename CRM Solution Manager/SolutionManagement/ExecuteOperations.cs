@@ -18,10 +18,11 @@ namespace SolutionManagement
     public class ExecuteOperations
     {
         /// <summary>
-        /// Method creates Master Solution Record
+        /// Method creates Custom entity CRM Solution Record
         /// </summary>
         /// <param name="service">Organization service</param>
         /// <param name="solution">CRM Solution</param>
+        /// <returns>returns GUID of newly created Custom entity CRM Solution</returns>
         public static Guid CreateMasterSolution(IOrganizationService service, Solution solution)
         {
             syed_mastersolutions masterSolutionUpdate = new syed_mastersolutions();
@@ -33,15 +34,16 @@ namespace SolutionManagement
             masterSolutionUpdate.syed_SolutionInstalledOn = solution.InstalledOn;
             masterSolutionUpdate.syed_Version = solution.Version;
             masterSolutionUpdate.syed_IsManaged = solution.IsManaged;
-            Guid Id = service.Create(masterSolutionUpdate);
-            return Id;
+            Guid id = service.Create(masterSolutionUpdate);
+            return id;
         }
 
         /// <summary>
         /// Method creates Master Solution Record
         /// </summary>
         /// <param name="service">Organization service</param>
-        /// <param name="solution">CRM Solution</param>
+        /// <param name="mastersolutions">CRM Solution</param>
+        /// <param name="syed_Sourcecontrolqueue">Dynamics Source control</param>
         public static void CreateSolutionDetail(IOrganizationService service, syed_mastersolutions mastersolutions, syed_sourcecontrolqueue syed_Sourcecontrolqueue)
         {
             syed_solutiondetail solutiondetail = new syed_solutiondetail();
@@ -69,7 +71,8 @@ namespace SolutionManagement
         /// Method creates Master Solution Record
         /// </summary>
         /// <param name="service">Organization service</param>
-        /// <param name="solution">CRM Solution</param>
+        /// <param name="syed_Solutiondetail">Master Solution</param>
+        /// <param name="syed_Sourcecontrolqueue">Dynamics Source control</param>
         public static void CreateSolutionDetail(IOrganizationService service, syed_solutiondetail syed_Solutiondetail, syed_sourcecontrolqueue syed_Sourcecontrolqueue)
         {
             syed_solutiondetail solutiondetail = new syed_solutiondetail();
@@ -89,10 +92,12 @@ namespace SolutionManagement
         }
 
         /// <summary>
-        /// Method creates Master Solution Record
+        /// Method creates Dynamics source Control record
         /// </summary>
         /// <param name="service">Organization service</param>
-        /// <param name="solution">CRM Solution</param>
+        /// <param name="solutionId">Solution Id</param>
+        /// <param name="mode">Check In or Release mode</param>
+        /// <returns>returns GUID of newly created Dynamics source Control record</returns>
         public static Guid CreateDynamicsSourceControl(IOrganizationService service, string solutionId, string mode)
         {
             syed_sourcecontrolqueue sourcecontrolqueue = new syed_sourcecontrolqueue();
@@ -112,8 +117,8 @@ namespace SolutionManagement
                 sourcecontrolqueue.syed_IncludeInRelease = false;
             }
 
-            Guid Id = service.Create(sourcecontrolqueue);
-            return Id;
+            Guid id = service.Create(sourcecontrolqueue);
+            return id;
         }
     }
 }

@@ -377,11 +377,14 @@
   <project key="1163279788">
     <configuration>DEBUG;TRACE</configuration>
   </project>
+  <project key="-1271827491">
+    <configuration>DEBUG;TRACE</configuration>
+  </project>
   <sourcecode name="CRMConstant.cs" parser="StyleCop.CSharp.CsParser">
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-06-04 10:56:35.234</sourceFile>
+      <sourceFile>2019-07-04 10:50:18.064</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -404,7 +407,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-06-04 10:56:35.231</sourceFile>
+      <sourceFile>2019-06-23 22:27:54.000</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -427,7 +430,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-06-13 11:12:41.072</sourceFile>
+      <sourceFile>2019-07-30 11:02:43.941</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -450,7 +453,30 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-06-04 10:56:35.225</sourceFile>
+      <sourceFile>2019-06-23 22:27:54.000</sourceFile>
+      <parser>2019-05-22 11:14:37.459</parser>
+      <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
+      <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
+      <StyleCop.CSharp.LayoutRules>2019-05-22 11:14:37.459</StyleCop.CSharp.LayoutRules>
+      <StyleCop.CSharp.LayoutRules.FilesHashCode>0</StyleCop.CSharp.LayoutRules.FilesHashCode>
+      <StyleCop.CSharp.MaintainabilityRules>2019-05-22 11:14:37.459</StyleCop.CSharp.MaintainabilityRules>
+      <StyleCop.CSharp.MaintainabilityRules.FilesHashCode>0</StyleCop.CSharp.MaintainabilityRules.FilesHashCode>
+      <StyleCop.CSharp.NamingRules>2019-05-22 11:14:37.459</StyleCop.CSharp.NamingRules>
+      <StyleCop.CSharp.NamingRules.FilesHashCode>0</StyleCop.CSharp.NamingRules.FilesHashCode>
+      <StyleCop.CSharp.OrderingRules>2019-05-22 11:14:37.459</StyleCop.CSharp.OrderingRules>
+      <StyleCop.CSharp.OrderingRules.FilesHashCode>0</StyleCop.CSharp.OrderingRules.FilesHashCode>
+      <StyleCop.CSharp.ReadabilityRules>2019-05-22 11:14:37.459</StyleCop.CSharp.ReadabilityRules>
+      <StyleCop.CSharp.ReadabilityRules.FilesHashCode>0</StyleCop.CSharp.ReadabilityRules.FilesHashCode>
+      <StyleCop.CSharp.SpacingRules>2019-05-22 11:14:37.459</StyleCop.CSharp.SpacingRules>
+      <StyleCop.CSharp.SpacingRules.FilesHashCode>0</StyleCop.CSharp.SpacingRules.FilesHashCode>
+    </timestamps>
+    <violations />
+  </sourcecode>
+  <sourcecode name="EncryptPassword.cs" parser="StyleCop.CSharp.CsParser">
+    <timestamps>
+      <styleCop>2019-05-22 11:14:37.459</styleCop>
+      <settingsFile>2019-05-22 11:14:37.429</settingsFile>
+      <sourceFile>2019-07-31 12:37:13.751</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -473,7 +499,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-06-13 11:15:39.918</sourceFile>
+      <sourceFile>2019-07-31 12:47:07.605</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -496,7 +522,30 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-06-04 10:56:35.222</sourceFile>
+      <sourceFile>2019-07-31 12:50:25.100</sourceFile>
+      <parser>2019-05-22 11:14:37.459</parser>
+      <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
+      <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
+      <StyleCop.CSharp.LayoutRules>2019-05-22 11:14:37.459</StyleCop.CSharp.LayoutRules>
+      <StyleCop.CSharp.LayoutRules.FilesHashCode>0</StyleCop.CSharp.LayoutRules.FilesHashCode>
+      <StyleCop.CSharp.MaintainabilityRules>2019-05-22 11:14:37.459</StyleCop.CSharp.MaintainabilityRules>
+      <StyleCop.CSharp.MaintainabilityRules.FilesHashCode>0</StyleCop.CSharp.MaintainabilityRules.FilesHashCode>
+      <StyleCop.CSharp.NamingRules>2019-05-22 11:14:37.459</StyleCop.CSharp.NamingRules>
+      <StyleCop.CSharp.NamingRules.FilesHashCode>0</StyleCop.CSharp.NamingRules.FilesHashCode>
+      <StyleCop.CSharp.OrderingRules>2019-05-22 11:14:37.459</StyleCop.CSharp.OrderingRules>
+      <StyleCop.CSharp.OrderingRules.FilesHashCode>0</StyleCop.CSharp.OrderingRules.FilesHashCode>
+      <StyleCop.CSharp.ReadabilityRules>2019-05-22 11:14:37.459</StyleCop.CSharp.ReadabilityRules>
+      <StyleCop.CSharp.ReadabilityRules.FilesHashCode>0</StyleCop.CSharp.ReadabilityRules.FilesHashCode>
+      <StyleCop.CSharp.SpacingRules>2019-05-22 11:14:37.459</StyleCop.CSharp.SpacingRules>
+      <StyleCop.CSharp.SpacingRules.FilesHashCode>0</StyleCop.CSharp.SpacingRules.FilesHashCode>
+    </timestamps>
+    <violations />
+  </sourcecode>
+  <sourcecode name="EncryptPasswordHelper.cs" parser="StyleCop.CSharp.CsParser">
+    <timestamps>
+      <styleCop>2019-05-22 11:14:37.459</styleCop>
+      <settingsFile>2019-05-22 11:14:37.429</settingsFile>
+      <sourceFile>2019-07-31 12:53:10.994</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -519,7 +568,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-06-04 10:56:35.221</sourceFile>
+      <sourceFile>2019-06-23 22:27:54.000</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -542,7 +591,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-06-04 10:56:35.219</sourceFile>
+      <sourceFile>2019-07-31 12:52:13.836</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -565,7 +614,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-06-04 10:56:35.217</sourceFile>
+      <sourceFile>2019-07-30 11:02:43.946</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -588,7 +637,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-06-04 10:56:35.212</sourceFile>
+      <sourceFile>2019-06-23 22:27:54.000</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -611,7 +660,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-06-04 10:56:35.210</sourceFile>
+      <sourceFile>2019-06-23 22:27:54.000</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -634,7 +683,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-06-13 11:15:11.518</sourceFile>
+      <sourceFile>2019-07-30 11:02:43.939</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>

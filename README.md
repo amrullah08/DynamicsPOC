@@ -2,8 +2,8 @@
 
 This Repository helps you to connect and build CICD Automation Tool for Dynamics 3645
   
-## CICD Deployment Automation Tool Features
-# Direct Deployment:
+# CICD Deployment Automation Tool Features
+## Direct Deployment:
 •	Direct deployment to one/multiple instances.
 ## GitHub Repository Commit and DevOps Pipeline Deployment:
 •	Check-In CRM solution related files to Git-Hub repository and maintaining folder structure for CRM components in Git-Hub repository.

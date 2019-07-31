@@ -345,7 +345,7 @@ namespace CrmSolution
         public const int ConvertRule = 154;
 
         /// <summary>
-        /// Attribute Picklist Value
+        /// Attribute Pick list Value
         /// </summary>
         public const int AttributePicklistValue = 4;
 

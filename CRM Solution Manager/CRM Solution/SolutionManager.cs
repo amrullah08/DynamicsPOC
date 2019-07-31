@@ -163,6 +163,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                         }
                     }
                 }
+
                 if (componentsMaster.Count == 0)
                 {
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
@@ -171,32 +172,9 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
                 }
+
                 Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
-
             }
-        }
-
-        /// <summary>
-        /// Method retrieves target components
-        /// </summary>
-        /// <param name="serviceProxy">service proxy</param>
-        /// <param name="retrieveResponse">retrieve response</param>
-        /// <param name="type">type</param>
-        private void QueryTargetComponents(OrganizationServiceProxy serviceProxy, RetrieveResponse retrieveResponse, string type)
-        {
-            var qe = new QueryExpression(type)
-            {
-                ColumnSet = new ColumnSet(true),
-                Criteria = new FilterExpression
-                {
-                    Conditions =
-                                {
-                                    new ConditionExpression("name", ConditionOperator.Equal, retrieveResponse.Entity.Attributes["name"].ToString()),
-                                }
-                }
-            };
-            EntityCollection solutionComponents = serviceProxy.RetrieveMultiple(qe);
-            Entity solutionCom = solutionComponents.Entities[0];
         }
 
         /// <summary>
@@ -208,6 +186,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
         /// <param name="componentType">component Type</param>
         /// <param name="componentId">component Id</param>
         /// <param name="componentDetails">component Details</param>
+        /// <param name="targetService">target Instance Service</param>
         public void GetComponentDetails(CopySettings settings, Entity target, Entity component, int componentType, Guid componentId, string componentDetails, OrganizationServiceProxy targetService)
         {
             Entity sourceSolution = null;
@@ -233,6 +212,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                         targetEntityReq.LogicalName = retrievedEntity.EntityMetadata.LogicalName;
                         var targetRetrievedEntity = (RetrieveEntityResponse)targetService.Execute(targetEntityReq);
                     }
+
                     break;
 
                 case Constants.WebResources:
@@ -248,6 +228,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedWebresource, "webresource");
                     }
+
                     break;
 
                 case Constants.Attribute:
@@ -265,6 +246,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                         targetAttributeReq.LogicalName = retrievedAttribute.AttributeMetadata.LogicalName;
                         var targetRetrievedAttribute = (RetrieveAttributeResponse)targetService.Execute(targetAttributeReq);
                     }
+
                     break;
 
                 case Constants.Relationship:
@@ -281,6 +263,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                         targetRelationshipReq.Name = retrievedrelationshipReq.RelationshipMetadata.SchemaName;
                         var targetRetrievedrelationshipReq = (RetrieveRelationshipResponse)targetService.Execute(targetRelationshipReq);
                     }
+
                     break;
 
                 case Constants.DisplayString:
@@ -296,6 +279,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedDisplayString, "displaystring");
                     }
+
                     break;
 
                 case Constants.SavedQuery:
@@ -311,6 +295,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSavedQuery, "savedquery");
                     }
+
                     break;
 
                 case Constants.SavedQueryVisualization:
@@ -326,6 +311,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSavedQueryVisualization, "savedqueryvisualization");
                     }
+
                     break;
 
                 case Constants.SystemForm:
@@ -341,6 +327,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSystemForm, "systemform");
                     }
+
                     break;
 
                 case Constants.HierarchyRule:
@@ -356,6 +343,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedHierarchyRule, "hierarchyrule");
                     }
+
                     break;
 
                 case Constants.SiteMap:
@@ -371,6 +359,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSiteMap, "sitemap");
                     }
+
                     break;
 
                 case Constants.PluginAssembly:
@@ -386,6 +375,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedPluginAssembly, "pluginassembly");
                     }
+
                     break;
 
                 case Constants.PluginType:
@@ -401,6 +391,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedPluginTypeRequest, "plugintype");
                     }
+
                     break;
 
                 case Constants.SDKMessageProcessingStep:
@@ -416,6 +407,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSDKMessageProcessingStep, "sdkmessageprocessingstep");
                     }
+
                     break;
 
                 case Constants.ServiceEndpoint:
@@ -431,6 +423,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedServiceEndpoint, "serviceendpoint");
                     }
+
                     break;
 
                 case Constants.Report:
@@ -446,6 +439,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedReport, "report");
                     }
+
                     break;
 
                 case Constants.Role:
@@ -461,6 +455,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedRole, "role");
                     }
+
                     break;
 
                 case Constants.FieldSecurityProfile:
@@ -476,6 +471,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedFieldSecurityProfile, "fieldsecurityprofile");
                     }
+
                     break;
 
                 case Constants.ConnectionRole:
@@ -491,6 +487,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedConnectionRole, "connectionrole");
                     }
+
                     break;
 
                 case Constants.Workflow:
@@ -506,6 +503,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedWorkflow, "workflow");
                     }
+
                     break;
 
                 case Constants.KBArticleTemplate:
@@ -521,6 +519,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedKBArticleTemplate, "kbarticletemplate");
                     }
+
                     break;
 
                 case Constants.MailMergeTemplate:
@@ -536,6 +535,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedMailMergeTemplate, "mailmergetemplate");
                     }
+
                     break;
 
                 case Constants.ContractTemplate:
@@ -551,6 +551,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedContractTemplate, "contracttemplate");
                     }
+
                     break;
 
                 case Constants.EmailTemplate:
@@ -566,6 +567,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedEmailTemplate, "template");
                     }
+
                     break;
 
                 case Constants.SLA:
@@ -581,6 +583,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSLA, "sla");
                     }
+
                     break;
 
                 case Constants.ConvertRule:
@@ -596,6 +599,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedConvertRule, "convertrule");
                     }
+
                     break;
 
                 case Constants.SDKMessageProcessingStepImage:
@@ -611,6 +615,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     {
                         this.QueryTargetComponents(targetService, retrievedSdkmessageprocessingstepimage, "sdkmessageprocessingstepimage");
                     }
+
                     break;
 
                 default:
@@ -618,6 +623,29 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     Console.WriteLine("Unable to copy component type: " + component.FormattedValues[componentDetails] + " and objectID: " + componentId.ToString());
                     break;
             }
+        }
+
+        /// <summary>
+        /// Method retrieves target components
+        /// </summary>
+        /// <param name="serviceProxy">service proxy</param>
+        /// <param name="retrieveResponse">retrieve response</param>
+        /// <param name="type">type of component </param>
+        private void QueryTargetComponents(OrganizationServiceProxy serviceProxy, RetrieveResponse retrieveResponse, string type)
+        {
+            var qe = new QueryExpression(type)
+            {
+                ColumnSet = new ColumnSet(true),
+                Criteria = new FilterExpression
+                {
+                    Conditions =
+                                {
+                                    new ConditionExpression("name", ConditionOperator.Equal, retrieveResponse.Entity.Attributes["name"].ToString()),
+                                }
+                }
+            };
+            EntityCollection solutionComponents = serviceProxy.RetrieveMultiple(qe);
+            Entity solutionCom = solutionComponents.Entities[0];
         }
 
         /// <summary>

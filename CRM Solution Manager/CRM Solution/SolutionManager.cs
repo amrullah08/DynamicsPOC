@@ -84,8 +84,6 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
         /// <param name="solutionFileInfo">solution info file</param>
         public void CopyComponents(SolutionFileInfo solutionFileInfo)
         {
-            solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemMergingStatus;
-            solutionFileInfo.Update();
             var solutions = this.RetrieveSolutions();
             CopySettings copySettings = this.GetCopySettings();
             foreach (var solution in solutions)
@@ -105,6 +103,10 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
 
             if (solutionFileInfo.SolutionsToBeMerged.Count > 0)
             {
+                solutionFileInfo.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
+                solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemMergingStatus;
+                solutionFileInfo.Update();
+
                 Console.WriteLine("Copying components into Master Solution.");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Copying components into Master Solution</th></tr>");
                 var components = this.CopyComponents(copySettings);
@@ -145,6 +147,10 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
             }
             else
             {
+                solutionFileInfo.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
+                solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForStatus] = "Listing components from Master solution";
+                solutionFileInfo.Update();
+
                 var componentsMaster = this.RetrieveComponentsFromSolutions(copySettings.TargetSolutions.Select(T => T.Id).ToList(), copySettings.ComponentsTypes);
 
                 Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>List of components in Master Solution</th></tr>");

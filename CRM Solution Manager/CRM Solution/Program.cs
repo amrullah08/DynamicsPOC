@@ -20,14 +20,19 @@ namespace CrmSolution
         /// <param name="args">args for the method</param>
         private static void Main(string[] args)
         {
+            string mode = string.Empty;
             if (args == null || args.Length == 0)
             {
-                args = new string[] { "SyedAmrullahMazhar", "Syed Amrullah", "syamrull@microsoft.com" };
+                mode = "Scheduled";
+            }
+            else
+            {
+                mode = args[0];
             }
 
             string solutionUniqueName = null; // args[0];
-            string committerName = args[1];
-            string committerEmail = args[2];
+            string committerName = "Syed Amrullah";
+            string committerEmail = "syamrull@microsoft.com";
             string authorEmail = "TestSolutionCommitterService@microsoft.com";
 
             ConfigurationSettings configurationSettings = Singleton.CrmConstantsInstance;
@@ -37,7 +42,7 @@ namespace CrmSolution
             Singleton.RepositoryConfigurationConstantsInstance.ResetLocalDirectory();
             configurationSettings.SetRepositoryConfigurationProperties(configurationSettingsList);
 
-            Singleton.RepositoryHelperInstance.TryUpdateToRepository(solutionUniqueName, committerName, committerEmail, authorEmail);
+            Singleton.RepositoryHelperInstance.TryUpdateToRepository(solutionUniqueName, committerName, committerEmail, authorEmail, mode);
         }
     }
 }

@@ -93,7 +93,7 @@ namespace CrmSolution
         /// <param name="committerName">committer name</param>
         /// <param name="committerEmail">committer email</param>
         /// <param name="authorEmail">author email</param>
-        public void TryUpdateToRepository(string solutionUniqueName, string committerName, string committerEmail, string authorEmail)
+        public void TryUpdateToRepository(string solutionUniqueName, string committerName, string committerEmail, string authorEmail, string mode)
         {
             try
             {
@@ -108,7 +108,7 @@ namespace CrmSolution
                                 Singleton.CrmConstantsInstance.SolutionPackagerPath);
 
                 int timeOut = Convert.ToInt32(Singleton.CrmConstantsInstance.SleepTimeoutInMillis);
-                var solutionFiles = crmSolutionHelper.DownloadSolutionFile(solutionUniqueName);
+                var solutionFiles = crmSolutionHelper.DownloadSolutionFile(solutionUniqueName, mode);
                 if (!crmSolutionHelper.CanPush)
                 {
                     System.Threading.Thread.Sleep(timeOut);

@@ -115,7 +115,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="solutionUnqiueName">unique solution name</param>
         /// <returns>returns list of solution file info</returns>
-        public List<SolutionFileInfo> DownloadSolutionFile(string solutionUnqiueName)
+        public List<SolutionFileInfo> DownloadSolutionFile(string solutionUnqiueName, string mode)
         {
             this.InitializeOrganizationService();
             this.CanPush = false;
@@ -123,7 +123,7 @@ namespace CrmSolution
             Console.WriteLine("Connecting to the " + this.serviceUri.OriginalString);
             var serviceProxy = this.InitializeOrganizationService();
             serviceProxy.EnableProxyTypes();
-            EntityCollection querySampleSolutionResults = this.FetchSourceControlQueues(serviceProxy);
+            EntityCollection querySampleSolutionResults = this.FetchSourceControlQueues(serviceProxy, mode);
             if (querySampleSolutionResults.Entities.Count > 0)
             {
                 for (int i = 0; i < querySampleSolutionResults.Entities.Count; i++)
@@ -679,7 +679,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <returns>returns entity collection</returns>
-        private EntityCollection FetchSourceControlQueues(OrganizationServiceProxy serviceProxy)
+        private EntityCollection FetchSourceControlQueues(OrganizationServiceProxy serviceProxy, string mode)
         {
             QueryExpression querySampleSolution = new QueryExpression
             {
@@ -687,8 +687,15 @@ namespace CrmSolution
                 ColumnSet = new ColumnSet() { AllColumns = true },
                 Criteria = new FilterExpression()
             };
-
-            querySampleSolution.Criteria.AddCondition(Constants.SourceControlQueueAttributeNameForStatus, ConditionOperator.Equal, Constants.SourceControlQueueQueuedStatus);
+            if (mode == "WEB")
+            {
+                querySampleSolution.Criteria.AddCondition(Constants.SourceControlQueueAttributeNameForStatus, ConditionOperator.Equal, Constants.SourceControlQueueQueuedStatus);
+            }
+            else
+            {
+                querySampleSolution.Criteria.AddCondition(Constants.SourceControlQueueAttributeNameForStatus, ConditionOperator.Equal, Constants.SourceControlQueueQueuedStatus);
+                querySampleSolution.Criteria.AddCondition(Constants.SourceControlQueueAttributeNameForIsScheduled, ConditionOperator.Equal, true);
+            }
 
             Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Fetching Solutions to be copied to Repository " + "<br>");
             Console.WriteLine("Fetching Solutions to be copied to Repository ");

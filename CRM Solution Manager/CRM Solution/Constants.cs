@@ -25,6 +25,11 @@ namespace CrmSolution
         public const string SourceControlQueueAttributeNameForStatus = "syed_status";
 
         /// <summary>
+        /// status column
+        /// </summary>
+        public const string SourceControlQueueAttributeNameForIsScheduled = "syed_isshedulled";
+
+        /// <summary>
         /// Value for completed status
         /// </summary>
         public const string SourceControlQueueCompletedStatus = "Completed";

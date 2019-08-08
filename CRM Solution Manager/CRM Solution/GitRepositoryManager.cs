@@ -11,6 +11,7 @@ namespace GitDeploy
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Text.RegularExpressions;
     using System.Xml;
     using CrmSolution;
     using LibGit2Sharp;
@@ -215,7 +216,7 @@ namespace GitDeploy
                         commitIds = string.Empty;
                     }
 
-                    commitIds += string.Format("Commit Info <br/><a href='{0}/commit/{1}'>{2}</a>", this.repoUrl.Replace(".git",""), commit.Id.Sha, commit.Message);
+                    commitIds += string.Format("Commit Info <br/><a href='{0}/commit/{1}'>{2}</a>", this.repoUrl.Replace(".git", ""), commit.Id.Sha, commit.Message);
                     solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForCommitIds] = commitIds;
                 }
             }
@@ -463,25 +464,31 @@ namespace GitDeploy
                 return;
             }
 
-            foreach (var dataFile in Directory.GetFiles(webResources, "*.data.xml"))
+            foreach (var dataFile in Directory.GetFiles(webResources, "*.data.xml", SearchOption.AllDirectories))
             {
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.Load(dataFile);
                 var webResourceType = xmlDoc.SelectSingleNode("//WebResource/WebResourceType").InnerText;
-                var webResournceName = xmlDoc.SelectSingleNode("//WebResource/Name").InnerText;
+                string webResournceName = xmlDoc.SelectSingleNode("//WebResource/Name").InnerText;
+                string modifiedName = string.Empty;
+                string[] webList = Regex.Split(webResournceName, "/");
+                if (webList.Length != 0)
+                {
+                    modifiedName = webList[webList.Length - 1];
+                }
                 string commitFileLoc = null;
                 switch (webResourceType)
                 {
                     case "1":
-                        commitFileLoc = this.webResourcesHtmllocalFolder + webResournceName;
+                        commitFileLoc = this.webResourcesHtmllocalFolder + modifiedName;
                         break;
 
                     case "3":
-                        commitFileLoc = this.webResourcesJsFolder + webResournceName;
+                        commitFileLoc = this.webResourcesJsFolder + modifiedName;
                         break;
 
                     case "5":
-                        commitFileLoc = this.webResourcesImageslocalFolder + webResournceName;
+                        commitFileLoc = this.webResourcesImageslocalFolder + modifiedName;
                         break;
                 }
 

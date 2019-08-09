@@ -476,6 +476,10 @@ namespace GitDeploy
                 {
                     modifiedName = webList[webList.Length - 1];
                 }
+                if (modifiedName == "")
+                {
+                    modifiedName = webResournceName;
+                }
                 string commitFileLoc = null;
                 switch (webResourceType)
                 {
@@ -491,9 +495,11 @@ namespace GitDeploy
                         commitFileLoc = this.webResourcesImageslocalFolder + modifiedName;
                         break;
                 }
-
-                File.Copy(webResources + "\\" + webResournceName, commitFileLoc, true);
-                repo.Index.Add(commitFileLoc.Replace(this.localFolder.FullName, string.Empty));
+                if (commitFileLoc != null && commitFileLoc != string.Empty)
+                {
+                    File.Copy(webResources + "\\" + webResournceName, commitFileLoc, true);
+                    repo.Index.Add(commitFileLoc.Replace(this.localFolder.FullName, string.Empty));
+                }
             }
         }
 

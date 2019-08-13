@@ -687,7 +687,7 @@ namespace CrmSolution
                 ColumnSet = new ColumnSet() { AllColumns = true },
                 Criteria = new FilterExpression()
             };
-            if (mode == "WEB")
+            if (mode == Constants.argumentWEB)
             {
                 querySampleSolution.Criteria.AddCondition(Constants.SourceControlQueueAttributeNameForStatus, ConditionOperator.Equal, Constants.SourceControlQueueQueuedStatus);
             }

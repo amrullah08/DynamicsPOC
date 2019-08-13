@@ -23,7 +23,7 @@ namespace CrmSolution
             string mode = string.Empty;
             if (args == null || args.Length == 0)
             {
-                mode = "Scheduled";
+                mode = Constants.argumentScheduled;
             }
             else
             {

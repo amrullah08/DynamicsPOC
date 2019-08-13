@@ -15,6 +15,16 @@ namespace CrmSolution
     public class Constants
     {
         /// <summary>
+        /// WEB arguments
+        /// </summary>
+        public const string argumentWEB = "WEB";
+
+        /// <summary>
+        /// WEB arguments
+        /// </summary>
+        public const string argumentScheduled = "Scheduled";
+
+        /// <summary>
         /// Entity Source Control Queue
         /// </summary>
         public const string SounceControlQueue = "syed_sourcecontrolqueue";

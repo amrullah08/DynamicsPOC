@@ -20,6 +20,11 @@ namespace CrmSolution
         public const string SounceControlQueue = "syed_sourcecontrolqueue";
 
         /// <summary>
+        /// repository column
+        /// </summary>
+        public const string SourceControlQueueAttributeNameForRepository = "syed_sourcecontrol";
+
+        /// <summary>
         /// status column
         /// </summary>
         public const string SourceControlQueueAttributeNameForStatus = "syed_status";
@@ -78,6 +83,21 @@ namespace CrmSolution
         /// Value for successful push to repo status
         /// </summary>
         public const string SourceControlQueuemPushToRepositorySuccessStatus = "Successfully Pushed To Repository";
+
+        /// <summary>
+        /// Value for Source Control for Git Hub
+               /// </summary>
+        public const int SourceControlGitHub = 433710000;
+
+        /// <summary>
+        /// Value for Source Control for Azure DevOps Server (TFS)
+        /// </summary>
+        public const int SourceControlAzureDevOpsServer = 433710001;
+
+        /// <summary>
+        /// Value for Source Control for Azure DevOps
+        /// </summary>
+        public const int SourceControlAzureDevOps = 433710002;
 
         /// <summary>
         /// Value for Missing Components in Target

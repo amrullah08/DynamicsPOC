@@ -102,6 +102,37 @@ namespace CrmSolution
             }
         }
 
+
+        /// <summary>
+        /// Gets or sets repository url
+        /// </summary>
+        public string TFSUserName
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["TFSUserName"];
+            }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets repository url
+        /// </summary>
+        public string TFSPassword
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["TFSPassword"];
+            }
+
+            set
+            {
+            }
+        }
+
         /// <summary>
         /// Gets or sets repository release directory containing CRM Solutions
         /// </summary>

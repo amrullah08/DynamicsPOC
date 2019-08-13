@@ -334,7 +334,7 @@ namespace CrmSolution
 
             if (solutionImportResult == "success")
             {
-                this.CallPublishAllCustomizationChanges(serviceProxy, solutionFile);
+                this.PublishAllCustomizationChanges(serviceProxy, solutionFile);
                 solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuePublishSuccessfulStatus;
             }
 

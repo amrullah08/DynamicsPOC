@@ -8,19 +8,39 @@
 namespace GitDeploy
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using System.Reflection;
+    using System.Text.RegularExpressions;
     using System.Xml;
     using CrmSolution;
     using LibGit2Sharp;
     using LibGit2Sharp.Handlers;
+    using Microsoft.TeamFoundation.Client;
+    using Microsoft.TeamFoundation.VersionControl.Client;
+    using Microsoft.VisualStudio.Services.Common;
 
     /// <summary>
     /// Class for repository management
     /// </summary>
     public class GitRepositoryManager : IGitRepositoryManager
     {
+        private TfsTeamProjectCollection _tfs;
+        private VersionControlServer _versionControl;
+        private Workspace _workspace;
+
+        /// <summary>
+        /// tfs user name
+        /// </summary>
+        private readonly string tfsUserName;
+
+        /// <summary>
+        /// GitHub password
+        /// </summary>
+        private readonly string tfsPassword;
+
         /// <summary>
         /// Repository url
         /// </summary>
@@ -96,6 +116,8 @@ namespace GitDeploy
         /// </summary>
         /// <param name="username">The credentials username.</param>
         /// <param name="password">The credentials password.</param>
+        /// <param name="tfsUserName">The tfs credentials username.</param>
+        /// <param name="tfsPassword">The tfs credentials password.</param>
         /// <param name="gitRepoUrl">The repo URL.</param>
         /// <param name="remoteName">remote name</param>
         /// <param name="branchName">branch name</param>
@@ -112,6 +134,8 @@ namespace GitDeploy
         public GitRepositoryManager(
             string username,
             string password,
+            string tfsUsername,
+            string tfsPassWord,
             string gitRepoUrl,
             string remoteName,
             string branchName,
@@ -139,6 +163,8 @@ namespace GitDeploy
                 Password = password
             };
 
+            this.tfsUserName = tfsUsername;
+            this.tfsPassword = tfsPassWord;
             this.repoUrl = gitRepoUrl;
             this.authorName = authorname;
             this.authorEmail = authoremail;
@@ -158,36 +184,11 @@ namespace GitDeploy
         {
             return !Directory.EnumerateFileSystemEntries(path).Any();
         }
-
-        /// <summary>
-        /// Commits all changes
-        /// </summary>
-        /// <param name="solutionFileInfo">solution file info</param>
-        /// <param name="solutionFilePath">release solution list file</param>
-        public void CommitAllChanges(SolutionFileInfo solutionFileInfo, string solutionFilePath)
+        public void CommitFilesToGitHub(SolutionFileInfo solutionFileInfo, string solutionFilePath, string fileUnmanaged, string fileManaged,
+          string webResources, string multilpleSolutionsImportPSPathVirtual, string solutionToBeImportedPSPathVirtual)
         {
             try
             {
-                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Committing Powershell Scripts" + "<br>");
-                Console.WriteLine("Committing Powershell Scripts");
-                string multilpleSolutionsImportPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.MultilpleSolutionsImport);
-                string multilpleSolutionsImportPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.MultilpleSolutionsImport;
-                File.Copy(multilpleSolutionsImportPSPath, multilpleSolutionsImportPSPathVirtual, true);
-
-                string solutionToBeImportedPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.SolutionToBeImported);
-                string solutionToBeImportedPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.SolutionToBeImported;
-                File.Copy(solutionToBeImportedPSPath, solutionToBeImportedPSPathVirtual, true);
-
-                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Committing solutions" + "<br>");
-                Console.WriteLine("Committing solutions");
-                string fileUnmanaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_.zip";
-                File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
-
-                string fileManaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_managed_.zip";
-                File.Copy(solutionFileInfo.SolutionFilePathManaged, fileManaged, true);
-
-                string webResources = solutionFileInfo.SolutionExtractionPath + "\\WebResources";
-
                 using (var repo = new Repository(this.localFolder.FullName))
                 {
                     this.AddRepositoryIndexes(fileUnmanaged, repo);
@@ -199,7 +200,6 @@ namespace GitDeploy
                     repo.Index.Add(solutionFilePath.Replace(this.localFolder.FullName, string.Empty));
                     repo.Index.Add(multilpleSolutionsImportPSPathVirtual.Replace(this.localFolder.FullName, string.Empty));
                     repo.Index.Add(solutionToBeImportedPSPathVirtual.Replace(this.localFolder.FullName, string.Empty));
-
                     var offset = DateTimeOffset.Now;
                     Signature author = new Signature(this.authorName, this.authorEmail, offset);
                     Signature committer = new Signature(this.committerName, this.committerEmail, offset);
@@ -215,11 +215,222 @@ namespace GitDeploy
                         commitIds = string.Empty;
                     }
 
-                    commitIds += string.Format("Commit Info <br/><a href='{0}/commit/{1}'>{2}</a>", this.repoUrl.Replace(".git",""), commit.Id.Sha, commit.Message);
+                    commitIds += string.Format("Commit Info <br/><a href='{0}/commit/{1}'>{2}</a>", this.repoUrl.Replace(".git", ""), commit.Id.Sha, commit.Message);
                     solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForCommitIds] = commitIds;
                 }
             }
             catch (EmptyCommitException ex)
+            {
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public void CommitFilesToTFS(SolutionFileInfo solutionFileInfo, string solutionFilePath, string fileUnmanaged, string fileManaged,
+        string webResources, string multilpleSolutionsImportPSPathVirtual, string solutionToBeImportedPSPathVirtual, Workspace workspace)
+        {
+            try
+            {
+                this._workspace = workspace;
+                this.AddRepositoryIndexes(fileUnmanaged, null);
+                this.AddRepositoryIndexes(fileManaged, null);
+                this.AddWebResourcesToRepository(webResources, null);
+                //// todo: add extracted solution files to repository
+                this.AddExtractedSolutionToRepository(solutionFileInfo, null);
+                List<PendingChange> pc = new List<PendingChange>(_workspace.GetPendingChanges());
+
+                PendingChange[] pcArr = pc.Where(x => x.ChangeType != ChangeType.Delete && x.ItemType != ItemType.Folder && x.FileName != this.localFolder.FullName.ToString()).ToArray();
+
+                if (pcArr.Length > 0)
+                {
+                    _workspace.CheckIn(pcArr, "Automated Checkin (" + _workspace + ") " + DateTime.Today.ToShortDateString());
+                    Console.WriteLine("Completed: Checkin");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" <br/> Completed: Checkin");
+
+                }
+
+                foreach (var pchg in pc)
+                {
+                    Console.WriteLine(pchg.ChangeType.ToString() + "::" + pchg.FileName);
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("<br/>" + pchg.ChangeType.ToString() + "::" + pchg.FileName);
+
+                }
+
+                _workspace.Delete();
+
+                bool folderExists = Directory.Exists(this.localFolder.FullName);
+                if (folderExists)
+                {
+                    var fList = Directory.GetFiles(this.localFolder.FullName, "*.*", SearchOption.AllDirectories);
+                    foreach (var f in fList)
+                    {
+                        File.Delete(f);
+                    }
+                    Directory.Delete(this.localFolder.FullName, true);
+                }
+
+                solutionFileInfo.Update();
+                solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushToRepositorySuccessStatus;
+                solutionFileInfo.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
+
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + "Successfully Pushed files to TFS" + "<br>");
+                Console.WriteLine("Successfully Pushed files to TFS");
+                Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(Singleton.CrmConstantsInstance.ServiceProxy, solutionFileInfo.Solution);
+
+            }
+            catch (Exception ex)
+            {
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
+                Console.WriteLine(ex.Message);
+                if (_workspace != null)
+                {
+                    _workspace.Delete();
+                }
+
+                bool folderExists = Directory.Exists(this.localFolder.FullName);
+                if (folderExists)
+                {
+                    var fList = Directory.GetFiles(this.localFolder.FullName, "*.*", SearchOption.AllDirectories);
+                    foreach (var f in fList)
+                    {
+                        File.Delete(f);
+                    }
+                    Directory.Delete(this.localFolder.FullName, true);
+                }
+                throw ex;
+
+            }
+        }
+
+        /// <summary>
+        /// method saves Hash set to the specified file
+        /// </summary>
+        /// <param name="solutionFilePath">path of file that contains list of solution to be released</param>
+        /// <param name="hashSet">hash set to store release solution</param>
+        public void SaveSolutionfile(string solutionFilePath, HashSet<string> hashSet)
+        {
+            bool solutionfileUnManagedExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(solutionFilePath), ItemType.Any);
+            if (solutionfileUnManagedExit)
+            {
+                _workspace.PendEdit(solutionFilePath, RecursionType.Full);
+                File.WriteAllText(solutionFilePath, string.Empty);
+                File.WriteAllLines(solutionFilePath, hashSet.Where(cc => !string.IsNullOrEmpty(cc)).ToArray());
+            }
+            else
+            {
+                File.WriteAllText(solutionFilePath, string.Empty);
+                File.WriteAllLines(solutionFilePath, hashSet.Where(cc => !string.IsNullOrEmpty(cc)).ToArray());
+                _workspace.PendAdd(solutionFilePath, true);
+            }
+        }
+
+        /// <summary>
+        /// Commits all changes
+        /// </summary>
+        /// <param name="solutionFileInfo">solution file info</param>
+        /// <param name="solutionFilePath">release solution list file</param>
+        public void CommitAllChanges(SolutionFileInfo solutionFileInfo, string solutionFilePath, Workspace workspace)
+        {
+            try
+            {
+                _workspace = workspace;
+                string multilpleSolutionsImportPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.MultilpleSolutionsImport);
+                string multilpleSolutionsImportPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.MultilpleSolutionsImport;
+                string solutionToBeImportedPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.SolutionToBeImported);
+                string solutionToBeImportedPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.SolutionToBeImported;
+                string fileUnmanaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_.zip";
+                string fileManaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_managed_.zip";
+                string webResources = solutionFileInfo.SolutionExtractionPath + "\\WebResources";
+
+                if (this._workspace == null && solutionFileInfo.Repository != Constants.SourceControlAzureDevOpsServer)
+                {
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Committing Powershell Scripts" + "<br>");
+                    Console.WriteLine("Committing Powershell Scripts");
+
+                    File.Copy(multilpleSolutionsImportPSPath, multilpleSolutionsImportPSPathVirtual, true);
+                    File.Copy(solutionToBeImportedPSPath, solutionToBeImportedPSPathVirtual, true);
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Committing solutions" + "<br>");
+                    Console.WriteLine("Committing solutions");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy managed" + "<br>");
+                    File.Copy(solutionFileInfo.SolutionFilePathManaged, fileManaged, true);
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy unmanaged" + "<br>");
+                    File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
+                    CommitFilesToGitHub(solutionFileInfo, solutionFilePath, fileUnmanaged, fileManaged, webResources, multilpleSolutionsImportPSPathVirtual, solutionToBeImportedPSPathVirtual);
+                }
+                else
+                {
+                    //Copy Zip Files
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Committing solutions" + "<br>");
+                    Console.WriteLine("Committing solutions");
+
+                    bool solutionfileUnManagedExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(fileUnmanaged), ItemType.Any);
+                    if (solutionfileUnManagedExit)
+                    {
+                        _workspace.PendEdit(fileUnmanaged, RecursionType.Full);
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy unmanaged" + "<br>");
+                        File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
+
+                    }
+                    else
+                    {
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy unmanaged" + "<br>");
+                        File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
+                        _workspace.PendAdd(fileUnmanaged, true);
+                    }
+
+
+
+
+                    bool solutionfileManagedExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(fileUnmanaged), ItemType.Any);
+                    if (solutionfileManagedExit)
+                    {
+                        _workspace.PendEdit(fileUnmanaged, RecursionType.Full);
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy managed" + "<br>");
+                        File.Copy(solutionFileInfo.SolutionFilePathManaged, fileManaged, true);
+
+                    }
+                    else
+                    {
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy managed" + "<br>");
+                        File.Copy(solutionFileInfo.SolutionFilePathManaged, fileManaged, true);
+                        _workspace.PendAdd(fileUnmanaged, true);
+                    }
+
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Committing Powershell Scripts" + "<br>");
+                    Console.WriteLine("Committing Powershell Scripts");
+
+                    //Copy PowerShell
+                    bool fileExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(multilpleSolutionsImportPSPathVirtual), ItemType.Any);
+                    if (fileExit)
+                    {
+                        _workspace.PendEdit(multilpleSolutionsImportPSPathVirtual, RecursionType.Full);
+                        File.Copy(multilpleSolutionsImportPSPath, multilpleSolutionsImportPSPathVirtual, true);
+
+                    }
+                    else
+                    {
+                        File.Copy(multilpleSolutionsImportPSPath, multilpleSolutionsImportPSPathVirtual, true);
+                        _workspace.PendAdd(multilpleSolutionsImportPSPathVirtual, true);
+                    }
+
+                    //Copy PowerShell
+
+                    bool exits = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(solutionToBeImportedPSPathVirtual), ItemType.Any);
+                    if (exits)
+                    {
+                        _workspace.PendEdit(solutionToBeImportedPSPathVirtual, RecursionType.Full);
+                        File.Copy(solutionToBeImportedPSPath, solutionToBeImportedPSPathVirtual, true);
+                    }
+                    else
+                    {
+                        File.Copy(solutionToBeImportedPSPath, solutionToBeImportedPSPathVirtual, true);
+                        _workspace.PendAdd(solutionToBeImportedPSPathVirtual, true);
+                    }
+
+                    CommitFilesToTFS(solutionFileInfo, solutionFilePath, fileUnmanaged, fileManaged, webResources, multilpleSolutionsImportPSPathVirtual, solutionToBeImportedPSPathVirtual, _workspace);
+                }
+            }
+            catch (Exception ex)
             {
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
                 Console.WriteLine(ex.Message);
@@ -287,6 +498,83 @@ namespace GitDeploy
         /// <summary>
         /// Method updates repository
         /// </summary>
+        public Workspace ConnectTFSMap()
+        {
+            try
+            {
+                string wkSpcName = "CICD" + DateTime.Today.DayOfYear + DateTime.Today.Minute;
+                bool folderExists = Directory.Exists(this.localFolder.FullName);
+                if (!folderExists)
+                {
+                    Directory.CreateDirectory(this.localFolder.FullName);
+                }
+
+                NetworkCredential networkCredential = new NetworkCredential(this.tfsUserName, this.tfsPassword);
+                VssBasicCredential basicCredential = new VssBasicCredential(networkCredential);
+
+                VssCredentials tfsCredentials = new VssCredentials(basicCredential);
+
+                _tfs = new TfsTeamProjectCollection(new Uri(this.repoUrl), tfsCredentials);
+                _tfs.Authenticate();
+                // Get a reference to Version Control.              
+                _versionControl = _tfs.GetService<VersionControlServer>();
+
+                _workspace = _versionControl.TryGetWorkspace(this.localFolder.FullName);
+                if (_workspace != null)
+                {
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("existing workspace delete <br/>" + _versionControl.AuthorizedUser);
+
+                    _workspace.Delete();
+                }
+
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" <br/>" + _versionControl.AuthorizedUser);
+
+                Console.WriteLine("workspace create");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("workspace create <br/>");
+
+                _workspace = _versionControl.CreateWorkspace(wkSpcName, _versionControl.AuthorizedUser);
+                Console.WriteLine(" workspace created;");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("workspace created <br/>");
+
+
+                // Create a mapping using the Team Project supplied on the command line.
+                _workspace.Map(this.branchName, this.localFolder.ToString());
+                Console.WriteLine("Completed: Map;");
+
+                // Get the files from the repository.
+                _workspace.Get();
+
+                Console.WriteLine("Completed: Files Mapped ");
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Completed: Files Mapped  <br/>");
+
+            }
+            catch (Exception ex)
+            {
+                if (_workspace != null)
+                {
+                    _workspace.Delete();
+                }
+                Console.WriteLine(ex.Message);
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(ex.Message);
+
+
+                bool folderExists = Directory.Exists(this.localFolder.FullName);
+                if (folderExists)
+                {
+                    var fList = Directory.GetFiles(this.localFolder.FullName, "*.*", SearchOption.AllDirectories);
+                    foreach (var f in fList)
+                    {
+                        File.Delete(f);
+                    }
+                    Directory.Delete(this.localFolder.FullName, true);
+                }
+                throw ex;
+            }
+            return _workspace;
+        }
+        /// <summary>
+        /// Method updates repository
+        /// </summary>
         public void UpdateRepository()
         {
             //// https://github.com/libgit2/libgit2sharp/blob/2f8ad262b7613e9e68aefd4f55956bf24b05d042/LibGit2Sharp.Tests/MergeFixture.cs
@@ -327,7 +615,7 @@ namespace GitDeploy
 
                             PullOptions pullOptions = new PullOptions()
                             {
-                                MergeOptions = new MergeOptions()
+                                MergeOptions = new LibGit2Sharp.MergeOptions()
                                 {
                                     FastForwardStrategy = FastForwardStrategy.Default,
                                 },
@@ -393,7 +681,7 @@ namespace GitDeploy
         /// <param name="source">source directory</param>
         /// <param name="destination">destination directory</param>
         /// <param name="repo">repository instance</param>
-        public void CopyDirectory(string source, string destination, Repository repo)
+        public void CopyDirectory(string source, string destination, Repository repo, Workspace _workspace)
         {
             string[] files;
 
@@ -413,15 +701,48 @@ namespace GitDeploy
                 // Sub directories
                 if (Directory.Exists(element))
                 {
-                    this.CopyDirectory(element, destination + Path.GetFileName(element), repo);
+                    if (repo != null)
+                    {
+                        this.CopyDirectory(element, destination + Path.GetFileName(element), repo, null);
+                    }
+                    else
+                    {
+                        this.CopyDirectory(element, destination + Path.GetFileName(element), null, _workspace);
+                    }
+
                 }
                 else
                 {
-                    // Files in directory
-                    File.Copy(element, destination + Path.GetFileName(element), true);
-                    repo.Index.Add((destination + Path.GetFileName(element)).Replace(this.localFolder.FullName, string.Empty));
+                    if (repo != null)
+                    {
+                        // Files in directory
+                        File.Copy(element, destination + Path.GetFileName(element), true);
+                        File.Copy(element, destination + Path.GetFileName(element), true);
+
+                        repo.Index.Add((destination + Path.GetFileName(element)).Replace(this.localFolder.FullName, string.Empty));
+                    }
+                    else
+                    {
+                        bool fileExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(destination + Path.GetFileName(element)), ItemType.Any);
+                        if (fileExit)
+                        {
+                            _workspace.PendEdit(destination + Path.GetFileName(element), RecursionType.Full);
+                            // Files in directory
+                            File.Copy(element, destination + Path.GetFileName(element), true);
+                            File.Copy(element, destination + Path.GetFileName(element), true);
+
+                        }
+                        else
+                        {
+                            // Files in directory
+                            File.Copy(element, destination + Path.GetFileName(element), true);
+                            File.Copy(element, destination + Path.GetFileName(element), true);
+                            _workspace.PendAdd(destination + Path.GetFileName(element), true);
+                        }
+                    }
                 }
             }
+
         }
 
         /// <summary>
@@ -463,30 +784,61 @@ namespace GitDeploy
                 return;
             }
 
-            foreach (var dataFile in Directory.GetFiles(webResources, "*.data.xml"))
+            foreach (var dataFile in Directory.GetFiles(webResources, "*.data.xml", SearchOption.AllDirectories))
             {
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.Load(dataFile);
                 var webResourceType = xmlDoc.SelectSingleNode("//WebResource/WebResourceType").InnerText;
-                var webResournceName = xmlDoc.SelectSingleNode("//WebResource/Name").InnerText;
+                string webResournceName = xmlDoc.SelectSingleNode("//WebResource/Name").InnerText;
+                string modifiedName = string.Empty;
+                string[] webList = Regex.Split(webResournceName, "/");
+                if (webList.Length != 0)
+                {
+                    modifiedName = webList[webList.Length - 1];
+                }
+                if (modifiedName == "")
+                {
+                    modifiedName = webResournceName;
+                }
                 string commitFileLoc = null;
                 switch (webResourceType)
                 {
                     case "1":
-                        commitFileLoc = this.webResourcesHtmllocalFolder + webResournceName;
+                        commitFileLoc = this.webResourcesHtmllocalFolder + modifiedName;
                         break;
 
                     case "3":
-                        commitFileLoc = this.webResourcesJsFolder + webResournceName;
+                        commitFileLoc = this.webResourcesJsFolder + modifiedName;
                         break;
 
                     case "5":
-                        commitFileLoc = this.webResourcesImageslocalFolder + webResournceName;
+                        commitFileLoc = this.webResourcesImageslocalFolder + modifiedName;
                         break;
                 }
+                if (commitFileLoc != null && commitFileLoc != string.Empty)
+                {
+                    if (repo != null)
+                    {
+                        File.Copy(webResources + "\\" + webResournceName, commitFileLoc, true);
+                        repo.Index.Add(commitFileLoc.Replace(this.localFolder.FullName, string.Empty));
+                    }
+                    else
+                    {
+                        bool fileExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(commitFileLoc), ItemType.Any);
+                        if (fileExit)
+                        {
+                            _workspace.PendEdit(commitFileLoc, RecursionType.Full);
+                            File.Copy(webResources + "\\" + webResournceName, commitFileLoc, true);
 
-                File.Copy(webResources + "\\" + webResournceName, commitFileLoc, true);
-                repo.Index.Add(commitFileLoc.Replace(this.localFolder.FullName, string.Empty));
+                        }
+                        else
+                        {
+                            File.Copy(webResources + "\\" + webResournceName, commitFileLoc, true);
+                            _workspace.PendAdd(commitFileLoc, true);
+                        }
+
+                    }
+                }
             }
         }
 
@@ -497,7 +849,17 @@ namespace GitDeploy
         /// <param name="repo">repository to be committed</param>
         private void AddExtractedSolutionToRepository(SolutionFileInfo solutionFileInfo, Repository repo)
         {
-            this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.solutionlocalFolder.FullName + solutionFileInfo.SolutionUniqueName, repo);
+            if (repo != null)
+            {
+                this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.solutionlocalFolder.FullName + solutionFileInfo.SolutionUniqueName, repo, null);
+
+            }
+            else
+            {
+                this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.solutionlocalFolder.FullName + solutionFileInfo.SolutionUniqueName, null, _workspace);
+
+            }
+
         }
 
         /// <summary>
@@ -515,22 +877,70 @@ namespace GitDeploy
                     {
                         if (string.IsNullOrEmpty(file))
                         {
-                            repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
+                            if (repo != null)
+                            {
+                                repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
+                            }
+                            else
+                            {
+                                bool fileExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(file), ItemType.Any);
+                                if (fileExit)
+                                {
+                                    _workspace.PendEdit(file, RecursionType.Full);
+                                }
+                                else
+                                {
+                                    _workspace.PendAdd(file, true);
+                                }
+                            }
                         }
                         else
                         {
                             if (f.EndsWith(file))
                             {
-                                repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
+                                if (repo != null)
+                                {
+                                    repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
+                                }
+                                else
+                                {
+                                    bool fxit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(file), ItemType.Any);
+                                    if (fxit)
+                                    {
+                                        _workspace.PendEdit(file, RecursionType.Full);
+                                    }
+                                    else
+                                    {
+                                        _workspace.PendAdd(file, true);
+                                    }
+
+                                }
                             }
+
                         }
                     }
                 }
             }
             else
             {
-                repo.Index.Add(file.Replace(this.localFolder.FullName, string.Empty));
+                if (repo != null)
+                {
+                    repo.Index.Add(file.Replace(this.localFolder.FullName, string.Empty));
+                }
+                else
+                {
+                    bool isFile = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(file), ItemType.Any);
+                    if (isFile)
+                    {
+                        _workspace.PendEdit(file, RecursionType.Full);
+                    }
+                    else
+                    {
+                        _workspace.PendAdd(file, true);
+                    }
+                }
             }
+
         }
     }
 }

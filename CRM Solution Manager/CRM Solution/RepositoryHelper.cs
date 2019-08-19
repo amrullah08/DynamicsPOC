@@ -254,9 +254,7 @@ namespace CrmSolution
 
             if (solutionFile.Repository == Constants.SourceControlAzureDevOpsServer)
             {
-                workspace = gitRepositoryManager.ConnectTFSMap();
-                gitRepositoryManager.SaveSolutionfile(solutionFilePath, hashSet);
-                gitRepositoryManager.CommitAllChanges(solutionFile, solutionFilePath, workspace);
+                workspace = gitRepositoryManager.ConnectTFSMap(solutionFile, solutionFilePath, hashSet);
             }
             else
             {

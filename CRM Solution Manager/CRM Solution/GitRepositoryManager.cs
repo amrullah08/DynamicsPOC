@@ -312,7 +312,6 @@ namespace GitDeploy
             bool solutionfileUnManagedExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(solutionFilePath), ItemType.Any);
             if (solutionfileUnManagedExit)
             {
-                _workspace.PendEdit(solutionFilePath, RecursionType.Full);
                 File.WriteAllText(solutionFilePath, string.Empty);
                 File.WriteAllLines(solutionFilePath, hashSet.Where(cc => !string.IsNullOrEmpty(cc)).ToArray());
             }
@@ -329,11 +328,10 @@ namespace GitDeploy
         /// </summary>
         /// <param name="solutionFileInfo">solution file info</param>
         /// <param name="solutionFilePath">release solution list file</param>
-        public void CommitAllChanges(SolutionFileInfo solutionFileInfo, string solutionFilePath, Workspace workspace)
+        public void CommitAllChanges(SolutionFileInfo solutionFileInfo, string solutionFilePath, HashSet<string> hashSet)
         {
             try
             {
-                _workspace = workspace;
                 string multilpleSolutionsImportPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.MultilpleSolutionsImport);
                 string multilpleSolutionsImportPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.MultilpleSolutionsImport;
                 string solutionToBeImportedPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.SolutionToBeImported);
@@ -346,7 +344,6 @@ namespace GitDeploy
                 {
                     Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Committing Powershell Scripts" + "<br>");
                     Console.WriteLine("Committing Powershell Scripts");
-
                     File.Copy(multilpleSolutionsImportPSPath, multilpleSolutionsImportPSPathVirtual, true);
                     File.Copy(solutionToBeImportedPSPath, solutionToBeImportedPSPathVirtual, true);
                     Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Committing solutions" + "<br>");
@@ -359,6 +356,7 @@ namespace GitDeploy
                 }
                 else
                 {
+                    SaveSolutionfile(solutionFilePath, hashSet);
                     //Copy Zip Files
                     Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Committing solutions" + "<br>");
                     Console.WriteLine("Committing solutions");
@@ -366,7 +364,7 @@ namespace GitDeploy
                     bool solutionfileUnManagedExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(fileUnmanaged), ItemType.Any);
                     if (solutionfileUnManagedExit)
                     {
-                        _workspace.PendEdit(fileUnmanaged, RecursionType.Full);
+                        //_workspace.PendEdit(fileUnmanaged, RecursionType.Full);
                         Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy unmanaged" + "<br>");
                         File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
 
@@ -379,12 +377,10 @@ namespace GitDeploy
                     }
 
 
-
-
                     bool solutionfileManagedExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(fileUnmanaged), ItemType.Any);
                     if (solutionfileManagedExit)
                     {
-                        _workspace.PendEdit(fileUnmanaged, RecursionType.Full);
+                        //_workspace.PendEdit(fileUnmanaged, RecursionType.Full);
                         Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy managed" + "<br>");
                         File.Copy(solutionFileInfo.SolutionFilePathManaged, fileManaged, true);
 
@@ -403,7 +399,7 @@ namespace GitDeploy
                     bool fileExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(multilpleSolutionsImportPSPathVirtual), ItemType.Any);
                     if (fileExit)
                     {
-                        _workspace.PendEdit(multilpleSolutionsImportPSPathVirtual, RecursionType.Full);
+                        // _workspace.PendEdit(multilpleSolutionsImportPSPathVirtual, RecursionType.Full);
                         File.Copy(multilpleSolutionsImportPSPath, multilpleSolutionsImportPSPathVirtual, true);
 
                     }
@@ -418,7 +414,7 @@ namespace GitDeploy
                     bool exits = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(solutionToBeImportedPSPathVirtual), ItemType.Any);
                     if (exits)
                     {
-                        _workspace.PendEdit(solutionToBeImportedPSPathVirtual, RecursionType.Full);
+                        // _workspace.PendEdit(solutionToBeImportedPSPathVirtual, RecursionType.Full);
                         File.Copy(solutionToBeImportedPSPath, solutionToBeImportedPSPathVirtual, true);
                     }
                     else
@@ -498,16 +494,16 @@ namespace GitDeploy
         /// <summary>
         /// Method updates repository
         /// </summary>
-        public Workspace ConnectTFSMap()
+        public Workspace ConnectTFSMap(SolutionFileInfo solutionFileInfo, string solutionFilePath, HashSet<string> hashSet)
         {
             try
             {
-                string wkSpcName = "CICD" + DateTime.Today.DayOfYear + DateTime.Today.Minute;
+                string wkSpcName = "C" + DateTime.Today.DayOfYear + DateTime.Today.Minute;
                 bool folderExists = Directory.Exists(this.localFolder.FullName);
-                if (!folderExists)
-                {
-                    Directory.CreateDirectory(this.localFolder.FullName);
-                }
+                //if (!folderExists)
+                //{
+                //    Directory.CreateDirectory(this.localFolder.FullName);
+                //}
 
                 NetworkCredential networkCredential = new NetworkCredential(this.tfsUserName, this.tfsPassword);
                 VssBasicCredential basicCredential = new VssBasicCredential(networkCredential);
@@ -519,12 +515,21 @@ namespace GitDeploy
                 // Get a reference to Version Control.              
                 _versionControl = _tfs.GetService<VersionControlServer>();
 
-                _workspace = _versionControl.TryGetWorkspace(this.localFolder.FullName);
-                if (_workspace != null)
+                Workspace workspace = _versionControl.QueryWorkspaces(
+                    wkSpcName,
+                    _versionControl.AuthorizedUser,
+                    Environment.MachineName).SingleOrDefault();
+
+                Console.WriteLine("existing workspace" + workspace);
+                if (workspace != null)
                 {
                     Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("existing workspace delete <br/>" + _versionControl.AuthorizedUser);
 
-                    _workspace.Delete();
+                    workspace.Delete();
+                }
+                else
+                {
+                    Console.WriteLine(" workspace is null");
                 }
 
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" <br/>" + _versionControl.AuthorizedUser);
@@ -532,7 +537,7 @@ namespace GitDeploy
                 Console.WriteLine("workspace create");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("workspace create <br/>");
 
-                _workspace = _versionControl.CreateWorkspace(wkSpcName, _versionControl.AuthorizedUser);
+                _workspace = _versionControl.CreateWorkspace(wkSpcName);
                 Console.WriteLine(" workspace created;");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("workspace created <br/>");
 
@@ -543,9 +548,12 @@ namespace GitDeploy
 
                 // Get the files from the repository.
                 _workspace.Get();
+                _workspace.PendEdit(this.localFolder.FullName.ToString());
 
                 Console.WriteLine("Completed: Files Mapped ");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Completed: Files Mapped  <br/>");
+                this.CommitAllChanges(solutionFileInfo, solutionFilePath, hashSet);
+
 
             }
             catch (Exception ex)
@@ -726,7 +734,7 @@ namespace GitDeploy
                         bool fileExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(destination + Path.GetFileName(element)), ItemType.Any);
                         if (fileExit)
                         {
-                            _workspace.PendEdit(destination + Path.GetFileName(element), RecursionType.Full);
+                            // _workspace.PendEdit(destination + Path.GetFileName(element), RecursionType.Full);
                             // Files in directory
                             File.Copy(element, destination + Path.GetFileName(element), true);
                             File.Copy(element, destination + Path.GetFileName(element), true);
@@ -827,7 +835,7 @@ namespace GitDeploy
                         bool fileExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(commitFileLoc), ItemType.Any);
                         if (fileExit)
                         {
-                            _workspace.PendEdit(commitFileLoc, RecursionType.Full);
+                            //_workspace.PendEdit(commitFileLoc, RecursionType.Full);
                             File.Copy(webResources + "\\" + webResournceName, commitFileLoc, true);
 
                         }
@@ -886,7 +894,7 @@ namespace GitDeploy
                                 bool fileExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(file), ItemType.Any);
                                 if (fileExit)
                                 {
-                                    _workspace.PendEdit(file, RecursionType.Full);
+                                    //  _workspace.PendEdit(file, RecursionType.Full);
                                 }
                                 else
                                 {
@@ -907,7 +915,7 @@ namespace GitDeploy
                                     bool fxit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(file), ItemType.Any);
                                     if (fxit)
                                     {
-                                        _workspace.PendEdit(file, RecursionType.Full);
+                                        // _workspace.PendEdit(file, RecursionType.Full);
                                     }
                                     else
                                     {
@@ -932,7 +940,7 @@ namespace GitDeploy
                     bool isFile = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(file), ItemType.Any);
                     if (isFile)
                     {
-                        _workspace.PendEdit(file, RecursionType.Full);
+                        // _workspace.PendEdit(file, RecursionType.Full);
                     }
                     else
                     {

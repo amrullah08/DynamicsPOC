@@ -267,6 +267,36 @@ namespace SolutionManagement
             try
             {
                 string fetchXML = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+  <entity name='syed_sourcecontrolqueue'>
+    <all-attributes />
+    <order attribute='modifiedon' descending='true' />
+    <filter type='and'>
+      <condition attribute='syed_comment' operator='like' value='%Template%' />
+    </filter>
+  </entity>
+</fetch>";
+                EntityCollection templateRecord = service.RetrieveMultiple(new FetchExpression(fetchXML));
+                return templateRecord;
+            }
+            catch (Exception ex)
+            {
+                tracingService.Trace(ex.ToString());
+                throw new InvalidPluginExecutionException(ex.Message.ToString(), ex);
+            }
+        }
+
+
+        /// <summary>
+        /// Method retrieves Master solution from Dynamics source control Template.
+        /// </summary>
+        /// <param name="service">Organization service</param>
+        /// <param name="tracingService">Tracing Service to trace error</param>
+        /// <returns>returns Master solution from Dynamics source control Template</returns>
+        public static EntityCollection RetrieveMasterSolutionTemplate(IOrganizationService service, ITracingService tracingService)
+        {
+            try
+            {
+                string fetchXML = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
   <entity name='syed_solutiondetail'>
      <all-attributes />
     <order attribute='modifiedon' descending='true' />

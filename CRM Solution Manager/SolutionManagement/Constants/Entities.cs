@@ -5,7 +5,7 @@
 //     Changes to this file may cause incorrect behavior and will be lost if
 //     the code is regenerated.
 // </auto-generated>
-// Created via this command line: "C:\Users\m-jkrishnan\AppData\Roaming\MscrmTools\XrmToolBox\Plugins\DLaB.EarlyBoundGenerator\crmsvcutil.exe" /url:"https://winpilot.api.crm8.dynamics.com/XRMServices/2011/Organization.svc" /namespace:"SolutionConstants" /out:"C:\Users\m-jkrishnan\AppData\Roaming\MscrmTools\XrmToolBox\Settings\EBG\Entities.cs" /servicecontextname:"CrmServiceContext" /codecustomization:"DLaB.CrmSvcUtilExtensions.Entity.CustomizeCodeDomService,DLaB.CrmSvcUtilExtensions" /codegenerationservice:"DLaB.CrmSvcUtilExtensions.Entity.CustomCodeGenerationService,DLaB.CrmSvcUtilExtensions" /codewriterfilter:"DLaB.CrmSvcUtilExtensions.Entity.CodeWriterFilterService,DLaB.CrmSvcUtilExtensions" /namingservice:"DLaB.CrmSvcUtilExtensions.NamingService,DLaB.CrmSvcUtilExtensions" /metadataproviderservice:"DLaB.CrmSvcUtilExtensions.Entity.MetadataProviderService,DLaB.CrmSvcUtilExtensions" /username:"Pilot@WinPilot.onmicrosoft.com" /password:"********" 
+// Created via this command line: "C:\Users\jkrishnan\AppData\Roaming\MscrmTools\XrmToolBox\Plugins\DLaB.EarlyBoundGenerator\crmsvcutil.exe" /url:"https://winpilot.api.crm8.dynamics.com/XRMServices/2011/Organization.svc" /namespace:"SolutionConstants" /out:"C:\Users\jkrishnan\AppData\Roaming\MscrmTools\XrmToolBox\Settings\EBG\Entities.cs" /servicecontextname:"CrmServiceContext" /codecustomization:"DLaB.CrmSvcUtilExtensions.Entity.CustomizeCodeDomService,DLaB.CrmSvcUtilExtensions" /codegenerationservice:"DLaB.CrmSvcUtilExtensions.Entity.CustomCodeGenerationService,DLaB.CrmSvcUtilExtensions" /codewriterfilter:"DLaB.CrmSvcUtilExtensions.Entity.CodeWriterFilterService,DLaB.CrmSvcUtilExtensions" /namingservice:"DLaB.CrmSvcUtilExtensions.NamingService,DLaB.CrmSvcUtilExtensions" /metadataproviderservice:"DLaB.CrmSvcUtilExtensions.Entity.MetadataProviderService,DLaB.CrmSvcUtilExtensions" /username:"Pilot@WinPilot.onmicrosoft.com" /password:"********" 
 //------------------------------------------------------------------------------
 
 [assembly: Microsoft.Xrm.Sdk.Client.ProxyTypesAssemblyAttribute()]
@@ -499,6 +499,40 @@ namespace SolutionConstants
 			get
 			{
 				return this.GetAttributeValue<System.Nullable<long>>("versionnumber");
+			}
+		}
+		
+		/// <summary>
+		/// 1:N solution_parent_solution
+		/// </summary>
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("solution_parent_solution", Microsoft.Xrm.Sdk.EntityRole.Referenced)]
+		public System.Collections.Generic.IEnumerable<SolutionConstants.Solution> Referencedsolution_parent_solution
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntities<SolutionConstants.Solution>("solution_parent_solution", Microsoft.Xrm.Sdk.EntityRole.Referenced);
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("Referencedsolution_parent_solution");
+				this.SetRelatedEntities<SolutionConstants.Solution>("solution_parent_solution", Microsoft.Xrm.Sdk.EntityRole.Referenced, value);
+				this.OnPropertyChanged("Referencedsolution_parent_solution");
+			}
+		}
+		
+		/// <summary>
+		/// N:1 solution_parent_solution
+		/// </summary>
+		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("parentsolutionid")]
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("solution_parent_solution", Microsoft.Xrm.Sdk.EntityRole.Referencing)]
+		public SolutionConstants.Solution Referencingsolution_parent_solution
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntity<SolutionConstants.Solution>("solution_parent_solution", Microsoft.Xrm.Sdk.EntityRole.Referencing);
 			}
 		}
 		
@@ -1567,6 +1601,47 @@ namespace SolutionConstants
 		}
 		
 		/// <summary>
+		/// 1:N syed_syed_deploymentinstance_syed_sourcecontrolqueue_DeploymentInstance
+		/// </summary>
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("syed_syed_deploymentinstance_syed_sourcecontrolqueue_DeploymentInstance")]
+		public System.Collections.Generic.IEnumerable<SolutionConstants.syed_sourcecontrolqueue> syed_syed_deploymentinstance_syed_sourcecontrolqueue_DeploymentInstance
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntities<SolutionConstants.syed_sourcecontrolqueue>("syed_syed_deploymentinstance_syed_sourcecontrolqueue_DeploymentInstance", null);
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_syed_deploymentinstance_syed_sourcecontrolqueue_DeploymentInstance");
+				this.SetRelatedEntities<SolutionConstants.syed_sourcecontrolqueue>("syed_syed_deploymentinstance_syed_sourcecontrolqueue_DeploymentInstance", null, value);
+				this.OnPropertyChanged("syed_syed_deploymentinstance_syed_sourcecontrolqueue_DeploymentInstance");
+			}
+		}
+		
+		/// <summary>
+		/// N:1 syed_syed_sourcecontrolqueue_syed_deploymentin
+		/// </summary>
+		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_dynamicssourcecontrol")]
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("syed_syed_sourcecontrolqueue_syed_deploymentin")]
+		public SolutionConstants.syed_sourcecontrolqueue syed_syed_sourcecontrolqueue_syed_deploymentin
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntity<SolutionConstants.syed_sourcecontrolqueue>("syed_syed_sourcecontrolqueue_syed_deploymentin", null);
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_syed_sourcecontrolqueue_syed_deploymentin");
+				this.SetRelatedEntity<SolutionConstants.syed_sourcecontrolqueue>("syed_syed_sourcecontrolqueue_syed_deploymentin", null, value);
+				this.OnPropertyChanged("syed_syed_sourcecontrolqueue_syed_deploymentin");
+			}
+		}
+		
+		/// <summary>
 		/// Constructor for populating via LINQ queries given a LINQ anonymous type
 		/// <param name="anonymousType">LINQ anonymous type.</param>
 		/// </summary>
@@ -2245,6 +2320,46 @@ namespace SolutionConstants
 			get
 			{
 				return this.GetAttributeValue<System.Nullable<long>>("versionnumber");
+			}
+		}
+		
+		/// <summary>
+		/// 1:N syed_CRMSolutions
+		/// </summary>
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("syed_CRMSolutions")]
+		public System.Collections.Generic.IEnumerable<SolutionConstants.syed_solutiondetail> syed_CRMSolutions
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntities<SolutionConstants.syed_solutiondetail>("syed_CRMSolutions", null);
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_CRMSolutions");
+				this.SetRelatedEntities<SolutionConstants.syed_solutiondetail>("syed_CRMSolutions", null, value);
+				this.OnPropertyChanged("syed_CRMSolutions");
+			}
+		}
+		
+		/// <summary>
+		/// 1:N syed_syed_mastersolutions_syed_mergesolutions_CRMSolutions
+		/// </summary>
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("syed_syed_mastersolutions_syed_mergesolutions_CRMSolutions")]
+		public System.Collections.Generic.IEnumerable<SolutionConstants.syed_mergesolutions> syed_syed_mastersolutions_syed_mergesolutions_CRMSolutions
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntities<SolutionConstants.syed_mergesolutions>("syed_syed_mastersolutions_syed_mergesolutions_CRMSolutions", null);
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_syed_mastersolutions_syed_mergesolutions_CRMSolutions");
+				this.SetRelatedEntities<SolutionConstants.syed_mergesolutions>("syed_syed_mastersolutions_syed_mergesolutions_CRMSolutions", null, value);
+				this.OnPropertyChanged("syed_syed_mastersolutions_syed_mergesolutions_CRMSolutions");
 			}
 		}
 		
@@ -2947,6 +3062,69 @@ namespace SolutionConstants
 			get
 			{
 				return this.GetAttributeValue<System.Nullable<long>>("versionnumber");
+			}
+		}
+		
+		/// <summary>
+		/// N:1 syed_syed_mastersolutions_syed_mergesolutions_CRMSolutions
+		/// </summary>
+		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_crmsolutions")]
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("syed_syed_mastersolutions_syed_mergesolutions_CRMSolutions")]
+		public SolutionConstants.syed_mastersolutions syed_syed_mastersolutions_syed_mergesolutions_CRMSolutions
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntity<SolutionConstants.syed_mastersolutions>("syed_syed_mastersolutions_syed_mergesolutions_CRMSolutions", null);
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_syed_mastersolutions_syed_mergesolutions_CRMSolutions");
+				this.SetRelatedEntity<SolutionConstants.syed_mastersolutions>("syed_syed_mastersolutions_syed_mergesolutions_CRMSolutions", null, value);
+				this.OnPropertyChanged("syed_syed_mastersolutions_syed_mergesolutions_CRMSolutions");
+			}
+		}
+		
+		/// <summary>
+		/// N:1 syed_syed_solutiondetail_syed_mergesolutions_mastersolutionid
+		/// </summary>
+		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_mastersolution")]
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("syed_syed_solutiondetail_syed_mergesolutions_mastersolutionid")]
+		public SolutionConstants.syed_solutiondetail syed_syed_solutiondetail_syed_mergesolutions_mastersolutionid
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntity<SolutionConstants.syed_solutiondetail>("syed_syed_solutiondetail_syed_mergesolutions_mastersolutionid", null);
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_syed_solutiondetail_syed_mergesolutions_mastersolutionid");
+				this.SetRelatedEntity<SolutionConstants.syed_solutiondetail>("syed_syed_solutiondetail_syed_mergesolutions_mastersolutionid", null, value);
+				this.OnPropertyChanged("syed_syed_solutiondetail_syed_mergesolutions_mastersolutionid");
+			}
+		}
+		
+		/// <summary>
+		/// N:1 syed_syed_sourcecontrolqueue_syed_mergesolutions_ListofSolution
+		/// </summary>
+		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_listofsolution")]
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("syed_syed_sourcecontrolqueue_syed_mergesolutions_ListofSolution")]
+		public SolutionConstants.syed_sourcecontrolqueue syed_syed_sourcecontrolqueue_syed_mergesolutions_ListofSolution
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntity<SolutionConstants.syed_sourcecontrolqueue>("syed_syed_sourcecontrolqueue_syed_mergesolutions_ListofSolution", null);
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_syed_sourcecontrolqueue_syed_mergesolutions_ListofSolution");
+				this.SetRelatedEntity<SolutionConstants.syed_sourcecontrolqueue>("syed_syed_sourcecontrolqueue_syed_mergesolutions_ListofSolution", null, value);
+				this.OnPropertyChanged("syed_syed_sourcecontrolqueue_syed_mergesolutions_ListofSolution");
 			}
 		}
 		
@@ -3713,6 +3891,68 @@ namespace SolutionConstants
 		}
 		
 		/// <summary>
+		/// 1:N syed_syed_solutiondetail_syed_mergesolutions_mastersolutionid
+		/// </summary>
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("syed_syed_solutiondetail_syed_mergesolutions_mastersolutionid")]
+		public System.Collections.Generic.IEnumerable<SolutionConstants.syed_mergesolutions> syed_syed_solutiondetail_syed_mergesolutions_mastersolutionid
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntities<SolutionConstants.syed_mergesolutions>("syed_syed_solutiondetail_syed_mergesolutions_mastersolutionid", null);
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_syed_solutiondetail_syed_mergesolutions_mastersolutionid");
+				this.SetRelatedEntities<SolutionConstants.syed_mergesolutions>("syed_syed_solutiondetail_syed_mergesolutions_mastersolutionid", null, value);
+				this.OnPropertyChanged("syed_syed_solutiondetail_syed_mergesolutions_mastersolutionid");
+			}
+		}
+		
+		/// <summary>
+		/// N:1 syed_CRMSolutions
+		/// </summary>
+		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_crmsolutionsid")]
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("syed_CRMSolutions")]
+		public SolutionConstants.syed_mastersolutions syed_CRMSolutions
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntity<SolutionConstants.syed_mastersolutions>("syed_CRMSolutions", null);
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_CRMSolutions");
+				this.SetRelatedEntity<SolutionConstants.syed_mastersolutions>("syed_CRMSolutions", null, value);
+				this.OnPropertyChanged("syed_CRMSolutions");
+			}
+		}
+		
+		/// <summary>
+		/// N:1 syed_syed_sourcecontrolqueue_syed_solutiondeta
+		/// </summary>
+		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_listofsolutionid")]
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("syed_syed_sourcecontrolqueue_syed_solutiondeta")]
+		public SolutionConstants.syed_sourcecontrolqueue syed_syed_sourcecontrolqueue_syed_solutiondeta
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntity<SolutionConstants.syed_sourcecontrolqueue>("syed_syed_sourcecontrolqueue_syed_solutiondeta", null);
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_syed_sourcecontrolqueue_syed_solutiondeta");
+				this.SetRelatedEntity<SolutionConstants.syed_sourcecontrolqueue>("syed_syed_sourcecontrolqueue_syed_solutiondeta", null, value);
+				this.OnPropertyChanged("syed_syed_sourcecontrolqueue_syed_solutiondeta");
+			}
+		}
+		
+		/// <summary>
 		/// Constructor for populating via LINQ queries given a LINQ anonymous type
 		/// <param name="anonymousType">LINQ anonymous type.</param>
 		/// </summary>
@@ -4256,6 +4496,26 @@ namespace SolutionConstants
 		/// <summary>
 		/// 
 		/// </summary>
+		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_isshedulled")]
+		public System.Nullable<bool> syed_IsShedulled
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetAttributeValue<System.Nullable<bool>>("syed_isshedulled");
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_IsShedulled");
+				this.SetAttributeValue("syed_isshedulled", value);
+				this.OnPropertyChanged("syed_IsShedulled");
+			}
+		}
+		
+		/// <summary>
+		/// 
+		/// </summary>
 		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_mergesolutions")]
 		public System.Nullable<bool> syed_MergeSolutions
 		{
@@ -4350,6 +4610,26 @@ namespace SolutionConstants
 				this.OnPropertyChanging("syed_RepositoryUrl");
 				this.SetAttributeValue("syed_repositoryurl", value);
 				this.OnPropertyChanged("syed_RepositoryUrl");
+			}
+		}
+		
+		/// <summary>
+		/// 
+		/// </summary>
+		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_sourcecontrol")]
+		public Microsoft.Xrm.Sdk.OptionSetValue syed_SourceControl
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetAttributeValue<Microsoft.Xrm.Sdk.OptionSetValue>("syed_sourcecontrol");
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_SourceControl");
+				this.SetAttributeValue("syed_sourcecontrol", value);
+				this.OnPropertyChanged("syed_SourceControl");
 			}
 		}
 		
@@ -4490,6 +4770,87 @@ namespace SolutionConstants
 		}
 		
 		/// <summary>
+		/// 1:N syed_syed_sourcecontrolqueue_syed_deploymentin
+		/// </summary>
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("syed_syed_sourcecontrolqueue_syed_deploymentin")]
+		public System.Collections.Generic.IEnumerable<SolutionConstants.syed_deploymentinstance> syed_syed_sourcecontrolqueue_syed_deploymentin
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntities<SolutionConstants.syed_deploymentinstance>("syed_syed_sourcecontrolqueue_syed_deploymentin", null);
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_syed_sourcecontrolqueue_syed_deploymentin");
+				this.SetRelatedEntities<SolutionConstants.syed_deploymentinstance>("syed_syed_sourcecontrolqueue_syed_deploymentin", null, value);
+				this.OnPropertyChanged("syed_syed_sourcecontrolqueue_syed_deploymentin");
+			}
+		}
+		
+		/// <summary>
+		/// 1:N syed_syed_sourcecontrolqueue_syed_mergesolutions_ListofSolution
+		/// </summary>
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("syed_syed_sourcecontrolqueue_syed_mergesolutions_ListofSolution")]
+		public System.Collections.Generic.IEnumerable<SolutionConstants.syed_mergesolutions> syed_syed_sourcecontrolqueue_syed_mergesolutions_ListofSolution
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntities<SolutionConstants.syed_mergesolutions>("syed_syed_sourcecontrolqueue_syed_mergesolutions_ListofSolution", null);
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_syed_sourcecontrolqueue_syed_mergesolutions_ListofSolution");
+				this.SetRelatedEntities<SolutionConstants.syed_mergesolutions>("syed_syed_sourcecontrolqueue_syed_mergesolutions_ListofSolution", null, value);
+				this.OnPropertyChanged("syed_syed_sourcecontrolqueue_syed_mergesolutions_ListofSolution");
+			}
+		}
+		
+		/// <summary>
+		/// 1:N syed_syed_sourcecontrolqueue_syed_solutiondeta
+		/// </summary>
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("syed_syed_sourcecontrolqueue_syed_solutiondeta")]
+		public System.Collections.Generic.IEnumerable<SolutionConstants.syed_solutiondetail> syed_syed_sourcecontrolqueue_syed_solutiondeta
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntities<SolutionConstants.syed_solutiondetail>("syed_syed_sourcecontrolqueue_syed_solutiondeta", null);
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_syed_sourcecontrolqueue_syed_solutiondeta");
+				this.SetRelatedEntities<SolutionConstants.syed_solutiondetail>("syed_syed_sourcecontrolqueue_syed_solutiondeta", null, value);
+				this.OnPropertyChanged("syed_syed_sourcecontrolqueue_syed_solutiondeta");
+			}
+		}
+		
+		/// <summary>
+		/// N:1 syed_syed_deploymentinstance_syed_sourcecontrolqueue_DeploymentInstance
+		/// </summary>
+		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_deploymentinstance")]
+		[Microsoft.Xrm.Sdk.RelationshipSchemaNameAttribute("syed_syed_deploymentinstance_syed_sourcecontrolqueue_DeploymentInstance")]
+		public SolutionConstants.syed_deploymentinstance syed_syed_deploymentinstance_syed_sourcecontrolqueue_DeploymentInstance
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetRelatedEntity<SolutionConstants.syed_deploymentinstance>("syed_syed_deploymentinstance_syed_sourcecontrolqueue_DeploymentInstance", null);
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_syed_deploymentinstance_syed_sourcecontrolqueue_DeploymentInstance");
+				this.SetRelatedEntity<SolutionConstants.syed_deploymentinstance>("syed_syed_deploymentinstance_syed_sourcecontrolqueue_DeploymentInstance", null, value);
+				this.OnPropertyChanged("syed_syed_deploymentinstance_syed_sourcecontrolqueue_DeploymentInstance");
+			}
+		}
+		
+		/// <summary>
 		/// Constructor for populating via LINQ queries given a LINQ anonymous type
 		/// <param name="anonymousType">LINQ anonymous type.</param>
 		/// </summary>
@@ -4558,6 +4919,21 @@ namespace SolutionConstants
 			set
 			{
 				syed_overwritesolutionstxt = value.HasValue ? new Microsoft.Xrm.Sdk.OptionSetValue((int)value) : null;
+			}
+		}
+		
+		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_sourcecontrol")]
+		public virtual syed_sourcecontrolqueue_syed_SourceControl? syed_SourceControlEnum
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return ((syed_sourcecontrolqueue_syed_SourceControl?)(EntityOptionSetEnum.GetEnum(this, "syed_sourcecontrol")));
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				syed_SourceControl = value.HasValue ? new Microsoft.Xrm.Sdk.OptionSetValue((int)value) : null;
 			}
 		}
 	}

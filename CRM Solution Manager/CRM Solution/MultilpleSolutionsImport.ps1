@@ -1,5 +1,5 @@
 ﻿#
-# Filename: ImportSolution.ps1
+# Filename: ImportSolution.ps1.
 #
 param(
 $solutionListFile,
@@ -28,6 +28,7 @@ Import-Module $env:DOWNLOADSECUREFILE3_SECUREFILEPATH
 Import-Module $env:DOWNLOADSECUREFILE4_SECUREFILEPATH
 Import-Module $env:DOWNLOADSECUREFILE5_SECUREFILEPATH
 Import-Module $env:DOWNLOADSECUREFILE6_SECUREFILEPATH
+Import-Module $env:DOWNLOADSECUREFILE7_SECUREFILEPATH
 }
 
 Write-Host $solutionImportPath
@@ -62,7 +63,7 @@ $solutionInfo = Get-XrmSolutionInfoFromZip -SolutionFilePath $file.FullName
 
         $importJobId = [guid]::NewGuid()
     
-        $asyncOperationId = Import-XrmSolution -ConnectionString "$crmConnectionString" -SolutionFilePath $file.FullName -publishWorkflows $publishWorkflows -overwriteUnmanagedCustomizations $overwriteUnmanagedCustomizations -SkipProductUpdateDependencies $skipProductUpdateDependencies -ConvertToManaged $convertToManaged -HoldingSolution $holdingSolution -ImportAsync $true -WaitForCompletion $true -ImportJobId $importJobId -AsyncWaitTimeout $AsyncWaitTimeout -Verbose
+        $asyncOperationId = Import-XrmSolution -ConnectionString "$crmConnectionString" -SolutionFilePath $file.FullName -publishWorkflows $publishWorkflows -overwriteUnmanagedCustomizations $overwriteUnmanagedCustomizations -SkipProductUpdateDependencies $skipProductUpdateDependencies -ConvertToManaged $convertToManaged -HoldingSolution $holdingSolution -ImportAsync $true -ImportJobId $importJobId -AsyncWaitTimeout $AsyncWaitTimeout -Verbose
    
         Write-Host "Solution Import Completed. Import Job Id: $importJobId"
 

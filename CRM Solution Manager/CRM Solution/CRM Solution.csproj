@@ -299,9 +299,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
-    <None Include="Properties\PublishProfiles\CRMSolution20190523100130 - Web Deploy.pubxml" />
-    <None Include="Properties\PublishProfiles\CRMSolutionWebJobs - Web Deploy.pubxml" />
-    <None Include="Properties\webjob-publish-settings.json" />
     <None Include="Settings.StyleCop" />
     <None Include="SolutionToBeImported.ps1">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

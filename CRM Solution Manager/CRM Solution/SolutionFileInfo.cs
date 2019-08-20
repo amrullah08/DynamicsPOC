@@ -54,7 +54,7 @@ namespace CrmSolution
             this.OrganizationServiceProxy = organizationServiceProxy;
             this.SolutionsToBeMerged = new List<string>();
             this.SolutionUniqueName = solutionDetail.GetAttributeValue<string>("syed_listofsolutions");
-
+            this.Repository = solution.GetAttributeValue<OptionSetValue>(Constants.SourceControlQueueAttributeNameForRepository).Value;
             ////solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSolutionName);
             this.Message = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForComment);
             this.OwnerName = solution.GetAttributeValue<EntityReference>(Constants.SourceControlQueueAttributeNameForOwnerId).Name;
@@ -85,6 +85,8 @@ namespace CrmSolution
 
             this.Solution = solution;
         }
+
+        public int Repository { get; set; }
 
         /// <summary>
         /// Gets or sets master solution id

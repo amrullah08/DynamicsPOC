@@ -11,6 +11,9 @@ namespace CrmSolution
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using Microsoft.TeamFoundation.Client;
+    using Microsoft.TeamFoundation.VersionControl.Client;
+    using Microsoft.VisualStudio.Services.Common;
 
     /// <summary>
     /// Repository helper
@@ -93,7 +96,7 @@ namespace CrmSolution
         /// <param name="committerName">committer name</param>
         /// <param name="committerEmail">committer email</param>
         /// <param name="authorEmail">author email</param>
-        public void TryUpdateToRepository(string solutionUniqueName, string committerName, string committerEmail, string authorEmail)
+        public void TryUpdateToRepository(string solutionUniqueName, string committerName, string committerEmail, string authorEmail, string mode)
         {
             try
             {
@@ -108,7 +111,7 @@ namespace CrmSolution
                                 Singleton.CrmConstantsInstance.SolutionPackagerPath);
 
                 int timeOut = Convert.ToInt32(Singleton.CrmConstantsInstance.SleepTimeoutInMillis);
-                var solutionFiles = crmSolutionHelper.DownloadSolutionFile(solutionUniqueName);
+                var solutionFiles = crmSolutionHelper.DownloadSolutionFile(solutionUniqueName, mode);
                 if (!crmSolutionHelper.CanPush)
                 {
                     System.Threading.Thread.Sleep(timeOut);
@@ -143,9 +146,11 @@ namespace CrmSolution
             return new GitDeploy.GitRepositoryManager(
                                                     Singleton.RepositoryConfigurationConstantsInstance.GitUserName,
                                                     Singleton.RepositoryConfigurationConstantsInstance.GitUserPassword,
-                                                    Singleton.RepositoryConfigurationConstantsInstance.RepositoryUrl,
-                                                    Singleton.RepositoryConfigurationConstantsInstance.RepositoryRemoteName,
-                                                    Singleton.RepositoryConfigurationConstantsInstance.BranchName,
+                                                     Singleton.RepositoryConfigurationConstantsInstance.TFSUserName,
+                                                    Singleton.RepositoryConfigurationConstantsInstance.TFSPassword,
+                                                 solutionFile.GitRepoUrl ?? Singleton.RepositoryConfigurationConstantsInstance.RepositoryUrl,
+                                                    solutionFile.RemoteName ?? Singleton.RepositoryConfigurationConstantsInstance.RepositoryRemoteName,
+                                                   solutionFile.BranchName ?? Singleton.RepositoryConfigurationConstantsInstance.BranchName,
                                                     Convert.ToBoolean(Singleton.RepositoryConfigurationConstantsInstance.CloneRepositoryAlways),
                                                     Singleton.RepositoryConfigurationConstantsInstance.LocalDirectory,
                                                     Singleton.RepositoryConfigurationConstantsInstance.JsDirectory,
@@ -225,10 +230,14 @@ namespace CrmSolution
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushingToStatus;
             solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
             solutionFile.Update();
-
+            Workspace workspace = null;
             ////GitDeploy.GitRepositoryManager gitRepositoryManager = GetRepositoryManager(committerName, committerEmail, authorEmail, solutionFile);
 
-            gitRepositoryManager.UpdateRepository();
+            if (solutionFile.Repository != Constants.SourceControlAzureDevOpsServer)
+            {
+                gitRepositoryManager.UpdateRepository();
+            }
+
 
             ////433710000 value for Yes
             if (solutionFile.SolutionsTxt == 433710000 && File.Exists(solutionFilePath))
@@ -238,16 +247,23 @@ namespace CrmSolution
             }
 
             this.PopulateHashset(solutionFilePath, hashSet);
-
             if (!hashSet.Contains(solutionFile.SolutionFileZipName) && solutionFile.IncludeInRelease)
             {
                 hashSet.Add(solutionFile.SolutionFileZipName);
             }
 
-            this.SaveHashSet(solutionFilePath, hashSet);
-            gitRepositoryManager.CommitAllChanges(solutionFile, solutionFilePath);
+            if (solutionFile.Repository == Constants.SourceControlAzureDevOpsServer)
+            {
+                workspace = gitRepositoryManager.ConnectTFSMap(solutionFile, solutionFilePath, hashSet);
+            }
+            else
+            {
+                this.SaveHashSet(solutionFilePath, hashSet);
+                gitRepositoryManager.CommitAllChanges(solutionFile, solutionFilePath, null);
+                gitRepositoryManager.PushCommits();
+            }
 
-            gitRepositoryManager.PushCommits();
+
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushToRepositorySuccessStatus;
             solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();

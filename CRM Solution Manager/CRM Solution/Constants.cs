@@ -15,14 +15,34 @@ namespace CrmSolution
     public class Constants
     {
         /// <summary>
+        /// WEB arguments
+        /// </summary>
+        public const string argumentWEB = "WEB";
+
+        /// <summary>
+        /// WEB arguments
+        /// </summary>
+        public const string argumentScheduled = "Scheduled";
+
+        /// <summary>
         /// Entity Source Control Queue
         /// </summary>
         public const string SounceControlQueue = "syed_sourcecontrolqueue";
 
         /// <summary>
+        /// repository column
+        /// </summary>
+        public const string SourceControlQueueAttributeNameForRepository = "syed_sourcecontrol";
+
+        /// <summary>
         /// status column
         /// </summary>
         public const string SourceControlQueueAttributeNameForStatus = "syed_status";
+
+        /// <summary>
+        /// status column
+        /// </summary>
+        public const string SourceControlQueueAttributeNameForIsScheduled = "syed_isshedulled";
 
         /// <summary>
         /// Value for completed status
@@ -73,6 +93,21 @@ namespace CrmSolution
         /// Value for successful push to repo status
         /// </summary>
         public const string SourceControlQueuemPushToRepositorySuccessStatus = "Successfully Pushed To Repository";
+
+        /// <summary>
+        /// Value for Source Control for Git Hub
+               /// </summary>
+        public const int SourceControlGitHub = 433710000;
+
+        /// <summary>
+        /// Value for Source Control for Azure DevOps Server (TFS)
+        /// </summary>
+        public const int SourceControlAzureDevOpsServer = 433710001;
+
+        /// <summary>
+        /// Value for Source Control for Azure DevOps
+        /// </summary>
+        public const int SourceControlAzureDevOps = 433710002;
 
         /// <summary>
         /// Value for Missing Components in Target

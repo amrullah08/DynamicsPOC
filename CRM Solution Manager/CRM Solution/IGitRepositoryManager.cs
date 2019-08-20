@@ -7,6 +7,9 @@
 
 namespace CrmSolution
 {
+    using Microsoft.TeamFoundation.VersionControl.Client;
+    using System.Collections.Generic;
+
     /// <summary>
     /// interface for repository manager
     /// </summary>
@@ -17,7 +20,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="solutionFileInfo">solution file info</param>
         /// <param name="solutionFilePath">path of file having release solution list</param>
-        void CommitAllChanges(SolutionFileInfo solutionFileInfo, string solutionFilePath);
+        void CommitAllChanges(SolutionFileInfo solutionFileInfo, string solutionFilePath, HashSet<string> hashSet);
 
         /// <summary>
         /// Method pushes commits to the repository

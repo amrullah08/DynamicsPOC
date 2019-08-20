@@ -39,6 +39,6 @@ namespace CrmSolution
         /// </summary>
         /// <param name="solutionUnqiueName">unique solution name</param>
         /// <returns>returns list of downloaded solutions</returns>
-        List<SolutionFileInfo> DownloadSolutionFile(string solutionUnqiueName);
+        List<SolutionFileInfo> DownloadSolutionFile(string solutionUnqiueName,string mode);
     }
 }

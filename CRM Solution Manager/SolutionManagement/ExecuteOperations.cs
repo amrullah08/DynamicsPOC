@@ -107,6 +107,8 @@ namespace SolutionManagement
             sourcecontrolqueue.syed_name = "SOL-" + DateTime.UtcNow.ToString("dd/MM/yyyy hh:mm:ss");
             sourcecontrolqueue.syed_Comment = mode + DateTime.UtcNow.ToString("dd/MM/yyyy hh:mm:ss");
             sourcecontrolqueue.syed_overwritesolutionstxt = new OptionSetValue(433710000);
+            sourcecontrolqueue.syed_SourceControl = new OptionSetValue(433710002);
+
             sourcecontrolqueue.syed_CheckIn = true;
             if (mode == "Release")
             {

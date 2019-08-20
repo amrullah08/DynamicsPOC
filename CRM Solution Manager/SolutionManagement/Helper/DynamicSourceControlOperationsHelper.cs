@@ -36,7 +36,24 @@ namespace SolutionManagement
         /// <param name="tracingService">Tracing Service to trace error</param>
         public static void CreateSolutionDetail(IOrganizationService service, syed_sourcecontrolqueue sourceControlQueue, ITracingService tracingService)
         {
-            EntityCollection copyTemplate = SolutionHelper.RetrieveDynamicsSourceControlTemplate(service, tracingService);
+            //Copy feilds from Template Record.
+            EntityCollection copyDynamicsTemplate = SolutionHelper.RetrieveDynamicsSourceControlTemplate(service, tracingService);
+            foreach (syed_sourcecontrolqueue syed_Sourcecontrolqueue in copyDynamicsTemplate.Entities)
+            {
+                syed_sourcecontrolqueue _sourcecontrolqueue = new syed_sourcecontrolqueue();
+                _sourcecontrolqueue.syed_Branch = syed_Sourcecontrolqueue.syed_Branch;
+                _sourcecontrolqueue.syed_RemoteName = syed_Sourcecontrolqueue.syed_RemoteName;
+                _sourcecontrolqueue.syed_RepositoryUrl = syed_Sourcecontrolqueue.syed_RepositoryUrl;
+                _sourcecontrolqueue.syed_SourceControl = syed_Sourcecontrolqueue.syed_SourceControl;
+                _sourcecontrolqueue.Id = sourceControlQueue.Id;
+                _sourcecontrolqueue.syed_IsShedulled = syed_Sourcecontrolqueue.syed_IsShedulled;
+                _sourcecontrolqueue.syed_overwritesolutionstxt = syed_Sourcecontrolqueue.syed_overwritesolutionstxt;
+                service.Update(_sourcecontrolqueue);
+                break;
+            }
+
+            //Copy Master Solution Record from Template.
+            EntityCollection copyTemplate = SolutionHelper.RetrieveMasterSolutionTemplate(service, tracingService);
             foreach (syed_solutiondetail solutionDetail in copyTemplate.Entities)
             {
                 ExecuteOperations.CreateSolutionDetail(service, solutionDetail, sourceControlQueue);

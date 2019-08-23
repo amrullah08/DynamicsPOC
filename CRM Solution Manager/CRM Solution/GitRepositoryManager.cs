@@ -20,6 +20,7 @@ namespace GitDeploy
     using LibGit2Sharp.Handlers;
     using Microsoft.TeamFoundation.Client;
     using Microsoft.TeamFoundation.VersionControl.Client;
+    using Microsoft.TeamFoundation.VersionControl.Common;
     using Microsoft.VisualStudio.Services.Common;
 
     /// <summary>
@@ -498,7 +499,6 @@ namespace GitDeploy
         {
             try
             {
-                string wkSpcName = "C" + DateTime.Today.DayOfYear + DateTime.Today.Minute;
                 bool folderExists = Directory.Exists(this.localFolder.FullName);
                 //if (!folderExists)
                 //{
@@ -512,38 +512,37 @@ namespace GitDeploy
 
                 _tfs = new TfsTeamProjectCollection(new Uri(this.repoUrl), tfsCredentials);
                 _tfs.Authenticate();
+
                 // Get a reference to Version Control.              
                 _versionControl = _tfs.GetService<VersionControlServer>();
+                // Get a reference to Version Control.              
+                _versionControl = _tfs.GetService<VersionControlServer>();
+                _versionControl.NonFatalError += GitRepositoryManager.OnNonFatalError;
+                _versionControl.Getting += GitRepositoryManager.OnGetting;
+                _versionControl.BeforeCheckinPendingChange += GitRepositoryManager.OnBeforeCheckinPendingChange;
+                _versionControl.NewPendingChange += GitRepositoryManager.OnNewPendingChange;
 
-                Workspace workspace = _versionControl.QueryWorkspaces(
-                    wkSpcName,
-                    _versionControl.AuthorizedUser,
-                    Environment.MachineName).SingleOrDefault();
 
-                Console.WriteLine("existing workspace" + workspace);
-                if (workspace != null)
-                {
-                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("existing workspace delete <br/>" + _versionControl.AuthorizedUser);
-
-                    workspace.Delete();
-                }
-                else
-                {
-                    Console.WriteLine(" workspace is null");
-                }
 
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" <br/>" + _versionControl.AuthorizedUser);
 
                 Console.WriteLine("workspace create");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("workspace create <br/>");
+                CreateWorkspaceParameters parameters = new CreateWorkspaceParameters(Guid.NewGuid().ToString());
+                parameters.Location = WorkspaceLocation.Server;
 
-                _workspace = _versionControl.CreateWorkspace(wkSpcName);
+                _workspace = _versionControl.CreateWorkspace(parameters);
                 Console.WriteLine(" workspace created;");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("workspace created <br/>");
 
+                String ServerFolder = @"$/JaiProject";
+                WorkingFolder workfolder = new WorkingFolder(ServerFolder, this.localFolder.FullName.ToString());
 
+                Console.WriteLine(this.localFolder.FullName.ToString());
                 // Create a mapping using the Team Project supplied on the command line.
-                _workspace.Map(this.branchName, this.localFolder.ToString());
+                Console.WriteLine(this.localFolder.FullName.ToString());
+                _workspace.CreateMapping(workfolder);
+
                 Console.WriteLine("Completed: Map;");
 
                 // Get the files from the repository.
@@ -558,28 +557,39 @@ namespace GitDeploy
             }
             catch (Exception ex)
             {
-                if (_workspace != null)
-                {
-                    _workspace.Delete();
-                }
                 Console.WriteLine(ex.Message);
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(ex.Message);
-
-
-                bool folderExists = Directory.Exists(this.localFolder.FullName);
-                if (folderExists)
-                {
-                    var fList = Directory.GetFiles(this.localFolder.FullName, "*.*", SearchOption.AllDirectories);
-                    foreach (var f in fList)
-                    {
-                        File.Delete(f);
-                    }
-                    Directory.Delete(this.localFolder.FullName, true);
-                }
                 throw ex;
             }
             return _workspace;
         }
+
+        internal static void OnNonFatalError(Object sender, ExceptionEventArgs e)
+        {
+            if (e.Exception != null)
+            {
+                Console.Error.WriteLine("  Non - fatal exception: " + e.Exception.Message);
+            }
+            else
+            {
+                Console.Error.WriteLine("  Non - fatal failure: " + e.Failure.Message);
+            }
+        }
+        internal static void OnGetting(Object sender, GettingEventArgs e)
+        {
+            Console.WriteLine("  Getting: " + e.TargetLocalItem + ", status: " + e.Status);
+        }
+        internal static void OnBeforeCheckinPendingChange(Object sender, ProcessingChangeEventArgs e)
+        {
+            Console.WriteLine("  Checking in " + e.PendingChange.LocalItem);
+        }
+        internal static void OnNewPendingChange(Object sender, PendingChangeEventArgs e)
+        {
+            Console.WriteLine("  Pending " + PendingChange.GetLocalizedStringForChangeType(e.PendingChange.ChangeType) + " on " + e.PendingChange.LocalItem);
+        }
+
+
+
         /// <summary>
         /// Method updates repository
         /// </summary>

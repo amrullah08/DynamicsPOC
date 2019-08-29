@@ -257,18 +257,23 @@ namespace GitDeploy
 
                 }
 
+                WorkingFolder workfolder = new WorkingFolder(this.branchName, this.localFolder.FullName.ToString());
+                _workspace.Undo(this.localFolder.FullName.ToString(), RecursionType.Full);
+                _workspace.DeleteMapping(workfolder);
                 _workspace.Delete();
 
-                bool folderExists = Directory.Exists(this.localFolder.FullName);
-                if (folderExists)
-                {
-                    var fList = Directory.GetFiles(this.localFolder.FullName, "*.*", SearchOption.AllDirectories);
-                    foreach (var f in fList)
-                    {
-                        File.Delete(f);
-                    }
-                    Directory.Delete(this.localFolder.FullName, true);
-                }
+                //bool folderExists = Directory.Exists(this.localFolder.FullName);
+                //if (folderExists)
+                //{
+                //    var fList = Directory.GetFiles(this.localFolder.FullName, "*.*", SearchOption.AllDirectories);
+                //    foreach (var f in fList)
+                //    {
+                //        File.Delete(f);
+                //    }
+                //}
+
+                Console.WriteLine("After CheckIn workspace deleted");
+
 
                 solutionFileInfo.Update();
                 solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushToRepositorySuccessStatus;
@@ -283,11 +288,6 @@ namespace GitDeploy
             {
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
                 Console.WriteLine(ex.Message);
-                if (_workspace != null)
-                {
-                    _workspace.Delete();
-                }
-
                 bool folderExists = Directory.Exists(this.localFolder.FullName);
                 if (folderExists)
                 {
@@ -296,9 +296,11 @@ namespace GitDeploy
                     {
                         File.Delete(f);
                     }
-                    Directory.Delete(this.localFolder.FullName, true);
                 }
-                throw ex;
+                if (_workspace != null)
+                {
+                    _workspace.Delete();
+                }
 
             }
         }
@@ -343,6 +345,7 @@ namespace GitDeploy
 
                 if (this._workspace == null && solutionFileInfo.Repository != Constants.SourceControlAzureDevOpsServer)
                 {
+
                     Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Committing Powershell Scripts" + "<br>");
                     Console.WriteLine("Committing Powershell Scripts");
                     File.Copy(multilpleSolutionsImportPSPath, multilpleSolutionsImportPSPathVirtual, true);
@@ -357,6 +360,7 @@ namespace GitDeploy
                 }
                 else
                 {
+
                     SaveSolutionfile(solutionFilePath, hashSet);
                     //Copy Zip Files
                     Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Committing solutions" + "<br>");
@@ -523,6 +527,14 @@ namespace GitDeploy
                 _versionControl.NewPendingChange += GitRepositoryManager.OnNewPendingChange;
 
 
+                _workspace = _versionControl.TryGetWorkspace(this.localFolder.FullName.ToString());
+                if (_workspace != null)
+                {
+                    _workspace.Delete();
+                    Console.WriteLine("deleted workspace;");
+                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" <br/> deleted workspace;");
+                }
+
 
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" <br/>" + _versionControl.AuthorizedUser);
 
@@ -535,8 +547,8 @@ namespace GitDeploy
                 Console.WriteLine(" workspace created;");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("workspace created <br/>");
 
-                String ServerFolder = @"$/JaiProject";
-                WorkingFolder workfolder = new WorkingFolder(ServerFolder, this.localFolder.FullName.ToString());
+                //String ServerFolder = @"$/JaiProject";
+                WorkingFolder workfolder = new WorkingFolder(this.branchName, this.localFolder.FullName.ToString());
 
                 Console.WriteLine(this.localFolder.FullName.ToString());
                 // Create a mapping using the Team Project supplied on the command line.
@@ -547,10 +559,15 @@ namespace GitDeploy
 
                 // Get the files from the repository.
                 _workspace.Get();
-                _workspace.PendEdit(this.localFolder.FullName.ToString());
+                Console.WriteLine("Got Files");
 
                 Console.WriteLine("Completed: Files Mapped ");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Completed: Files Mapped  <br/>");
+                Console.WriteLine("CheckOut Files");
+                var tes = new string[1];
+                tes[0] = this.localFolder.FullName.ToString();
+                _workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, true, PendChangesOptions.GetLatestOnCheckout);
+                Console.WriteLine("CheckedOut Files");
                 this.CommitAllChanges(solutionFileInfo, solutionFilePath, hashSet);
 
 

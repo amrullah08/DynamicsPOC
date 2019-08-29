@@ -12,6 +12,7 @@ SYED.SourceControlQueue.EventHandler =
             try {
                 var formContext = executionContext.getFormContext();
                 var HTMLSection = formContext.ui.tabs.get("Reference");
+                SYED.SourceControlQueue.EventHandler.LockFields(executionContext);
 
                 var formType = formContext.ui.getFormType();
                 if (formType != "1") {
@@ -84,6 +85,7 @@ SYED.SourceControlQueue.EventHandler =
                 formContext.data.save().then(
                     function () {
                         SYED.SourceControlQueue.EventHandler.RefreshPage(executionContext);
+                        SYED.SourceControlQueue.EventHandler.LockFields(executionContext);
                     },
                     function (error) {
                         Xrm.Navigation.openAlertDialog(error.message);
@@ -192,6 +194,52 @@ SYED.SourceControlQueue.EventHandler =
             }
             catch (ex) {
                 console.log("Error at SYED.SourceControlQueue.EventHandler.ShowHideMergeButton function: " + ex.message + "|" + "Stack: " + ex.stack);
+                throw ex;
+            }
+        },
+
+        DispalySubmitButton: function (executionContext) {
+            try {
+                var formContext = null;
+
+                if (Xrm.Internal.isUci())
+                    formContext = executionContext;
+                else
+                    formContext = executionContext.getFormContext();
+
+                var QueueStatus = formContext.getAttribute("syed_status").getValue();
+                if (QueueStatus != "" && QueueStatus != null && QueueStatus != "Draft") {
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            } catch (ex) {
+                console.log("Error at SYED.SourceControlQueue.EventHandler.DispalySubmitButton function: " + ex.message + "|" + "Stack: " + ex.stack);
+                throw ex;
+            }
+        },
+
+        LockFields: function (executionContext) {
+            try {
+                var formContext = null;
+
+                if (Xrm.Internal.isUci())
+                    formContext = executionContext;
+                else
+                    formContext = executionContext.getFormContext();
+
+                var QueueStatus = formContext.getAttribute("syed_status").getValue();
+                if (QueueStatus != "" && QueueStatus != null && QueueStatus != "Draft") {
+                    var section = Xrm.Page.ui.tabs.get("Deployment_Details").sections.get("Deployment_Details_Section");
+                    var controls = section.controls.get();
+                    var controlsLenght = controls.length;
+                    for (var i = 0; i < controlsLenght; i++) {
+                        controls[i].setDisabled(true);
+                    }
+                }
+            } catch (ex) {
+                console.log("Error at SYED.SourceControlQueue.EventHandler.LockFields function: " + ex.message + "|" + "Stack: " + ex.stack);
                 throw ex;
             }
         }

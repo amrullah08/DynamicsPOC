@@ -1,0 +1,239 @@
+{
+  "options": [
+    {
+      "enabled": false,
+      "definition": { "id": "5d58cc01-7c75-450c-be18-a388ddb129ec" },
+      "inputs": {
+        "branchFilters": "[\"+refs/heads/*\"]",
+        "additionalFields": "{}"
+      }
+    },
+    {
+      "enabled": false,
+      "definition": { "id": "a9db38f9-9fdc-478c-b0f9-464221e58316" },
+      "inputs": {
+        "workItemType": "Issue",
+        "assignToRequestor": "true",
+        "additionalFields": "{}"
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "branchFilters": [ "+master" ],
+      "pathFilters": [],
+      "batchChanges": false,
+      "maxConcurrentBuildsPerBranch": 1,
+      "pollingInterval": 0,
+      "triggerType": 2
+    }
+  ],
+  "variables": {
+    "crmConnectionString": { "value": "AuthType=Office365;Username=igdsa36@IGDCRM.onmicrosoft.com;Password=6e%\\pbw}zBySp@tY;Url=https://igdcicd2.crm8.dynamics.com" },
+    "system.debug": {
+      "value": "false",
+      "allowOverride": true
+    }
+  },
+  "properties": {},
+  "tags": [],
+  "jobAuthorizationScope": 1,
+  "jobTimeoutInMinutes": 60,
+  "jobCancelTimeoutInMinutes": 5,
+  "process": {
+    "phases": [
+      {
+        "steps": [
+          {
+            "environment": {},
+            "enabled": true,
+            "continueOnError": false,
+            "alwaysRun": false,
+            "displayName": "Copy solutions.txt from Main Folder",
+            "timeoutInMinutes": 0,
+            "condition": "succeeded()",
+            "task": {
+              "id": "5bfb729a-a7c8-4a78-a7c3-8d717bb7c13c",
+              "versionSpec": "2.*",
+              "definitionType": "task"
+            },
+            "inputs": {
+              "SourceFolder": "",
+              "Contents": "*.txt\n*.ps1",
+              "TargetFolder": "$(Build.ArtifactStagingDirectory) ",
+              "CleanTargetFolder": "false",
+              "OverWrite": "false",
+              "flattenFolders": "false",
+              "preserveTimestamp": "false"
+            }
+          },
+          {
+            "environment": {},
+            "enabled": true,
+            "continueOnError": false,
+            "alwaysRun": false,
+            "displayName": "Publish Artifact: drop",
+            "timeoutInMinutes": 0,
+            "condition": "succeeded()",
+            "task": {
+              "id": "2ff763a7-ce83-4e1f-bc89-0ae63477cebe",
+              "versionSpec": "1.*",
+              "definitionType": "task"
+            },
+            "inputs": {
+              "PathtoPublish": "$(Build.ArtifactStagingDirectory)",
+              "ArtifactName": "drop",
+              "ArtifactType": "Container",
+              "TargetPath": "",
+              "Parallel": "false",
+              "ParallelCount": "8"
+            }
+          },
+          {
+            "environment": {},
+            "enabled": true,
+            "continueOnError": false,
+            "alwaysRun": false,
+            "displayName": "PowerShell Script",
+            "timeoutInMinutes": 0,
+            "condition": "succeeded()",
+            "task": {
+              "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+              "versionSpec": "2.*",
+              "definitionType": "task"
+            },
+            "inputs": {
+              "targetType": "filePath",
+              "filePath": "SolutionToBeImported.ps1",
+              "arguments": "-solutionListFile '$(Build.ArtifactStagingDirectory)/solutions.txt'",
+              "script": "# Write your PowerShell commands here.\n\nWrite-Host \"Hello World\"\n",
+              "errorActionPreference": "stop",
+              "failOnStderr": "false",
+              "ignoreLASTEXITCODE": "false",
+              "pwsh": "false",
+              "workingDirectory": ""
+            }
+          },
+          {
+            "environment": {},
+            "enabled": true,
+            "continueOnError": false,
+            "alwaysRun": false,
+            "displayName": "Copy zip Files to From Release",
+            "timeoutInMinutes": 0,
+            "condition": "succeeded()",
+            "task": {
+              "id": "5bfb729a-a7c8-4a78-a7c3-8d717bb7c13c",
+              "versionSpec": "2.*",
+              "definitionType": "task"
+            },
+            "inputs": {
+              "SourceFolder": "Test/Release",
+              "Contents": "$(SolutionsFileName)",
+              "TargetFolder": "$(Build.ArtifactStagingDirectory)/SolutionContainer",
+              "CleanTargetFolder": "false",
+              "OverWrite": "false",
+              "flattenFolders": "false",
+              "preserveTimestamp": "false"
+            }
+          },
+          {
+            "environment": {},
+            "enabled": true,
+            "continueOnError": false,
+            "alwaysRun": false,
+            "displayName": "Publish Artifact: drop",
+            "timeoutInMinutes": 0,
+            "condition": "succeeded()",
+            "task": {
+              "id": "2ff763a7-ce83-4e1f-bc89-0ae63477cebe",
+              "versionSpec": "1.*",
+              "definitionType": "task"
+            },
+            "inputs": {
+              "PathtoPublish": "$(Build.ArtifactStagingDirectory)",
+              "ArtifactName": "drop",
+              "ArtifactType": "Container",
+              "TargetPath": "",
+              "Parallel": "false",
+              "ParallelCount": "8"
+            }
+          }
+        ],
+        "name": "Agent job 1",
+        "refName": "Job_1",
+        "condition": "succeeded()",
+        "target": {
+          "executionOptions": { "type": 0 },
+          "allowScriptsAuthAccessOption": false,
+          "type": 1
+        },
+        "jobAuthorizationScope": 1
+      }
+    ],
+    "type": 1
+  },
+  "repository": {
+    "properties": {
+      "apiUrl": "https://api.github.com/repos/YarramNaresh/CICD",
+      "branchesUrl": "https://api.github.com/repos/YarramNaresh/CICD/branches",
+      "cloneUrl": "https://github.com/YarramNaresh/CICD.git",
+      "connectedServiceId": "",
+      "defaultBranch": "master",
+      "fullName": "YarramNaresh/CICD",
+      "hasAdminPermissions": "True",
+      "isFork": "False",
+      "isPrivate": "True",
+      "lastUpdated": "08/12/2019 07:03:59",
+      "manageUrl": "https://github.com/YarramNaresh/CICD",
+      "nodeId": "MDEwOlJlcG9zaXRvcnkyMDE0MzQ1MDM=",
+      "ownerId": "9726236",
+      "orgName": "YarramNaresh",
+      "refsUrl": "https://api.github.com/repos/YarramNaresh/CICD/git/refs",
+      "safeRepository": "YarramNaresh/CICD",
+      "shortName": "CICD",
+      "ownerAvatarUrl": "https://avatars1.githubusercontent.com/u/9726236?v=4",
+      "archived": "False",
+      "externalId": "201434503",
+      "ownerIsAUser": "True",
+      "checkoutNestedSubmodules": "false",
+      "cleanOptions": "0",
+      "fetchDepth": "0",
+      "gitLfsSupport": "false",
+      "reportBuildStatus": "true",
+      "skipSyncSource": "false",
+      "labelSourcesFormat": "$(build.buildNumber)",
+      "labelSources": "0"
+    },
+    "id": "YarramNaresh/CICD",
+    "type": "GitHub",
+    "name": "YarramNaresh/CICD",
+    "url": "https://github.com/YarramNaresh/CICD.git",
+    "defaultBranch": "master",
+    "clean": "false",
+    "checkoutSubmodules": false
+  },
+  "processParameters": {},
+  "quality": 1,
+  "authoredBy": {
+    "displayName": "Naresh Yarram",
+    "url": "https://spsprodsin1.vssps.visualstudio.com/A2dbb1883-48cf-4a10-813d-a7a37123bf50/_apis/Identities/fd9b04f9-c4ec-683a-84d4-a99a092a0059",
+    "_links": { "avatar": { "href": "https://dev.azure.com/v-naryar/_apis/GraphProfile/MemberAvatars/aad.ZmQ5YjA0ZjktYzRlYy03ODNhLTg0ZDQtYTk5YTA5MmEwMDU5" } },
+    "id": "fd9b04f9-c4ec-683a-84d4-a99a092a0059",
+    "uniqueName": "v-naryar@microsoft.com",
+    "imageUrl": "https://dev.azure.com/v-naryar/_apis/GraphProfile/MemberAvatars/aad.ZmQ5YjA0ZjktYzRlYy03ODNhLTg0ZDQtYTk5YTA5MmEwMDU5",
+    "descriptor": "aad.ZmQ5YjA0ZjktYzRlYy03ODNhLTg0ZDQtYTk5YTA5MmEwMDU5"
+  },
+  "drafts": [],
+  "queue": {
+    "_links": { "self": { "href": "https://dev.azure.com/v-naryar/_apis/build/Queues/3" } },
+    "id": 3,
+    "name": "Hosted VS2017",
+    "url": "https://dev.azure.com/v-naryar/_apis/build/Queues/3",
+    "pool": {
+      "id": 3,
+      "name": "Hosted VS2017",
+      "isHosted": true
+    }
+  }
+}

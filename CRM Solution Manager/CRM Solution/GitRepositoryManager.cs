@@ -261,17 +261,6 @@ namespace GitDeploy
                 _workspace.Undo(this.localFolder.FullName.ToString(), RecursionType.Full);
                 _workspace.DeleteMapping(workfolder);
                 _workspace.Delete();
-
-                //bool folderExists = Directory.Exists(this.localFolder.FullName);
-                //if (folderExists)
-                //{
-                //    var fList = Directory.GetFiles(this.localFolder.FullName, "*.*", SearchOption.AllDirectories);
-                //    foreach (var f in fList)
-                //    {
-                //        File.Delete(f);
-                //    }
-                //}
-
                 Console.WriteLine("After CheckIn workspace deleted");
 
 
@@ -315,6 +304,9 @@ namespace GitDeploy
             bool solutionfileUnManagedExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(solutionFilePath), ItemType.Any);
             if (solutionfileUnManagedExit)
             {
+                var tes = new string[1];
+                tes[0] = solutionFilePath;
+                _workspace.PendEdit(tes, RecursionType.Full, null,LockLevel.None, false, PendChangesOptions.GetLatestOnCheckout);
                 File.WriteAllText(solutionFilePath, string.Empty);
                 File.WriteAllLines(solutionFilePath, hashSet.Where(cc => !string.IsNullOrEmpty(cc)).ToArray());
             }
@@ -369,7 +361,10 @@ namespace GitDeploy
                     bool solutionfileUnManagedExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(fileUnmanaged), ItemType.Any);
                     if (solutionfileUnManagedExit)
                     {
-                        //_workspace.PendEdit(fileUnmanaged, RecursionType.Full);
+                        var tes = new string[1];
+                        tes[0] = fileUnmanaged;
+                        _workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, false, PendChangesOptions.GetLatestOnCheckout);
+
                         Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy unmanaged" + "<br>");
                         File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
 
@@ -382,10 +377,12 @@ namespace GitDeploy
                     }
 
 
-                    bool solutionfileManagedExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(fileUnmanaged), ItemType.Any);
+                    bool solutionfileManagedExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(fileManaged), ItemType.Any);
                     if (solutionfileManagedExit)
                     {
-                        //_workspace.PendEdit(fileUnmanaged, RecursionType.Full);
+                        var tes = new string[1];
+                        tes[0] = fileManaged;
+                        _workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, false, PendChangesOptions.GetLatestOnCheckout);
                         Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy managed" + "<br>");
                         File.Copy(solutionFileInfo.SolutionFilePathManaged, fileManaged, true);
 
@@ -394,7 +391,7 @@ namespace GitDeploy
                     {
                         Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy managed" + "<br>");
                         File.Copy(solutionFileInfo.SolutionFilePathManaged, fileManaged, true);
-                        _workspace.PendAdd(fileUnmanaged, true);
+                        _workspace.PendAdd(fileManaged, true);
                     }
 
                     Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Committing Powershell Scripts" + "<br>");
@@ -404,7 +401,9 @@ namespace GitDeploy
                     bool fileExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(multilpleSolutionsImportPSPathVirtual), ItemType.Any);
                     if (fileExit)
                     {
-                        // _workspace.PendEdit(multilpleSolutionsImportPSPathVirtual, RecursionType.Full);
+                        var tes = new string[1];
+                        tes[0] = multilpleSolutionsImportPSPathVirtual;
+                        _workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, false, PendChangesOptions.GetLatestOnCheckout);
                         File.Copy(multilpleSolutionsImportPSPath, multilpleSolutionsImportPSPathVirtual, true);
 
                     }
@@ -419,7 +418,9 @@ namespace GitDeploy
                     bool exits = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(solutionToBeImportedPSPathVirtual), ItemType.Any);
                     if (exits)
                     {
-                        // _workspace.PendEdit(solutionToBeImportedPSPathVirtual, RecursionType.Full);
+                        var tes = new string[1];
+                        tes[0] = solutionToBeImportedPSPathVirtual;
+                        _workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None,false, PendChangesOptions.GetLatestOnCheckout);
                         File.Copy(solutionToBeImportedPSPath, solutionToBeImportedPSPathVirtual, true);
                     }
                     else
@@ -504,14 +505,9 @@ namespace GitDeploy
             try
             {
                 bool folderExists = Directory.Exists(this.localFolder.FullName);
-                //if (!folderExists)
-                //{
-                //    Directory.CreateDirectory(this.localFolder.FullName);
-                //}
 
                 NetworkCredential networkCredential = new NetworkCredential(this.tfsUserName, this.tfsPassword);
                 VssBasicCredential basicCredential = new VssBasicCredential(networkCredential);
-
                 VssCredentials tfsCredentials = new VssCredentials(basicCredential);
 
                 _tfs = new TfsTeamProjectCollection(new Uri(this.repoUrl), tfsCredentials);
@@ -530,6 +526,9 @@ namespace GitDeploy
                 _workspace = _versionControl.TryGetWorkspace(this.localFolder.FullName.ToString());
                 if (_workspace != null)
                 {
+                    WorkingFolder workfolderToDelete = new WorkingFolder(this.branchName, this.localFolder.FullName.ToString());
+                    _workspace.Undo(this.localFolder.FullName.ToString(), RecursionType.Full);
+                    _workspace.DeleteMapping(workfolderToDelete);
                     _workspace.Delete();
                     Console.WriteLine("deleted workspace;");
                     Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" <br/> deleted workspace;");
@@ -564,9 +563,9 @@ namespace GitDeploy
                 Console.WriteLine("Completed: Files Mapped ");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Completed: Files Mapped  <br/>");
                 Console.WriteLine("CheckOut Files");
-                var tes = new string[1];
-                tes[0] = this.localFolder.FullName.ToString();
-                _workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, true, PendChangesOptions.GetLatestOnCheckout);
+                //var tes = new string[1];
+                //tes[0] = this.localFolder.FullName.ToString();
+                ////   _workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, true, PendChangesOptions.GetLatestOnCheckout);
                 Console.WriteLine("CheckedOut Files");
                 this.CommitAllChanges(solutionFileInfo, solutionFilePath, hashSet);
 
@@ -761,7 +760,9 @@ namespace GitDeploy
                         bool fileExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(destination + Path.GetFileName(element)), ItemType.Any);
                         if (fileExit)
                         {
-                            // _workspace.PendEdit(destination + Path.GetFileName(element), RecursionType.Full);
+                            var tes = new string[1];
+                            tes[0] = destination + Path.GetFileName(element);
+                            _workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, false, PendChangesOptions.GetLatestOnCheckout);
                             // Files in directory
                             File.Copy(element, destination + Path.GetFileName(element), true);
                             File.Copy(element, destination + Path.GetFileName(element), true);
@@ -862,7 +863,10 @@ namespace GitDeploy
                         bool fileExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(commitFileLoc), ItemType.Any);
                         if (fileExit)
                         {
-                            //_workspace.PendEdit(commitFileLoc, RecursionType.Full);
+
+                            var tes = new string[1];
+                            tes[0] = commitFileLoc;
+                            _workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, false, PendChangesOptions.GetLatestOnCheckout);
                             File.Copy(webResources + "\\" + webResournceName, commitFileLoc, true);
 
                         }
@@ -921,7 +925,10 @@ namespace GitDeploy
                                 bool fileExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(file), ItemType.Any);
                                 if (fileExit)
                                 {
-                                    //  _workspace.PendEdit(file, RecursionType.Full);
+                                    var tes = new string[1];
+                                    tes[0] = file;
+                                    _workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, false, PendChangesOptions.GetLatestOnCheckout);
+
                                 }
                                 else
                                 {
@@ -942,7 +949,9 @@ namespace GitDeploy
                                     bool fxit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(file), ItemType.Any);
                                     if (fxit)
                                     {
-                                        // _workspace.PendEdit(file, RecursionType.Full);
+                                        var tes = new string[1];
+                                        tes[0] = file;
+                                        _workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, false, PendChangesOptions.GetLatestOnCheckout);
                                     }
                                     else
                                     {
@@ -967,7 +976,9 @@ namespace GitDeploy
                     bool isFile = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(file), ItemType.Any);
                     if (isFile)
                     {
-                        // _workspace.PendEdit(file, RecursionType.Full);
+                        var tes = new string[1];
+                        tes[0] = file;
+                        _workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, false, PendChangesOptions.GetLatestOnCheckout);
                     }
                     else
                     {

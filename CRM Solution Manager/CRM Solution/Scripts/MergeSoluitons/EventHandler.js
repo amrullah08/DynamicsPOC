@@ -24,7 +24,7 @@ SYED.MergeSolution.EventHandler =
                             formContext.getAttribute("syed_solutioninstalledon").setValue(new Date(result["syed_solutioninstalledon"]));
                             formContext.getAttribute("syed_uniquename").setValue(result["syed_listofsolutions"]);
                             formContext.getAttribute("syed_version").setValue(result["syed_version"]);
-                            
+
                             formContext.getAttribute("syed_order").setValue(0);
                         },
                         function (error) {
@@ -47,6 +47,26 @@ SYED.MergeSolution.EventHandler =
             }
             catch (ex) {
                 console.log("Error at SYED.MergeSolution.EventHandler.SetCRMSolutionValues function: " + ex.message + "|" + "Stack: " + ex.stack);
+                throw ex;
+            }
+        },
+
+        Back: function (executionContext) {
+            try {
+                if (Xrm.Internal.isUci())
+                    formContext = executionContext;
+                else
+                    formContext = executionContext.getFormContext();
+
+                var sourceControl = formContext.getAttribute("syed_mastersolution").getValue();
+                if (sourceControl != null || sourceControl != undefined) {
+                    var entityFormOptions = {};
+                    entityFormOptions["entityName"] = sourceControl[0].entityType;
+                    entityFormOptions["entityId"] = sourceControl[0].id;
+                    Xrm.Navigation.openForm(entityFormOptions);
+                }
+            } catch (ex) {
+                console.log("Error at SYED.MergeSolution.EventHandler.Back function: " + ex.message + "|" + "Stack: " + ex.stack);
                 throw ex;
             }
         }

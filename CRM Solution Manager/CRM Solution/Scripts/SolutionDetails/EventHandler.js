@@ -53,13 +53,12 @@ SYED.SolutionDetail.EventHandler =
                         function success(result) {
                             formContext.getAttribute("syed_friendlyname").setValue(result["syed_friendlyname"]);
                             formContext.getAttribute("syed_ismanaged").setValue(result["syed_ismanaged"]);
-                            formContext.getAttribute("syed_name").setValue(result["syed_name"]);
+                            formContext.getAttribute("syed_name").setValue(result["syed_friendlyname"]);
                             formContext.getAttribute("syed_publisher").setValue(result["syed_publisher"]);
                             formContext.getAttribute("syed_solutioninstalledon").setValue(new Date(result["syed_solutioninstalledon"]));
                             formContext.getAttribute("syed_listofsolutions").setValue(result["syed_listofsolutions"]);
                             formContext.getAttribute("syed_version").setValue(result["syed_version"]);
                             formContext.getAttribute("syed_solutionid").setValue(result["syed_solutionid"]);
-                            formContext.getAttribute("syed_name").setValue("SOL-" + new Date().toLocaleString());
                             formContext.getAttribute("syed_order").setValue(0);
 
                         },
@@ -84,6 +83,27 @@ SYED.SolutionDetail.EventHandler =
             }
             catch (ex) {
                 console.log("Error at SYED.SolutionDetail.EventHandler.SetSourcecontrolValues function: " + ex.message + "|" + "Stack: " + ex.stack);
+                throw ex;
+            }
+        },
+
+        Back: function (executionContext) {
+            try {
+                if (Xrm.Internal.isUci())
+                    formContext = executionContext;
+                else
+                    formContext = executionContext.getFormContext();
+
+                var sourceControl = formContext.getAttribute("syed_listofsolutionid").getValue();
+                if (sourceControl != null || sourceControl != undefined) {
+                    var entityFormOptions = {};
+                    entityFormOptions["entityName"] = sourceControl[0].entityType;
+                    entityFormOptions["entityId"] = sourceControl[0].id;
+
+                    Xrm.Navigation.openForm(entityFormOptions);
+                }
+            } catch (ex) {
+                console.log("Error at SYED.SolutionDetail.EventHandler.Back function: " + ex.message + "|" + "Stack: " + ex.stack);
                 throw ex;
             }
         }

@@ -9,6 +9,7 @@ namespace CrmSolution
 {
     using System;
     using System.Configuration;
+    using System.Net;
     using System.ServiceModel.Description;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Client;
@@ -308,6 +309,9 @@ namespace CrmSolution
         /// <returns>returns organization service proxy</returns>
         private OrganizationServiceProxy InitializeOrganizationService()
         {
+
+            //Security Protocol as TLS12
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             OrganizationServiceProxy organizationServiceProxy = new OrganizationServiceProxy(new Uri(this.OrgServiceUrl), null, this.clientCredentials, null);
             organizationServiceProxy.Timeout = new TimeSpan(0, 30, 0);
             return organizationServiceProxy;

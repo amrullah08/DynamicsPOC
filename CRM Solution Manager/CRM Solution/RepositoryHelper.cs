@@ -238,26 +238,24 @@ namespace CrmSolution
                 gitRepositoryManager.UpdateRepository();
             }
 
-
-            ////433710000 value for Yes
-            if (solutionFile.SolutionsTxt == 433710000 && File.Exists(solutionFilePath))
-            {
-                File.WriteAllText(solutionFilePath, string.Empty);
-                hashSet.Clear();
-            }
-
-            this.PopulateHashset(solutionFilePath, hashSet);
-            if (!hashSet.Contains(solutionFile.SolutionFileZipName) && solutionFile.IncludeInRelease)
-            {
-                hashSet.Add(solutionFile.SolutionFileZipName);
-            }
-
             if (solutionFile.Repository == Constants.SourceControlAzureDevOpsServer)
             {
                 workspace = gitRepositoryManager.ConnectTFSMap(solutionFile, solutionFilePath, hashSet);
             }
             else
             {
+                ////433710000 value for Yes
+                if (solutionFile.SolutionsTxt == 433710000 && File.Exists(solutionFilePath))
+                {
+                    File.WriteAllText(solutionFilePath, string.Empty);
+                    hashSet.Clear();
+                }
+
+                this.PopulateHashset(solutionFilePath, hashSet);
+                if (!hashSet.Contains(solutionFile.SolutionFileZipName) && solutionFile.IncludeInRelease)
+                {
+                    hashSet.Add(solutionFile.SolutionFileZipName);
+                }
                 this.SaveHashSet(solutionFilePath, hashSet);
                 gitRepositoryManager.CommitAllChanges(solutionFile, solutionFilePath, null);
                 gitRepositoryManager.PushCommits();

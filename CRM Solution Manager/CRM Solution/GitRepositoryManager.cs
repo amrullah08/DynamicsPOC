@@ -333,9 +333,9 @@ namespace GitDeploy
         {
             try
             {
-                string multilpleSolutionsImportPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.MultilpleSolutionsImport);
+                string multilpleSolutionsImportPSPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\MultilpleSolutionsImport.ps1";
                 string multilpleSolutionsImportPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.MultilpleSolutionsImport;
-                string solutionToBeImportedPSPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.SolutionToBeImported);
+                string solutionToBeImportedPSPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\SolutionToBeImported.ps1";
                 string solutionToBeImportedPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.SolutionToBeImported;
                 string fileUnmanaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_.zip";
                 string fileManaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_managed_.zip";

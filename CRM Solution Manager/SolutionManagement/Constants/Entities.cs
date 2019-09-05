@@ -4592,11 +4592,91 @@ namespace SolutionConstants
 				this.OnPropertyChanged("syed_RemoteName");
 			}
 		}
-		
-		/// <summary>
-		/// 
-		/// </summary>
-		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_repositoryurl")]
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_repositoryhtmldirectory")]
+        public string syed_RepositoryHtmlDirectory
+        {
+            [System.Diagnostics.DebuggerNonUserCode()]
+            get
+            {
+                return this.GetAttributeValue<string>("syed_repositoryhtmldirectory");
+            }
+            [System.Diagnostics.DebuggerNonUserCode()]
+            set
+            {
+                this.OnPropertyChanging("syed_RepositoryHtmlDirectory");
+                this.SetAttributeValue("syed_repositoryhtmldirectory", value);
+                this.OnPropertyChanged("syed_RepositoryHtmlDirectory");
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_repositoryimagesdirectory")]
+        public string syed_RepositoryImagesDirectory
+        {
+            [System.Diagnostics.DebuggerNonUserCode()]
+            get
+            {
+                return this.GetAttributeValue<string>("syed_repositoryimagesdirectory");
+            }
+            [System.Diagnostics.DebuggerNonUserCode()]
+            set
+            {
+                this.OnPropertyChanging("syed_RepositoryImagesDirectory");
+                this.SetAttributeValue("syed_repositoryimagesdirectory", value);
+                this.OnPropertyChanged("syed_RepositoryImagesDirectory");
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_repositoryjsfolder")]
+        public string syed_RepositoryJsFolder
+        {
+            [System.Diagnostics.DebuggerNonUserCode()]
+            get
+            {
+                return this.GetAttributeValue<string>("syed_repositoryjsfolder");
+            }
+            [System.Diagnostics.DebuggerNonUserCode()]
+            set
+            {
+                this.OnPropertyChanging("syed_RepositoryJsFolder");
+                this.SetAttributeValue("syed_repositoryjsfolder", value);
+                this.OnPropertyChanged("syed_RepositoryJsFolder");
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_repositorysolutionfolder")]
+        public string syed_RepositorySolutionFolder
+        {
+            [System.Diagnostics.DebuggerNonUserCode()]
+            get
+            {
+                return this.GetAttributeValue<string>("syed_repositorysolutionfolder");
+            }
+            [System.Diagnostics.DebuggerNonUserCode()]
+            set
+            {
+                this.OnPropertyChanging("syed_RepositorySolutionFolder");
+                this.SetAttributeValue("syed_repositorysolutionfolder", value);
+                this.OnPropertyChanged("syed_RepositorySolutionFolder");
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_repositoryurl")]
 		public string syed_RepositoryUrl
 		{
 			[System.Diagnostics.DebuggerNonUserCode()]

@@ -48,6 +48,11 @@ namespace SolutionManagement
                 _sourcecontrolqueue.Id = sourceControlQueue.Id;
                 _sourcecontrolqueue.syed_IsShedulled = syed_Sourcecontrolqueue.syed_IsShedulled;
                 _sourcecontrolqueue.syed_overwritesolutionstxt = syed_Sourcecontrolqueue.syed_overwritesolutionstxt;
+                _sourcecontrolqueue.syed_RepositoryHtmlDirectory = syed_Sourcecontrolqueue.syed_RepositoryHtmlDirectory;
+                _sourcecontrolqueue.syed_RepositoryImagesDirectory = syed_Sourcecontrolqueue.syed_RepositoryImagesDirectory;
+                _sourcecontrolqueue.syed_RepositoryJsFolder = syed_Sourcecontrolqueue.syed_RepositoryJsFolder;
+                _sourcecontrolqueue.syed_RepositorySolutionFolder = syed_Sourcecontrolqueue.syed_RepositorySolutionFolder;
+
                 service.Update(_sourcecontrolqueue);
                 break;
             }

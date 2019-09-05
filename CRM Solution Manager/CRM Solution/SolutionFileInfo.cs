@@ -67,6 +67,10 @@ namespace CrmSolution
             this.GitRepoUrl = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryUrl);
             EntityCollection retrieveSolutionsToBeMerged = Singleton.CrmSolutionHelperInstance.RetrieveSolutionsToBeMergedByListOfSolutionId(organizationServiceProxy, solutionDetail.Id);
             this.MasterSolutionId = solutionDetail.GetAttributeValue<string>("syed_solutionid");
+            this.RepoHTMLFolder = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryHTMLFolder);
+            this.RepoImagesFolder = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryImageFolder);
+            this.RepoSolutionFolder = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositorySolutionFolder);
+            this.RepoJSFolder = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryJsFolder);
 
             if (this.CheckInSolution)
             {
@@ -117,6 +121,26 @@ namespace CrmSolution
         /// Gets or sets repo url
         /// </summary>
         public string GitRepoUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets Repo Solution Folder
+        /// </summary>
+        public string RepoSolutionFolder { get; set; }
+
+        /// <summary>
+        /// Gets or sets Repo HTML Folder
+        /// </summary>
+        public string RepoHTMLFolder { get; set; }
+
+        /// <summary>
+        /// Gets or sets Repo JS Folder
+        /// </summary>
+        public string RepoJSFolder { get; set; }
+
+        /// <summary>
+        /// Gets or sets Repo Images Folder
+        /// </summary>
+        public string RepoImagesFolder { get; set; }
 
         /// <summary>
         /// Gets or sets value indicating whether Overwrite solutions.txt needs to be overwritten or not

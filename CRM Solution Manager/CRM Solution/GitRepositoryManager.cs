@@ -153,10 +153,10 @@ namespace GitDeploy
         {
             var folder = new DirectoryInfo(localFolder);
             this.localFolder = folder;
-            this.webResourcesJsFolder = new DirectoryInfo(javascriptLocalFolder);
-            this.webResourcesHtmllocalFolder = new DirectoryInfo(htmlLocalFolder);
-            this.webResourcesImageslocalFolder = new DirectoryInfo(imagesLocalFolder);
-            this.solutionlocalFolder = new DirectoryInfo(solutionLocalFolder);
+            this.webResourcesJsFolder = javascriptLocalFolder != null ? new DirectoryInfo(javascriptLocalFolder) : null;
+            this.webResourcesHtmllocalFolder = htmlLocalFolder != null ? new DirectoryInfo(htmlLocalFolder) : null;
+            this.webResourcesImageslocalFolder = imagesLocalFolder != null ? new DirectoryInfo(imagesLocalFolder) : null;
+            this.solutionlocalFolder = solutionLocalFolder != null ? new DirectoryInfo(solutionLocalFolder) : null;
 
             this.credentials = new UsernamePasswordCredentials
             {
@@ -870,15 +870,36 @@ namespace GitDeploy
                 switch (webResourceType)
                 {
                     case "1":
-                        commitFileLoc = this.webResourcesHtmllocalFolder + modifiedName;
+                        if (this.webResourcesHtmllocalFolder != null && this.webResourcesHtmllocalFolder != this.localFolder)
+                        {
+                            commitFileLoc = this.webResourcesHtmllocalFolder + modifiedName;
+                        }
+                        else
+                        {
+                            commitFileLoc = null;
+                        }
                         break;
 
                     case "3":
-                        commitFileLoc = this.webResourcesJsFolder + modifiedName;
+                        if (this.webResourcesJsFolder != null && this.webResourcesJsFolder != this.localFolder)
+                        {
+                            commitFileLoc = this.webResourcesJsFolder + modifiedName;
+                        }
+                        else
+                        {
+                            commitFileLoc = null;
+                        }
                         break;
 
                     case "5":
-                        commitFileLoc = this.webResourcesImageslocalFolder + modifiedName;
+                        if (this.webResourcesImageslocalFolder != null && this.webResourcesImageslocalFolder != this.localFolder)
+                        {
+                            commitFileLoc = this.webResourcesImageslocalFolder + modifiedName;
+                        }
+                        else
+                        {
+                            commitFileLoc = null;
+                        }
                         break;
                 }
                 if (commitFileLoc != null && commitFileLoc != string.Empty)
@@ -918,15 +939,18 @@ namespace GitDeploy
         /// <param name="repo">repository to be committed</param>
         private void AddExtractedSolutionToRepository(SolutionFileInfo solutionFileInfo, Repository repo)
         {
-            if (repo != null)
+            if (this.solutionlocalFolder != null && this.solutionlocalFolder != this.localFolder)
             {
-                this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.solutionlocalFolder.FullName + solutionFileInfo.SolutionUniqueName, repo, null);
+                if (repo != null)
+                {
+                    this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.solutionlocalFolder.FullName + solutionFileInfo.SolutionUniqueName, repo, null);
 
-            }
-            else
-            {
-                this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.solutionlocalFolder.FullName + solutionFileInfo.SolutionUniqueName, null, _workspace);
+                }
+                else
+                {
+                    this.CopyDirectory(solutionFileInfo.SolutionExtractionPath, this.solutionlocalFolder.FullName + solutionFileInfo.SolutionUniqueName, null, _workspace);
 
+                }
             }
 
         }
@@ -938,37 +962,15 @@ namespace GitDeploy
         /// <param name="repo">Repository details</param>
         private void AddRepositoryIndexes(string file, Repository repo)
         {
-            if (string.IsNullOrEmpty(file))
+            if (this.solutionlocalFolder != null && this.solutionlocalFolder != this.localFolder)
             {
-                var files = this.solutionlocalFolder.GetFiles("*.zip").Select(f => f.FullName);
+                if (string.IsNullOrEmpty(file))
                 {
-                    foreach (var f in files)
+                    var files = this.solutionlocalFolder.GetFiles("*.zip").Select(f => f.FullName);
                     {
-                        if (string.IsNullOrEmpty(file))
+                        foreach (var f in files)
                         {
-                            if (repo != null)
-                            {
-                                repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
-                            }
-                            else
-                            {
-                                bool fileExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(file), ItemType.Any);
-                                if (fileExit)
-                                {
-                                    var tes = new string[1];
-                                    tes[0] = file;
-                                    _workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, false, PendChangesOptions.GetLatestOnCheckout);
-
-                                }
-                                else
-                                {
-                                    _workspace.PendAdd(file, true);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (f.EndsWith(file))
+                            if (string.IsNullOrEmpty(file))
                             {
                                 if (repo != null)
                                 {
@@ -976,47 +978,71 @@ namespace GitDeploy
                                 }
                                 else
                                 {
-                                    bool fxit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(file), ItemType.Any);
-                                    if (fxit)
+                                    bool fileExit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(file), ItemType.Any);
+                                    if (fileExit)
                                     {
                                         var tes = new string[1];
                                         tes[0] = file;
                                         _workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, false, PendChangesOptions.GetLatestOnCheckout);
+
                                     }
                                     else
                                     {
                                         _workspace.PendAdd(file, true);
                                     }
-
                                 }
                             }
+                            else
+                            {
+                                if (f.EndsWith(file))
+                                {
+                                    if (repo != null)
+                                    {
+                                        repo.Index.Add(f.Replace(this.localFolder.FullName, string.Empty));
+                                    }
+                                    else
+                                    {
+                                        bool fxit = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(file), ItemType.Any);
+                                        if (fxit)
+                                        {
+                                            var tes = new string[1];
+                                            tes[0] = file;
+                                            _workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, false, PendChangesOptions.GetLatestOnCheckout);
+                                        }
+                                        else
+                                        {
+                                            _workspace.PendAdd(file, true);
+                                        }
 
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (repo != null)
+                    {
+                        repo.Index.Add(file.Replace(this.localFolder.FullName, string.Empty));
+                    }
+                    else
+                    {
+                        bool isFile = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(file), ItemType.Any);
+                        if (isFile)
+                        {
+                            var tes = new string[1];
+                            tes[0] = file;
+                            _workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, false, PendChangesOptions.GetLatestOnCheckout);
+                        }
+                        else
+                        {
+                            _workspace.PendAdd(file, true);
                         }
                     }
                 }
             }
-            else
-            {
-                if (repo != null)
-                {
-                    repo.Index.Add(file.Replace(this.localFolder.FullName, string.Empty));
-                }
-                else
-                {
-                    bool isFile = _versionControl.ServerItemExists(_workspace.GetServerItemForLocalItem(file), ItemType.Any);
-                    if (isFile)
-                    {
-                        var tes = new string[1];
-                        tes[0] = file;
-                        _workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, false, PendChangesOptions.GetLatestOnCheckout);
-                    }
-                    else
-                    {
-                        _workspace.PendAdd(file, true);
-                    }
-                }
-            }
-
         }
     }
 }

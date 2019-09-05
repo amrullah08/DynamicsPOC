@@ -56,10 +56,10 @@ SYED.SourceControlQueue.EventHandler =
             try {
                 var formContext = null;
 
-                if (Xrm.Internal.isUci())
-                    formContext = executionContext;
-                else
-                    formContext = executionContext.getFormContext();
+                //if (Xrm.Internal.isUci())
+                //    formContext = executionContext;
+                //else
+                formContext = executionContext.getFormContext();
 
                 var entityFormOptions = {};
                 entityFormOptions["entityName"] = formContext.data.entity.getEntityName();
@@ -77,10 +77,10 @@ SYED.SourceControlQueue.EventHandler =
             try {
                 var formContext = null;
 
-                if (Xrm.Internal.isUci())
-                    formContext = executionContext;
-                else
-                    formContext = executionContext.getFormContext();
+                //if (Xrm.Internal.isUci())
+                //    formContext = executionContext;
+                //else
+                formContext = executionContext.getFormContext();
 
                 formContext.data.save().then(
                     function () {
@@ -118,10 +118,10 @@ SYED.SourceControlQueue.EventHandler =
             try {
                 var formContext = null;
 
-                if (Xrm.Internal.isUci())
-                    formContext = executionContext;
-                else
-                    formContext = executionContext.getFormContext();
+                //if (Xrm.Internal.isUci())
+                //    formContext = executionContext;
+                //else
+                formContext = executionContext.getFormContext();
 
                 var sourceControlQueueId = formContext.data.entity.getId();
                 Xrm.WebApi.online.retrieveMultipleRecords("syed_deploymentinstance", "?$select=syed_instanceurl&$filter=_syed_dynamicssourcecontrol_value eq " + sourceControlQueueId + "").then(
@@ -154,33 +154,12 @@ SYED.SourceControlQueue.EventHandler =
                 var sourceControlQueueId = formContext.data.entity.getId();
                 var formType = formContext.ui.getFormType();
 
-                var checkIn = formContext.getAttribute("syed_checkin").getValue();
-
                 if (formType != "1") {
                     Xrm.WebApi.online.retrieveMultipleRecords("syed_solutiondetail", "?$select=_syed_crmsolutionsid_value&$filter=_syed_listofsolutionid_value eq " + sourceControlQueueId + "").then(
                         function success(results) {
                             if (results.entities.length > 0) {
-                                if (checkIn) {
-                                    formContext.getAttribute("syed_status").setValue("Queued");
-                                    SYED.SourceControlQueue.EventHandler.SavePage(executionContext);
-                                }
-                                else {
-                                    SYED.SourceControlQueue.EventHandler.CheckDeploymentInstance(executionContext,
-                                        function (results) {
-                                            if (results.entities.length > 0) {
-                                                formContext.getAttribute("syed_status").setValue("Queued");
-                                                SYED.SourceControlQueue.EventHandler.SavePage(executionContext);
-                                            }
-                                            else {
-                                                formContext.ui.setFormNotification('To Submit, Please add Deployment Instance Details', 'ERROR', 'SUBMIT');
-                                            }
-                                        },
-                                        function (ex) {
-                                            console.log("Error at SYED.SourceControlQueue.EventHandler.ShowHideMergeButton function: " + ex.message + "|" + "Stack: " + ex.stack);
-                                            throw ex;
-                                        }
-                                    );
-                                }
+                                formContext.getAttribute("syed_status").setValue("Queued");
+                                SYED.SourceControlQueue.EventHandler.SavePage(executionContext);
                             }
                             else {
                                 formContext.ui.setFormNotification('To Submit, Please select Master Solution', 'ERROR', 'SUBMIT');
@@ -224,10 +203,10 @@ SYED.SourceControlQueue.EventHandler =
             try {
                 var formContext = null;
 
-                if (Xrm.Internal.isUci())
-                    formContext = executionContext;
-                else
-                    formContext = executionContext.getFormContext();
+                //if (Xrm.Internal.isUci())
+                //    formContext = executionContext;
+                //else
+                formContext = executionContext.getFormContext();
 
                 var QueueStatus = formContext.getAttribute("syed_status").getValue();
                 if (QueueStatus != "" && QueueStatus != null && QueueStatus != "Draft") {

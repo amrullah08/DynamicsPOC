@@ -125,6 +125,26 @@ namespace CrmSolution
         public const string SourceControlQueueAttributeNameForRepositoryUrl = "syed_repositoryurl";
 
         /// <summary>
+        /// repository Image folder
+        /// </summary>
+        public const string SourceControlQueueAttributeNameForRepositoryImageFolder = "syed_repositoryimagesdirectory";
+
+        /// <summary>
+        /// repository Solution folder
+        /// </summary>
+        public const string SourceControlQueueAttributeNameForRepositorySolutionFolder = "syed_repositorysolutionfolder";
+
+        /// <summary>
+        /// repository JS folder
+        /// </summary>
+        public const string SourceControlQueueAttributeNameForRepositoryJsFolder = "syed_repositoryjsfolder";
+
+        /// <summary>
+        /// repository HTML folder
+        /// </summary>
+        public const string SourceControlQueueAttributeNameForRepositoryHTMLFolder = "syed_repositoryhtmldirectory";
+
+        /// <summary>
         /// branch name column name
         /// </summary>
         public const string SourceControlQueueAttributeNameForBranch = "syed_branch";

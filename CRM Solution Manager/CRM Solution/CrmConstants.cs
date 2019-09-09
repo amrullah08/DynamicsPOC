@@ -299,7 +299,7 @@ namespace CrmSolution
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message.ToString(), ex);
+                throw new Exception(ex.Message, ex);
             }
         }
 

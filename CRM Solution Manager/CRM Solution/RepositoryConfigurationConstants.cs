@@ -64,6 +64,11 @@ namespace CrmSolution
         private string branchName;
 
         /// <summary>
+        /// solution text file 
+        /// </summary>
+        private string solutionText;
+
+        /// <summary>
         /// Gets or sets Repository local directory
         /// </summary>
         public string LocalDirectory
@@ -101,7 +106,6 @@ namespace CrmSolution
             {
             }
         }
-
 
         /// <summary>
         /// Gets or sets repository url
@@ -156,6 +160,21 @@ namespace CrmSolution
             get
             {
                 return this.javaScriptDirectory;
+            }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets repository solution text file
+        /// </summary>
+        public string SolutionText
+        {
+            get
+            {
+                return this.solutionText;
             }
 
             set
@@ -280,6 +299,13 @@ namespace CrmSolution
                         if (!string.IsNullOrEmpty(setting.GetAttributeValue<string>("syed_value")))
                         {
                             this.solutionFolder = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
+                        }
+
+                        break;
+                    case Constants.SolutionTextPath:
+                        if (!string.IsNullOrEmpty(setting.GetAttributeValue<string>("syed_value")))
+                        {
+                            this.solutionText = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
                         }
 
                         break;

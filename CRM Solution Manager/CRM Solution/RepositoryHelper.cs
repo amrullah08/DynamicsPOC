@@ -121,6 +121,7 @@ namespace CrmSolution
                 if (solutionFiles.Count > 0)
                 {
                     solutionFilePath = Singleton.RepositoryConfigurationConstantsInstance.LocalDirectory + "solutions.txt";
+
                     GitDeploy.GitRepositoryManager gitRepositoryManager = this.ConfigureRepository(solutionFiles[0], committerName, committerEmail, authorEmail, solutionFilePath);
                     this.PushRepository(solutionFiles, committerName, committerEmail, authorEmail, solutionFilePath, gitRepositoryManager);
                     System.Threading.Thread.Sleep(timeOut);
@@ -240,11 +241,13 @@ namespace CrmSolution
 
             if (solutionFile.Repository == Constants.SourceControlAzureDevOpsServer)
             {
-                workspace = gitRepositoryManager.ConnectTFSMap(solutionFile, solutionFilePath, hashSet);
+                gitRepositoryManager.ConnectTFSMap(solutionFile, solutionFilePath, hashSet);
             }
             else
             {
                 ////433710000 value for Yes
+                solutionFilePath = Singleton.RepositoryConfigurationConstantsInstance.SolutionText;
+
                 if (solutionFile.SolutionsTxt == 433710000 && File.Exists(solutionFilePath))
                 {
                     File.WriteAllText(solutionFilePath, string.Empty);
@@ -257,6 +260,7 @@ namespace CrmSolution
                     hashSet.Add(solutionFile.SolutionFileZipName);
                 }
                 this.SaveHashSet(solutionFilePath, hashSet);
+
                 gitRepositoryManager.CommitAllChanges(solutionFile, solutionFilePath, null);
                 gitRepositoryManager.PushCommits();
             }

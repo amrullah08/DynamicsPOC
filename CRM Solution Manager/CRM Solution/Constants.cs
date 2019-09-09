@@ -17,12 +17,12 @@ namespace CrmSolution
         /// <summary>
         /// WEB arguments
         /// </summary>
-        public const string argumentWEB = "WEB";
+        public const string ArgumentWEB = "WEB";
 
         /// <summary>
         /// WEB arguments
         /// </summary>
-        public const string argumentScheduled = "Scheduled";
+        public const string ArgumentScheduled = "Scheduled";
 
         /// <summary>
         /// Entity Source Control Queue
@@ -95,17 +95,17 @@ namespace CrmSolution
         public const string SourceControlQueuemPushToRepositorySuccessStatus = "Successfully Pushed To Repository";
 
         /// <summary>
-        /// Value for Source Control for Git Hub
+        /// Value for Source Control for GIT
                /// </summary>
         public const int SourceControlGitHub = 433710000;
 
         /// <summary>
-        /// Value for Source Control for Azure DevOps Server (TFS)
+        /// Value for Source Control for Azure Dev-Ops Server (TFS)
         /// </summary>
         public const int SourceControlAzureDevOpsServer = 433710001;
 
         /// <summary>
-        /// Value for Source Control for Azure DevOps
+        /// Value for Source Control for Azure Dev-Ops
         /// </summary>
         public const int SourceControlAzureDevOps = 433710002;
 
@@ -188,6 +188,11 @@ namespace CrmSolution
         ///  solution packager path
         /// </summary>
         public const string SolutionPackagerPath = "SolutionPackagerPath";
+
+        /// <summary>
+        ///  solution text file path
+        /// </summary>
+        public const string SolutionTextPath = "SolutionFile";
 
         /// <summary>
         ///  multiple solutions import

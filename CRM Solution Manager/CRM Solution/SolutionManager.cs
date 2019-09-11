@@ -583,7 +583,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedSLA = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(slaRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedSLA.Entity.Contains("name") ? retrievedSLA.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedSLA.Entity.Contains("name") ? retrievedSLA.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -599,7 +599,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedConvertRule = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(convertRuleRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedConvertRule.Entity.Contains("name") ? retrievedConvertRule.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedConvertRule.Entity.Contains("name") ? retrievedConvertRule.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -615,7 +615,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedSdkmessageprocessingstepimage = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(sdkmessageprocessingstepimage);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedSdkmessageprocessingstepimage.Entity.Contains("name") ? retrievedSdkmessageprocessingstepimage.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedSdkmessageprocessingstepimage.Entity.Contains("name") ? retrievedSdkmessageprocessingstepimage.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {

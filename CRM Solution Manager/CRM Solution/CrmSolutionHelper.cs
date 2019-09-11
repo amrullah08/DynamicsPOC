@@ -221,7 +221,7 @@ namespace CrmSolution
             {
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
                 Console.WriteLine(ex.Message);
-                throw new Exception(ex.Message.ToString(), ex);
+                throw new Exception(ex.Message, ex);
             }
         }
 
@@ -255,7 +255,7 @@ namespace CrmSolution
             {
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
                 Console.WriteLine(ex.Message);
-                throw new Exception(ex.Message.ToString(), ex);
+                throw new Exception(ex.Message, ex);
             }
         }
 
@@ -288,7 +288,7 @@ namespace CrmSolution
             ExecuteAsyncResponse importRequestResponse = (ExecuteAsyncResponse)serviceProxy.Execute(importRequest);
 
             string solutionImportResult = string.Empty;
-            while (solutionImportResult == string.Empty)
+            while (String.IsNullOrEmpty(solutionImportResult))
             {
                 Guid asyncJobId = importRequestResponse.AsyncJobId;
                 Entity job = (Entity)serviceProxy.Retrieve("asyncoperation", asyncJobId, new ColumnSet(new string[] { "asyncoperationid", "statuscode", "message" }));
@@ -678,6 +678,7 @@ namespace CrmSolution
         /// Method fetches source control queues
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
+        /// <param name="mode">web or Scheduled mode</param>
         /// <returns>returns entity collection</returns>
         private EntityCollection FetchSourceControlQueues(OrganizationServiceProxy serviceProxy, string mode)
         {
@@ -687,7 +688,7 @@ namespace CrmSolution
                 ColumnSet = new ColumnSet() { AllColumns = true },
                 Criteria = new FilterExpression()
             };
-            if (mode == Constants.argumentWEB)
+            if (mode == Constants.ArgumentWEB)
             {
                 querySampleSolution.Criteria.AddCondition(Constants.SourceControlQueueAttributeNameForStatus, ConditionOperator.Equal, Constants.SourceControlQueueQueuedStatus);
             }

@@ -53,7 +53,6 @@ namespace CrmSolution
         {
             this.OrganizationServiceProxy = organizationServiceProxy;
             this.SolutionsToBeMerged = new List<string>();
-            this.SolutionUniqueName = solutionDetail.GetAttributeValue<string>("syed_listofsolutions");
             this.Repository = solution.GetAttributeValue<OptionSetValue>(Constants.SourceControlQueueAttributeNameForRepository).Value;
             ////solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSolutionName);
             this.Message = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForComment);
@@ -61,16 +60,25 @@ namespace CrmSolution
             this.IncludeInRelease = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForIncludeInRelease);
             this.CheckInSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForCheckinSolution);
             ////this.MergeSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForMergeSolution);
-            this.ExportAsManaged = solutionDetail.GetAttributeValue<bool>("syed_exportas");
             this.SolutionsTxt = solution.GetAttributeValue<OptionSetValue>(Constants.SourceControlQueueAttributeNameForOverwriteSolutionsTxt)?.Value ?? 0;
             this.RemoteName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRemote);
             this.GitRepoUrl = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryUrl);
             EntityCollection retrieveSolutionsToBeMerged = Singleton.CrmSolutionHelperInstance.RetrieveSolutionsToBeMergedByListOfSolutionId(organizationServiceProxy, solutionDetail.Id);
-            this.MasterSolutionId = solutionDetail.GetAttributeValue<string>("syed_solutionid");
             this.RepoHTMLFolder = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryHTMLFolder);
             this.RepoImagesFolder = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryImageFolder);
             this.RepoSolutionFolder = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositorySolutionFolder);
             this.RepoJSFolder = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryJsFolder);
+
+            if (solutionDetail != null)
+            {
+                this.SolutionUniqueName = solutionDetail.GetAttributeValue<string>("syed_listofsolutions");
+                this.MasterSolutionId = solutionDetail.GetAttributeValue<string>("syed_solutionid");
+                this.ExportAsManaged = solutionDetail.GetAttributeValue<bool>("syed_exportas");
+            }
+            else
+            {
+                throw new ArgumentNullException(nameof(solutionDetail), "There is no Master Solution");
+            }
 
             if (this.CheckInSolution)
             {
@@ -90,6 +98,9 @@ namespace CrmSolution
             this.Solution = solution;
         }
 
+        /// <summary>
+        /// Gets or sets Repository
+        /// </summary>
         public int Repository { get; set; }
 
         /// <summary>

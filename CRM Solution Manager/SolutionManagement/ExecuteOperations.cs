@@ -68,6 +68,25 @@ namespace SolutionManagement
         }
 
         /// <summary>
+        /// Method update Master Solution Record
+        /// </summary>
+        /// <param name="service">Organization service</param>
+        /// <param name="mastersolutions">CRM Solution</param>
+        /// <param name="solutiondetail">Solution Detail</param>
+        public static void UpdateSolutionDetail(IOrganizationService service, syed_mastersolutions mastersolutions, syed_solutiondetail solutiondetail)
+        {
+            solutiondetail.syed_CRMSolutionsId = new EntityReference(mastersolutions.LogicalName.ToString(), mastersolutions.Id);
+            solutiondetail.syed_friendlyname = mastersolutions.syed_FriendlyName;
+            solutiondetail.syed_Publisher = mastersolutions.syed_Publisher;
+            solutiondetail.syed_SolutionInstalledOn = mastersolutions.syed_SolutionInstalledOn;
+            solutiondetail.syed_Version = mastersolutions.syed_Version;
+            solutiondetail.syed_SolutionId = mastersolutions.syed_SolutionId;
+            solutiondetail.syed_ListofSolutions = mastersolutions.syed_ListofSolutions;
+            solutiondetail.syed_name = mastersolutions.syed_FriendlyName;
+            service.Update(solutiondetail);
+        }
+
+        /// <summary>
         /// Method creates Master Solution Record
         /// </summary>
         /// <param name="service">Organization service</param>

@@ -191,25 +191,20 @@ namespace SolutionManagement
         /// <param name="sourceControlId">Dynamic Source Control GUID</param>
         /// <param name="tracingService">Tracing Service to trace error</param>
         /// <returns>returns Solution Details as entity collection</returns>
-        public static EntityCollection RetrieveMasterSolutionDetailsByListOfSolutionId(IOrganizationService service, Guid sourceControlId, ITracingService tracingService)
+        public static EntityCollection RetrieveMasterSolutionBySolutionOptions(IOrganizationService service, string sourceControlId, ITracingService tracingService)
         {
             try
             {
                 string fetchXML = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
-                                      <entity name='syed_solutiondetail'>
-                                        <attribute name='syed_solutiondetailid' />
-                                        <attribute name='syed_name' />
-                                        <attribute name='createdon' />
-                                        <attribute name='syed_order' />
-                                        <attribute name='syed_solutionid' />
-                                        <attribute name='syed_ismaster' />
-                                        <attribute name='syed_listofsolutions' />
-                                        <order attribute='syed_order' descending='false' />
-                                        <filter type='and'>
-                                          <condition attribute='syed_listofsolutionid' operator='eq'  uitype='syed_sourcecontrolqueue'  value='" + sourceControlId + @"' />
-                                        </filter>
-                                      </entity>
-                                    </fetch>";
+  <entity name='syed_solutiondetail'>
+    <all-attributes />
+    <order attribute='syed_name' descending='false' />
+    <filter type='and'>
+      <condition attribute='syed_listofsolutionid' operator='eq'  uitype='syed_sourcecontrolqueue'  value='" + sourceControlId + @"'  />
+      <condition attribute='syed_solutionoptions' operator='eq' value='433710001' />
+    </filter>
+  </entity>
+</fetch>";
                 EntityCollection associatedRecordList = service.RetrieveMultiple(new FetchExpression(fetchXML));
                 return associatedRecordList;
             }

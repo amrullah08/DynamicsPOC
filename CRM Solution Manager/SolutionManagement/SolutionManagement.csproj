@@ -72,9 +72,11 @@
     <Compile Include="Helper\SolutionHelper.cs" />
     <Compile Include="Helper\SolutionManagementHelper.cs" />
     <Compile Include="Helper\DynamicSourceControlOperationsHelper.cs" />
+    <Compile Include="Helper\VersionManagementHelper.cs" />
     <Compile Include="SolutionManagement.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DynamicSourceControlOperations.cs" />
+    <Compile Include="VersionManagement.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -77,15 +77,16 @@ SYED.SourceControlQueue.EventHandler =
             try {
                 var formContext = null;
 
-                //if (Xrm.Internal.isUci())
-                //    formContext = executionContext;
-                //else
-                formContext = executionContext.getFormContext();
+                if (Xrm.Internal.isUci())
+                    formContext = executionContext;
+                else
+                    formContext = executionContext.getFormContext();
 
                 formContext.data.save().then(
                     function () {
-                        SYED.SourceControlQueue.EventHandler.RefreshPage(executionContext);
+
                         SYED.SourceControlQueue.EventHandler.LockFields(executionContext);
+                        SYED.SourceControlQueue.EventHandler.RefreshPage(executionContext);
                     },
                     function (error) {
                         Xrm.Navigation.openAlertDialog(error.message);
@@ -118,9 +119,6 @@ SYED.SourceControlQueue.EventHandler =
             try {
                 var formContext = null;
 
-                //if (Xrm.Internal.isUci())
-                //    formContext = executionContext;
-                //else
                 formContext = executionContext.getFormContext();
 
                 var sourceControlQueueId = formContext.data.entity.getId();
@@ -141,6 +139,40 @@ SYED.SourceControlQueue.EventHandler =
             }
         },
 
+        CallAction: function (selectedId) {
+            try {
+                debugger;
+
+                selectedId = selectedId.replace("{", "").replace("}", "").toUpperCase();
+
+                var parameters = {};
+                parameters.SourceControlId = selectedId;
+
+                var req = new XMLHttpRequest();
+                req.open("POST", Xrm.Page.context.getClientUrl() + "/api/data/v9.1/syed_CloneAPatch", false);
+                req.setRequestHeader("OData-MaxVersion", "4.0");
+                req.setRequestHeader("OData-Version", "4.0");
+                req.setRequestHeader("Accept", "application/json");
+                req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                req.onreadystatechange = function () {
+                    if (this.readyState === 4) {
+                        req.onreadystatechange = null;
+                        if (this.status === 204) {
+                            //Success - No Return Data - Do Something
+                        } else {
+                            Xrm.Utility.alertDialog(this.statusText);
+                        }
+                    }
+                };
+                req.send(JSON.stringify(parameters));
+            }
+            catch (ex) {
+                console.log("Error at SYED.Solution.Ribbon.CallAction function: " + ex.message + "|" + "Stack: " + ex.stack);
+                throw ex;
+            }
+        },
+
+
         ShowHideMergeButton: function (executionContext) {
             try {
                 var formContext = null;
@@ -158,6 +190,9 @@ SYED.SourceControlQueue.EventHandler =
                     Xrm.WebApi.online.retrieveMultipleRecords("syed_solutiondetail", "?$select=_syed_crmsolutionsid_value&$filter=_syed_listofsolutionid_value eq " + sourceControlQueueId + "").then(
                         function success(results) {
                             if (results.entities.length > 0) {
+
+                                SYED.SourceControlQueue.EventHandler.CallAction(sourceControlQueueId.toLocaleString());
+
                                 formContext.getAttribute("syed_status").setValue("Queued");
                                 SYED.SourceControlQueue.EventHandler.SavePage(executionContext);
                             }
@@ -202,10 +237,6 @@ SYED.SourceControlQueue.EventHandler =
         LockFields: function (executionContext) {
             try {
                 var formContext = null;
-
-                //if (Xrm.Internal.isUci())
-                //    formContext = executionContext;
-                //else
                 formContext = executionContext.getFormContext();
 
                 var QueueStatus = formContext.getAttribute("syed_status").getValue();

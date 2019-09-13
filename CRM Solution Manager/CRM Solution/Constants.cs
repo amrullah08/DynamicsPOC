@@ -190,9 +190,19 @@ namespace CrmSolution
         public const string SolutionPackagerPath = "SolutionPackagerPath";
 
         /// <summary>
-        ///  solution text file path
+        ///  solution text file path for Checkin
         /// </summary>
         public const string SolutionTextPath = "SolutionFile";
+
+        /// <summary>
+        ///  solution text file path for Checkin
+        /// </summary>
+        public const string SolutionTextPathForRelease = "SolutionFileRelease";
+
+        /// <summary>
+        ///  solution text file path for Checkin
+        /// </summary>
+        public const string SolutionCheckerPath = "SoulutionCheckerConfigFile";
 
         /// <summary>
         ///  multiple solutions import

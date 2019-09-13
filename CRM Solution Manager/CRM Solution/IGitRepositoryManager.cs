@@ -20,7 +20,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="solutionFileInfo">solution file info</param>
         /// <param name="solutionFilePath">path of file having release solution list</param>
-        void CommitAllChanges(SolutionFileInfo solutionFileInfo, string solutionFilePath, HashSet<string> hashSet);
+        void CommitAllChanges(SolutionFileInfo solutionFileInfo, string solutionFilePath, HashSet<string> hashSet, string solutionCheckerPath);
 
         /// <summary>
         /// Method pushes commits to the repository

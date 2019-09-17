@@ -60,7 +60,6 @@ SYED.SolutionDetail.EventHandler =
                             formContext.getAttribute("syed_version").setValue(result["syed_version"]);
                             formContext.getAttribute("syed_solutionid").setValue(result["syed_solutionid"]);
                             formContext.getAttribute("syed_order").setValue(0);
-
                         },
                         function (error) {
                             Xrm.Utility.alertDialog(error.message);

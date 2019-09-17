@@ -118,6 +118,35 @@ namespace SolutionManagement
                 throw new InvalidPluginExecutionException(ex.Message.ToString(), ex);
             }
         }
+        /// <summary>
+        /// To retrieve CRM solutions entity, to check patch and versions.
+        /// </summary>
+        /// <param name="service">Organization service</param>
+        /// <param name="solutionId">CRM Solution GUID</param>
+        /// <param name="tracingService">Tracing Service to trace error</param>
+        /// <returns> returns CRM solutions as entity collection </returns>
+        public static EntityCollection RetrieveParentSolutionById(IOrganizationService service, Guid solutionId, ITracingService tracingService)
+        {
+            try
+            {
+                string fetchSolutions = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+                      <entity name='solution'>
+                        <all-attributes />
+                        <order attribute='version' descending='true' />
+                            <filter type='and'>                        
+                                <condition attribute='parentsolutionid'  operator='eq' value='" + solutionId + @"' />
+                            </filter>
+                      </entity>
+                    </fetch>";
+                EntityCollection solutionlist = service.RetrieveMultiple(new FetchExpression(fetchSolutions));
+                return solutionlist;
+            }
+            catch (Exception ex)
+            {
+                tracingService.Trace(ex.ToString());
+                throw new InvalidPluginExecutionException(ex.Message.ToString(), ex);
+            }
+        }
 
         /// <summary>
         /// To retrieve CRM solutions entity ID.

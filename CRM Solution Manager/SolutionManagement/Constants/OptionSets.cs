@@ -101,6 +101,21 @@ namespace SolutionConstants
 	
 	[System.Runtime.Serialization.DataContractAttribute()]
 	[System.CodeDom.Compiler.GeneratedCodeAttribute("CrmSvcUtil", "9.0.0.9479")]
+	public enum syed_solutiondetail_syed_SolutionOptions
+	{
+		
+		[System.Runtime.Serialization.EnumMemberAttribute()]
+		Choosefromexistingsolution = 433710000,
+		
+		[System.Runtime.Serialization.EnumMemberAttribute()]
+		CloneaPatch = 433710001,
+		
+		[System.Runtime.Serialization.EnumMemberAttribute()]
+		CloneSolution = 433710002,
+	}
+	
+	[System.Runtime.Serialization.DataContractAttribute()]
+	[System.CodeDom.Compiler.GeneratedCodeAttribute("CrmSvcUtil", "9.0.0.9479")]
 	public enum syed_sourcecontrolqueue_StatusCode
 	{
 		

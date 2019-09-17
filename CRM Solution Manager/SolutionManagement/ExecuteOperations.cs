@@ -34,6 +34,7 @@ namespace SolutionManagement
             masterSolutionUpdate.syed_SolutionInstalledOn = solution.InstalledOn;
             masterSolutionUpdate.syed_Version = solution.Version;
             masterSolutionUpdate.syed_IsManaged = solution.IsManaged;
+            masterSolutionUpdate.syed_parentsolutionid = solution.ParentSolutionId != null ? solution.ParentSolutionId.Id.ToString() : string.Empty;
             Guid id = service.Create(masterSolutionUpdate);
             return id;
         }

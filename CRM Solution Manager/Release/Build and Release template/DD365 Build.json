@@ -21,8 +21,8 @@
   "triggers": [
     {
       "branchFilters": [ "+master" ],
-      "pathFilters": [],
-      "batchChanges": true,
+      "pathFilters": [ "-/", "+DD365/Release/solutions.txt" ],
+      "batchChanges": false,
       "maxConcurrentBuildsPerBranch": 1,
       "pollingInterval": 0,
       "triggerType": 2
@@ -33,9 +33,46 @@
     "system.debug": {
       "value": "false",
       "allowOverride": true
-    },
-    "test": { "value": "Test_managed_.zip Jai_.zip" }
+    }
   },
+  "variableGroups": [
+    {
+      "variables": {
+        "ClientApplicationSecret": {
+          "value": null,
+          "isSecret": true
+        },
+        "CRMSourceInstanceUrl": {
+          "value": null,
+          "isSecret": true
+        },
+        "CRMSourcePassword": {
+          "value": null,
+          "isSecret": true
+        },
+        "CRMSourceUserName": {
+          "value": null,
+          "isSecret": true
+        },
+        "SolutionCheckerAppClientId": {
+          "value": null,
+          "isSecret": true
+        },
+        "TenantId": {
+          "value": null,
+          "isSecret": true
+        },
+        "CRMTargetInstanceConnectionString": {
+          "value": null,
+          "isSecret": true
+        }
+      },
+      "type": "AzureKeyVault",
+      "name": "KeyValutSecretsVariableGroup",
+      "description": "KeyValutSecretsVariableGroup",
+      "id": 1
+    }
+  ],
   "properties": {},
   "tags": [],
   "jobAuthorizationScope": 1,
@@ -50,7 +87,7 @@
             "enabled": true,
             "continueOnError": false,
             "alwaysRun": false,
-            "displayName": "Copy solutions.txt from Main Folder",
+            "displayName": "Copy .txt from Main Folder",
             "timeoutInMinutes": 0,
             "condition": "succeeded()",
             "task": {
@@ -59,9 +96,9 @@
               "definitionType": "task"
             },
             "inputs": {
-              "SourceFolder": "DD365/Data",
+              "SourceFolder": "DD365/Release",
               "Contents": "*.txt\n",
-              "TargetFolder": "$(Build.ArtifactStagingDirectory)",
+              "TargetFolder": "$(Build.ArtifactStagingDirectory) ",
               "CleanTargetFolder": "false",
               "OverWrite": "false",
               "flattenFolders": "false",
@@ -87,7 +124,8 @@
               "ArtifactType": "Container",
               "TargetPath": "",
               "Parallel": "false",
-              "ParallelCount": "8"
+              "ParallelCount": "8",
+              "FileCopyOptions": ""
             }
           },
           {
@@ -95,7 +133,7 @@
             "enabled": true,
             "continueOnError": false,
             "alwaysRun": false,
-            "displayName": "Copy Powershell scripts from Main Folder copy",
+            "displayName": "Copy ps1 from Main Folder",
             "timeoutInMinutes": 0,
             "condition": "succeeded()",
             "task": {
@@ -105,8 +143,8 @@
             },
             "inputs": {
               "SourceFolder": "DD365",
-              "Contents": "*.ps1\n",
-              "TargetFolder": "$(Build.ArtifactStagingDirectory)",
+              "Contents": "*.ps1",
+              "TargetFolder": "$(Build.ArtifactStagingDirectory) ",
               "CleanTargetFolder": "false",
               "OverWrite": "false",
               "flattenFolders": "false",
@@ -132,7 +170,8 @@
               "ArtifactType": "Container",
               "TargetPath": "",
               "Parallel": "false",
-              "ParallelCount": "8"
+              "ParallelCount": "8",
+              "FileCopyOptions": ""
             }
           },
           {
@@ -151,8 +190,8 @@
             "inputs": {
               "targetType": "filePath",
               "filePath": "DD365/SolutionToBeImported.ps1",
-              "arguments": "-solutionListFile '$(Build.ArtifactStagingDirectory)/solutions.txt'",
-              "script": "# Write your powershell commands here.\n\nWrite-Host \"Hello World\"\n\n# Use the environment variables input below to pass secret variables to this script.",
+              "arguments": "-solutionListFile '$(Build.ArtifactStagingDirectory)/solutions.txt' -configListFile '$(Build.ArtifactStagingDirectory)/config.txt' ",
+              "script": "# Write your PowerShell commands here.\n\nWrite-Host \"Hello World\"\n",
               "errorActionPreference": "stop",
               "failOnStderr": "false",
               "ignoreLASTEXITCODE": "false",
@@ -202,7 +241,8 @@
               "ArtifactType": "Container",
               "TargetPath": "",
               "Parallel": "false",
-              "ParallelCount": "8"
+              "ParallelCount": "8",
+              "FileCopyOptions": ""
             }
           },
           {
@@ -210,7 +250,7 @@
             "enabled": true,
             "continueOnError": false,
             "alwaysRun": false,
-            "displayName": "Solution Checker",
+            "displayName": "solution Checker",
             "timeoutInMinutes": 0,
             "condition": "succeeded()",
             "task": {
@@ -221,7 +261,91 @@
             "inputs": {
               "targetType": "filePath",
               "filePath": "DD365/SolutionChecker.ps1",
-              "arguments": " -clientAppId '734be64c-67ba-4001-a418-8b3e36325eac'     -tenantId '72f988bf-86f1-41af-91ab-2d7cd011db47'       -resultOutputDirectory '$(Build.ArtifactStagingDirectory)/SolutionContainer'     -ClientApplicationSecret 'vZu1DQ+Kd3y4UA+P-_OBT4@+X6IekpdM'   -rootPath '$(Build.ArtifactStagingDirectory)/SolutionContainer/' ",
+              "arguments": "-clientAppId $(SolutionCheckerAppClientId) -tenantId $(TenantId)   -resultOutputDirectory '$(Build.ArtifactStagingDirectory)'  -ClientApplicationSecret $(ClientApplicationSecret) -rootPath '$(Build.ArtifactStagingDirectory)/SolutionContainer'",
+              "script": "# Write your PowerShell commands here.\n\nWrite-Host \"Hello World\"\n",
+              "errorActionPreference": "stop",
+              "failOnStderr": "false",
+              "ignoreLASTEXITCODE": "false",
+              "pwsh": "false",
+              "workingDirectory": ""
+            }
+          },
+          {
+            "environment": {},
+            "enabled": true,
+            "continueOnError": false,
+            "alwaysRun": false,
+            "displayName": "Publish Artifact: drop",
+            "timeoutInMinutes": 0,
+            "condition": "succeeded()",
+            "task": {
+              "id": "2ff763a7-ce83-4e1f-bc89-0ae63477cebe",
+              "versionSpec": "1.*",
+              "definitionType": "task"
+            },
+            "inputs": {
+              "PathtoPublish": "$(Build.ArtifactStagingDirectory)",
+              "ArtifactName": "drop",
+              "ArtifactType": "Container",
+              "TargetPath": "",
+              "Parallel": "false",
+              "ParallelCount": "8",
+              "FileCopyOptions": ""
+            }
+          },
+          {
+            "environment": {},
+            "enabled": true,
+            "continueOnError": false,
+            "alwaysRun": false,
+            "displayName": "Download secure file",
+            "timeoutInMinutes": 0,
+            "condition": "succeeded()",
+            "task": {
+              "id": "2a6ca863-f2ce-4f4d-8bcb-15e64608ec4b",
+              "versionSpec": "1.*",
+              "definitionType": "task"
+            },
+            "inputs": {
+              "secureFile": "e9d17c9e-3a6d-4921-a8e5-6a1851e3c891",
+              "retryCount": "5"
+            }
+          },
+          {
+            "environment": {},
+            "enabled": true,
+            "continueOnError": false,
+            "alwaysRun": false,
+            "displayName": "Download secure file",
+            "timeoutInMinutes": 0,
+            "condition": "succeeded()",
+            "task": {
+              "id": "2a6ca863-f2ce-4f4d-8bcb-15e64608ec4b",
+              "versionSpec": "1.*",
+              "definitionType": "task"
+            },
+            "inputs": {
+              "secureFile": "03ef9761-4b4e-4338-8760-5cd8e3a5eb36",
+              "retryCount": "5"
+            }
+          },
+          {
+            "environment": {},
+            "enabled": true,
+            "continueOnError": false,
+            "alwaysRun": false,
+            "displayName": "ChangeQueueStatus",
+            "timeoutInMinutes": 0,
+            "condition": "succeeded()",
+            "task": {
+              "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+              "versionSpec": "2.*",
+              "definitionType": "task"
+            },
+            "inputs": {
+              "targetType": "filePath",
+              "filePath": "DD365/ChangeQueueStatus.ps1",
+              "arguments": "-crmServiceUrl \"$(CRMSourceInstanceUrl)\"  -UserName $(CRMSourceUserName)  -Password \"$(CRMSourcePassword)\"   -Status \"Devops Build Completed\" -resultFileUrls \"\"\"$(resultFileUrls)\"\"\" -buildurl \"$(Build.BuildUri)\"  -releaseurl \"\" -EntityRecordId $(ConfigIds) ",
               "script": "# Write your PowerShell commands here.\n\nWrite-Host \"Hello World\"\n",
               "errorActionPreference": "stop",
               "failOnStderr": "false",
@@ -286,6 +410,14 @@
       "name": "Azure Pipelines",
       "isHosted": true
     }
-  }
-
+  },
+  "id": 9,
+  "name": "DD365 Build",
+  "url": "https://dev.azure.com/syamrull/43dd2c46-1828-47cd-83ab-03e6c58d2d0a/_apis/build/Definitions/9?revision=29",
+  "uri": "vstfs:///Build/Definition/9",
+  "path": "\\",
+  "type": 2,
+  "queueStatus": 0,
+  "revision": 29,
+  "createdDate": "2019-09-18T10:35:23.877Z",
 }

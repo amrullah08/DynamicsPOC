@@ -144,7 +144,6 @@ SYED.SourceControlQueue.EventHandler =
                 debugger;
 
                 selectedId = selectedId.replace("{", "").replace("}", "").toUpperCase();
-
                 var parameters = {};
                 parameters.SourceControlId = selectedId;
 
@@ -157,8 +156,10 @@ SYED.SourceControlQueue.EventHandler =
                 req.onreadystatechange = function () {
                     if (this.readyState === 4) {
                         req.onreadystatechange = null;
-                        if (this.status === 204) {
-                            //Success - No Return Data - Do Something
+                        if (this.status === 200) {
+                            var results = JSON.parse(this.response);
+                            formContext.getAttribute("syed_status").setValue("Queued");
+                            SYED.SourceControlQueue.EventHandler.SavePage(executionContext);
                         } else {
                             Xrm.Utility.alertDialog(this.statusText);
                         }
@@ -190,11 +191,7 @@ SYED.SourceControlQueue.EventHandler =
                     Xrm.WebApi.online.retrieveMultipleRecords("syed_solutiondetail", "?$select=_syed_crmsolutionsid_value&$filter=_syed_listofsolutionid_value eq " + sourceControlQueueId + "").then(
                         function success(results) {
                             if (results.entities.length > 0) {
-
                                 SYED.SourceControlQueue.EventHandler.CallAction(sourceControlQueueId.toLocaleString());
-
-                                formContext.getAttribute("syed_status").setValue("Queued");
-                                SYED.SourceControlQueue.EventHandler.SavePage(executionContext);
                             }
                             else {
                                 formContext.ui.setFormNotification('To Submit, Please select Master Solution', 'ERROR', 'SUBMIT');

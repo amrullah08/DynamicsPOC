@@ -230,8 +230,7 @@ namespace SolutionManagement
     <order attribute='syed_name' descending='false' />
     <filter type='and'>
       <condition attribute='syed_listofsolutionid' operator='eq'  uitype='syed_sourcecontrolqueue'  value='" + sourceControlId + @"'  />
-      <condition attribute='syed_solutionoptions' operator='eq' value='433710001' />
-    </filter>
+          </filter>
   </entity>
 </fetch>";
                 EntityCollection associatedRecordList = service.RetrieveMultiple(new FetchExpression(fetchXML));

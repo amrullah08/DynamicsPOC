@@ -181,6 +181,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
 
                 Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
             }
+
         }
 
         /// <summary>

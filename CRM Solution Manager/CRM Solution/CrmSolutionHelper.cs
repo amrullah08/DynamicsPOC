@@ -281,6 +281,7 @@ namespace CrmSolution
                 SkipProductUpdateDependencies = true,
                 PublishWorkflows = false,
             };
+            serviceProxy.Timeout = new TimeSpan(0, 30, 0);
             ExecuteAsyncRequest importRequest = new ExecuteAsyncRequest()
             {
                 Request = impSolReq
@@ -350,7 +351,7 @@ namespace CrmSolution
         public void PublishAllCustomizationChanges(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
         {
             PublishAllXmlRequest publishAllXmlRequest = new PublishAllXmlRequest();
-            serviceProxy.Timeout = new TimeSpan(0, 10, 0);
+            serviceProxy.Timeout = new TimeSpan(0, 30, 0);
             serviceProxy.Execute(publishAllXmlRequest);
             Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Successfully published solution components." + "<br>");
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuePublishSuccessfulStatus;
@@ -371,11 +372,7 @@ namespace CrmSolution
             {
                 string fetchSolutions = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
                                               <entity name='syed_deploymentinstance'>
-                                                <attribute name='syed_deploymentinstanceid' />
-                                                <attribute name='syed_name' />
-                                                <attribute name='createdon' />
-                                                <attribute name='syed_password' />
-                                                <attribute name='syed_instanceurl' />
+                                                <all-attributes />
                                                 <order attribute='syed_name' descending='false' />
                                                 <filter type='and'>
                                                   <condition attribute='syed_dynamicssourcecontrol' operator='eq' uitype='syed_sourcecontrolqueue' value='" + sourceControlId + @"' />
@@ -526,6 +523,8 @@ namespace CrmSolution
         {
             Entity sourceControl = solutionFile.Solution;
             EntityCollection deploymentInstance = this.FetchDeplopymentInstance(serviceProxy, sourceControl.Id);
+            bool checkDependency = false;
+            bool import = false;
             var checkTarget = false;
             if (deploymentInstance.Entities.Count > 0)
             {
@@ -536,6 +535,8 @@ namespace CrmSolution
                     clientCredentials.UserName.Password = this.DecryptString(instance.Attributes["syed_password"].ToString());
                     ////Resetting password
                     instance.Attributes["syed_password"] = "Reset_Password";
+                    checkDependency = (bool)instance.Attributes["syed_checkdependency"];
+                    import = (bool)instance.Attributes["syed_import"];
                     serviceProxy.Update(instance);
                     OrganizationServiceProxy targetserviceProxy = new OrganizationServiceProxy(new Uri(instance.Attributes["syed_instanceurl"].ToString()), null, clientCredentials, null);
                     targetserviceProxy.EnableProxyTypes();
@@ -588,7 +589,7 @@ namespace CrmSolution
                         }
                     }
 
-                    if (!checkTarget)
+                    if (!checkTarget && import == true)
                     {
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");
@@ -601,7 +602,7 @@ namespace CrmSolution
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
                         this.ImportSolution(targetserviceProxy, solutionFile, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
                     }
-                    else
+                    else if (checkDependency)
                     {
                         Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Target Instance missing Required components.  <br> ");
                         solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueMissingComponents;
@@ -646,7 +647,7 @@ namespace CrmSolution
 
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + message + solutionName + "<br>");
                 Console.WriteLine(message + solutionName);
-                serviceProxy.Timeout = new TimeSpan(0, 10, 0);
+                serviceProxy.Timeout = new TimeSpan(0, 30, 0);
                 ExportSolutionResponse exportResponse = (ExportSolutionResponse)serviceProxy.Execute(exportRequest);
 
                 // Handles the response

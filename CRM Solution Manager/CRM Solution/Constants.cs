@@ -14,6 +14,46 @@ namespace CrmSolution
     /// </summary>
     public class Constants
     {
+
+        /// <summary>
+        ///  arguments for AR
+        /// </summary>
+        public const string ArgumentAR = "AR=";
+        /// <summary>
+        ///  arguments for TP
+        /// </summary>
+        public const string ArgumentTP = "TP=";
+
+        /// <summary>
+        ///  arguments for TU
+        /// </summary>
+        public const string ArgumentTU = "TU";
+              
+        /// <summary>
+        ///  arguments for GP
+        /// </summary>
+        public const string ArgumentGP = "GP=";
+
+        /// <summary>
+        ///  arguments for GU 
+        /// </summary>
+        public const string ArgumentGU = "GU=";
+
+        /// <summary>
+        ///  arguments for DP
+        /// </summary>
+        public const string ArgumentDP = "DP=";
+
+        /// <summary>
+        ///  arguments for DU
+        /// </summary>
+        public const string ArgumentDU = "DU=";
+
+        /// <summary>
+        ///  arguments for D365
+        /// </summary>
+        public const string ArgumentD365 = "D365=";
+
         /// <summary>
         /// WEB arguments
         /// </summary>

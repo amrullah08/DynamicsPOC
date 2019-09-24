@@ -59,6 +59,7 @@ SYED.Solution.Ribbon =
                         req.onreadystatechange = null;
                         if (this.status === 200) {
                             var results = JSON.parse(this.response);
+                            Xrm.Utility.alertDialog(mode + "- is in progress, for more details, Please refer Dynamics Source Control record");
                         } else {
                             Xrm.Utility.alertDialog(this.statusText);
                         }

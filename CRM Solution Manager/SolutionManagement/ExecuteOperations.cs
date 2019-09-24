@@ -34,6 +34,7 @@ namespace SolutionManagement
             masterSolutionUpdate.syed_SolutionInstalledOn = solution.InstalledOn;
             masterSolutionUpdate.syed_Version = solution.Version;
             masterSolutionUpdate.syed_IsManaged = solution.IsManaged;
+            masterSolutionUpdate.syed_parentsolutionid = solution.ParentSolutionId != null ? solution.ParentSolutionId.Id.ToString() : string.Empty;
             Guid id = service.Create(masterSolutionUpdate);
             return id;
         }
@@ -65,6 +66,25 @@ namespace SolutionManagement
             sourcecontrolqueue.Id = syed_Sourcecontrolqueue.Id;
             sourcecontrolqueue.syed_Status = "Queued";
             service.Update(sourcecontrolqueue);
+        }
+
+        /// <summary>
+        /// Method update Master Solution Record
+        /// </summary>
+        /// <param name="service">Organization service</param>
+        /// <param name="mastersolutions">CRM Solution</param>
+        /// <param name="solutiondetail">Solution Detail</param>
+        public static void UpdateSolutionDetail(IOrganizationService service, syed_mastersolutions mastersolutions, syed_solutiondetail solutiondetail)
+        {
+            solutiondetail.syed_CRMSolutionsId = new EntityReference(mastersolutions.LogicalName.ToString(), mastersolutions.Id);
+            solutiondetail.syed_friendlyname = mastersolutions.syed_FriendlyName;
+            solutiondetail.syed_Publisher = mastersolutions.syed_Publisher;
+            solutiondetail.syed_SolutionInstalledOn = mastersolutions.syed_SolutionInstalledOn;
+            solutiondetail.syed_Version = mastersolutions.syed_Version;
+            solutiondetail.syed_SolutionId = mastersolutions.syed_SolutionId;
+            solutiondetail.syed_ListofSolutions = mastersolutions.syed_ListofSolutions;
+            solutiondetail.syed_name = mastersolutions.syed_FriendlyName;
+            service.Update(solutiondetail);
         }
 
         /// <summary>

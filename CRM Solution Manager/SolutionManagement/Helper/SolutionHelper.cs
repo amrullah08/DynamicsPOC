@@ -118,6 +118,35 @@ namespace SolutionManagement
                 throw new InvalidPluginExecutionException(ex.Message.ToString(), ex);
             }
         }
+        /// <summary>
+        /// To retrieve CRM solutions entity, to check patch and versions.
+        /// </summary>
+        /// <param name="service">Organization service</param>
+        /// <param name="solutionId">CRM Solution GUID</param>
+        /// <param name="tracingService">Tracing Service to trace error</param>
+        /// <returns> returns CRM solutions as entity collection </returns>
+        public static EntityCollection RetrieveParentSolutionById(IOrganizationService service, Guid solutionId, ITracingService tracingService)
+        {
+            try
+            {
+                string fetchSolutions = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
+                      <entity name='solution'>
+                        <all-attributes />
+                        <order attribute='version' descending='true' />
+                            <filter type='and'>                        
+                                <condition attribute='parentsolutionid'  operator='eq' value='" + solutionId + @"' />
+                            </filter>
+                      </entity>
+                    </fetch>";
+                EntityCollection solutionlist = service.RetrieveMultiple(new FetchExpression(fetchSolutions));
+                return solutionlist;
+            }
+            catch (Exception ex)
+            {
+                tracingService.Trace(ex.ToString());
+                throw new InvalidPluginExecutionException(ex.Message.ToString(), ex);
+            }
+        }
 
         /// <summary>
         /// To retrieve CRM solutions entity ID.
@@ -191,25 +220,19 @@ namespace SolutionManagement
         /// <param name="sourceControlId">Dynamic Source Control GUID</param>
         /// <param name="tracingService">Tracing Service to trace error</param>
         /// <returns>returns Solution Details as entity collection</returns>
-        public static EntityCollection RetrieveMasterSolutionDetailsByListOfSolutionId(IOrganizationService service, Guid sourceControlId, ITracingService tracingService)
+        public static EntityCollection RetrieveMasterSolutionBySolutionOptions(IOrganizationService service, string sourceControlId, ITracingService tracingService)
         {
             try
             {
                 string fetchXML = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
-                                      <entity name='syed_solutiondetail'>
-                                        <attribute name='syed_solutiondetailid' />
-                                        <attribute name='syed_name' />
-                                        <attribute name='createdon' />
-                                        <attribute name='syed_order' />
-                                        <attribute name='syed_solutionid' />
-                                        <attribute name='syed_ismaster' />
-                                        <attribute name='syed_listofsolutions' />
-                                        <order attribute='syed_order' descending='false' />
-                                        <filter type='and'>
-                                          <condition attribute='syed_listofsolutionid' operator='eq'  uitype='syed_sourcecontrolqueue'  value='" + sourceControlId + @"' />
-                                        </filter>
-                                      </entity>
-                                    </fetch>";
+  <entity name='syed_solutiondetail'>
+    <all-attributes />
+    <order attribute='syed_name' descending='false' />
+    <filter type='and'>
+      <condition attribute='syed_listofsolutionid' operator='eq'  uitype='syed_sourcecontrolqueue'  value='" + sourceControlId + @"'  />
+          </filter>
+  </entity>
+</fetch>";
                 EntityCollection associatedRecordList = service.RetrieveMultiple(new FetchExpression(fetchXML));
                 return associatedRecordList;
             }

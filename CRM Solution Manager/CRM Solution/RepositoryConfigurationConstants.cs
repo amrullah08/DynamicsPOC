@@ -69,6 +69,21 @@ namespace CrmSolution
         private string solutionText;
 
         /// <summary>
+        /// Time Trigger text file 
+        /// </summary>
+        private string timeTriggerPath;
+
+        /// <summary>
+        /// solution text file 
+        /// </summary>
+        private string solutionCheckerPath;
+
+        /// <summary>
+        /// solution text file 
+        /// </summary>
+        private string solutionTextRelease;
+
+        /// <summary>
         /// Gets or sets Repository local directory
         /// </summary>
         public string LocalDirectory
@@ -175,6 +190,51 @@ namespace CrmSolution
             get
             {
                 return this.solutionText;
+            }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets solution checker path file
+        /// </summary>
+        public string SolutionCheckerPath
+        {
+            get
+            {
+                return this.solutionCheckerPath;
+            }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets solution checker path file
+        /// </summary>
+        public string TimeTriggerPath
+        {
+            get
+            {
+                return this.timeTriggerPath;
+            }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets repository solution text file for Release
+        /// </summary>
+        public string SolutionTextRelease
+        {
+            get
+            {
+                return this.solutionTextRelease;
             }
 
             set
@@ -306,6 +366,27 @@ namespace CrmSolution
                         if (!string.IsNullOrEmpty(setting.GetAttributeValue<string>("syed_value")))
                         {
                             this.solutionText = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
+                        }
+                        break;
+
+                    case Constants.SolutionCheckerPath:
+                        if (!string.IsNullOrEmpty(setting.GetAttributeValue<string>("syed_value")))
+                        {
+                            this.solutionCheckerPath = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
+                        }
+                        break;
+
+                    case Constants.TimeTriggerPath:
+                        if (!string.IsNullOrEmpty(setting.GetAttributeValue<string>("syed_value")))
+                        {
+                            this.timeTriggerPath = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
+                        }
+                        break;
+
+                    case Constants.SolutionTextPathForRelease:
+                        if (!string.IsNullOrEmpty(setting.GetAttributeValue<string>("syed_value")))
+                        {
+                            this.solutionTextRelease = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
                         }
 
                         break;

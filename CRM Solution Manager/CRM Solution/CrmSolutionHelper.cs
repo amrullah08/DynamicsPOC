@@ -11,6 +11,7 @@ namespace CrmSolution
     using System.Collections.Generic;
     using System.IO;
     using System.Management.Automation;
+    using System.Security.Cryptography;
     using System.ServiceModel.Description;
     using System.Text;
     using System.Threading.Tasks;
@@ -281,6 +282,7 @@ namespace CrmSolution
                 SkipProductUpdateDependencies = true,
                 PublishWorkflows = false,
             };
+            serviceProxy.Timeout = new TimeSpan(0, 30, 0);
             ExecuteAsyncRequest importRequest = new ExecuteAsyncRequest()
             {
                 Request = impSolReq
@@ -350,7 +352,7 @@ namespace CrmSolution
         public void PublishAllCustomizationChanges(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
         {
             PublishAllXmlRequest publishAllXmlRequest = new PublishAllXmlRequest();
-            serviceProxy.Timeout = new TimeSpan(0, 10, 0);
+            serviceProxy.Timeout = new TimeSpan(0, 30, 0);
             serviceProxy.Execute(publishAllXmlRequest);
             Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Successfully published solution components." + "<br>");
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuePublishSuccessfulStatus;
@@ -371,11 +373,7 @@ namespace CrmSolution
             {
                 string fetchSolutions = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
                                               <entity name='syed_deploymentinstance'>
-                                                <attribute name='syed_deploymentinstanceid' />
-                                                <attribute name='syed_name' />
-                                                <attribute name='createdon' />
-                                                <attribute name='syed_password' />
-                                                <attribute name='syed_instanceurl' />
+                                                <all-attributes />
                                                 <order attribute='syed_name' descending='false' />
                                                 <filter type='and'>
                                                   <condition attribute='syed_dynamicssourcecontrol' operator='eq' uitype='syed_sourcecontrolqueue' value='" + sourceControlId + @"' />
@@ -526,6 +524,8 @@ namespace CrmSolution
         {
             Entity sourceControl = solutionFile.Solution;
             EntityCollection deploymentInstance = this.FetchDeplopymentInstance(serviceProxy, sourceControl.Id);
+            bool checkDependency = false;
+            bool import = false;
             var checkTarget = false;
             if (deploymentInstance.Entities.Count > 0)
             {
@@ -536,6 +536,8 @@ namespace CrmSolution
                     clientCredentials.UserName.Password = this.DecryptString(instance.Attributes["syed_password"].ToString());
                     ////Resetting password
                     instance.Attributes["syed_password"] = "Reset_Password";
+                    checkDependency = (bool)instance.Attributes["syed_checkdependency"];
+                    import = (bool)instance.Attributes["syed_import"];
                     serviceProxy.Update(instance);
                     OrganizationServiceProxy targetserviceProxy = new OrganizationServiceProxy(new Uri(instance.Attributes["syed_instanceurl"].ToString()), null, clientCredentials, null);
                     targetserviceProxy.EnableProxyTypes();
@@ -588,7 +590,7 @@ namespace CrmSolution
                         }
                     }
 
-                    if (!checkTarget)
+                    if (!checkTarget && import == true)
                     {
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr>");
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<td style='width:100px;background-color:tomato;border: 1px solid #ccc'>");
@@ -601,7 +603,7 @@ namespace CrmSolution
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
                         this.ImportSolution(targetserviceProxy, solutionFile, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
                     }
-                    else
+                    else if (checkDependency)
                     {
                         Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Target Instance missing Required components.  <br> ");
                         solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueueMissingComponents;
@@ -620,10 +622,25 @@ namespace CrmSolution
         /// <returns> Decrypted string </returns>
         private string DecryptString(string encryptString)
         {
-            byte[] b = Convert.FromBase64String(encryptString);
-            string decrypted = System.Text.ASCIIEncoding.ASCII.GetString(b);
-
-            return decrypted;
+            string EncryptionKey = Constants.EncryptionKey;
+            encryptString = encryptString.Replace(" ", "+");
+            byte[] cipherBytes = Convert.FromBase64String(encryptString);
+            using (Aes encryptor = Aes.Create())
+            {
+                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                encryptor.Key = pdb.GetBytes(32);
+                encryptor.IV = pdb.GetBytes(16);
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateDecryptor(), CryptoStreamMode.Write))
+                    {
+                        cs.Write(cipherBytes, 0, cipherBytes.Length);
+                        cs.Close();
+                    }
+                    encryptString = Encoding.Unicode.GetString(ms.ToArray());
+                }
+            }
+            return encryptString;
         }
 
         /// <summary>
@@ -646,7 +663,7 @@ namespace CrmSolution
 
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + message + solutionName + "<br>");
                 Console.WriteLine(message + solutionName);
-                serviceProxy.Timeout = new TimeSpan(0, 10, 0);
+                serviceProxy.Timeout = new TimeSpan(0, 30, 0);
                 ExportSolutionResponse exportResponse = (ExportSolutionResponse)serviceProxy.Execute(exportRequest);
 
                 // Handles the response

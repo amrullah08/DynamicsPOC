@@ -77,15 +77,16 @@ SYED.SourceControlQueue.EventHandler =
             try {
                 var formContext = null;
 
-                //if (Xrm.Internal.isUci())
-                //    formContext = executionContext;
-                //else
-                formContext = executionContext.getFormContext();
+                if (Xrm.Internal.isUci())
+                    formContext = executionContext;
+                else
+                    formContext = executionContext.getFormContext();
 
                 formContext.data.save().then(
                     function () {
-                        SYED.SourceControlQueue.EventHandler.RefreshPage(executionContext);
+
                         SYED.SourceControlQueue.EventHandler.LockFields(executionContext);
+                        SYED.SourceControlQueue.EventHandler.RefreshPage(executionContext);
                     },
                     function (error) {
                         Xrm.Navigation.openAlertDialog(error.message);
@@ -118,9 +119,6 @@ SYED.SourceControlQueue.EventHandler =
             try {
                 var formContext = null;
 
-                //if (Xrm.Internal.isUci())
-                //    formContext = executionContext;
-                //else
                 formContext = executionContext.getFormContext();
 
                 var sourceControlQueueId = formContext.data.entity.getId();
@@ -141,6 +139,47 @@ SYED.SourceControlQueue.EventHandler =
             }
         },
 
+        CallAction: function (executionContext, selectedId) {
+            try {
+                debugger;
+
+                var formContext = null;
+                if (Xrm.Internal.isUci())
+                    formContext = executionContext;
+                else
+                    formContext = executionContext.getFormContext();
+
+                selectedId = selectedId.replace("{", "").replace("}", "").toUpperCase();
+                var parameters = {};
+                parameters.SourceControlId = selectedId;
+
+                var req = new XMLHttpRequest();
+                req.open("POST", Xrm.Page.context.getClientUrl() + "/api/data/v9.1/syed_CloneAPatch", false);
+                req.setRequestHeader("OData-MaxVersion", "4.0");
+                req.setRequestHeader("OData-Version", "4.0");
+                req.setRequestHeader("Accept", "application/json");
+                req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                req.onreadystatechange = function () {
+                    if (this.readyState === 4) {
+                        req.onreadystatechange = null;
+                        if (this.status === 200) {
+                            var results = JSON.parse(this.response);
+                            formContext.getAttribute("syed_status").setValue("Queued");
+                            SYED.SourceControlQueue.EventHandler.SavePage(executionContext);
+                        } else {
+                            Xrm.Utility.alertDialog(this.statusText);
+                        }
+                    }
+                };
+                req.send(JSON.stringify(parameters));
+            }
+            catch (ex) {
+                console.log("Error at SYED.Solution.Ribbon.CallAction function: " + ex.message + "|" + "Stack: " + ex.stack);
+                throw ex;
+            }
+        },
+
+
         ShowHideMergeButton: function (executionContext) {
             try {
                 var formContext = null;
@@ -155,11 +194,20 @@ SYED.SourceControlQueue.EventHandler =
                 var formType = formContext.ui.getFormType();
 
                 if (formType != "1") {
-                    Xrm.WebApi.online.retrieveMultipleRecords("syed_solutiondetail", "?$select=_syed_crmsolutionsid_value&$filter=_syed_listofsolutionid_value eq " + sourceControlQueueId + "").then(
+
+                    Xrm.WebApi.online.retrieveMultipleRecords("syed_solutiondetail", "?$select=_syed_crmsolutionsid_value,syed_solutionoptions&$filter=_syed_listofsolutionid_value eq " + sourceControlQueueId + "").then(
                         function success(results) {
                             if (results.entities.length > 0) {
-                                formContext.getAttribute("syed_status").setValue("Queued");
-                                SYED.SourceControlQueue.EventHandler.SavePage(executionContext);
+                                for (var i = 0; i < results.entities.length; i++) {
+                                    var syed_solutionoptions = results.entities[i]["syed_solutionoptions"];
+                                    if (syed_solutionoptions == "433710001" || syed_solutionoptions == "433710002") {
+                                        SYED.SourceControlQueue.EventHandler.CallAction(executionContext, sourceControlQueueId.toLocaleString());
+                                    }
+                                    else {
+                                        formContext.getAttribute("syed_status").setValue("Queued");
+                                        SYED.SourceControlQueue.EventHandler.SavePage(executionContext);
+                                    }
+                                }
                             }
                             else {
                                 formContext.ui.setFormNotification('To Submit, Please select Master Solution', 'ERROR', 'SUBMIT');
@@ -202,10 +250,6 @@ SYED.SourceControlQueue.EventHandler =
         LockFields: function (executionContext) {
             try {
                 var formContext = null;
-
-                //if (Xrm.Internal.isUci())
-                //    formContext = executionContext;
-                //else
                 formContext = executionContext.getFormContext();
 
                 var QueueStatus = formContext.getAttribute("syed_status").getValue();

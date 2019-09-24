@@ -380,11 +380,14 @@
   <project key="-1271827491">
     <configuration>DEBUG;TRACE</configuration>
   </project>
+  <project key="1413349375">
+    <configuration>DEBUG;TRACE</configuration>
+  </project>
   <sourcecode name="CRMConstant.cs" parser="StyleCop.CSharp.CsParser">
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-07-04 10:50:18.064</sourceFile>
+      <sourceFile>2019-09-11 13:11:58.844</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -407,7 +410,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-06-23 22:27:54.000</sourceFile>
+      <sourceFile>2019-09-11 13:11:58.846</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -430,7 +433,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-07-30 11:02:43.941</sourceFile>
+      <sourceFile>2019-09-17 17:08:07.461</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -453,7 +456,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-06-23 22:27:54.000</sourceFile>
+      <sourceFile>2019-09-11 13:11:58.852</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -476,7 +479,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-07-31 12:37:13.751</sourceFile>
+      <sourceFile>2019-09-11 13:11:58.854</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -499,7 +502,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-07-31 12:47:07.605</sourceFile>
+      <sourceFile>2019-09-17 17:12:18.383</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -522,7 +525,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-07-31 12:50:25.100</sourceFile>
+      <sourceFile>2019-09-11 13:11:58.857</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -539,13 +542,41 @@
       <StyleCop.CSharp.SpacingRules>2019-05-22 11:14:37.459</StyleCop.CSharp.SpacingRules>
       <StyleCop.CSharp.SpacingRules.FilesHashCode>0</StyleCop.CSharp.SpacingRules.FilesHashCode>
     </timestamps>
-    <violations />
+    <violations>
+      <violation namespace="StyleCop.CSharp.NamingRules" rule="FieldNamesMustNotBeginWithUnderscore" ruleCheckId="SA1309">
+        <context>Field names must not start with an underscore.</context>
+        <line>43</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.SpacingRules" rule="SingleLineCommentsMustBeginWithSingleSpace" ruleCheckId="SA1005">
+        <context>The comment must start with a single space. To ignore this error when commenting out a line of code, begin the comment with '////' rather than '//'.</context>
+        <line>39</line>
+        <index>1947</index>
+        <endIndex>1981</endIndex>
+        <startLine>39</startLine>
+        <startColumn>13</startColumn>
+        <endLine>39</endLine>
+        <endColumn>47</endColumn>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.SpacingRules" rule="SingleLineCommentsMustBeginWithSingleSpace" ruleCheckId="SA1005">
+        <context>The comment must start with a single space. To ignore this error when commenting out a line of code, begin the comment with '////' rather than '//'.</context>
+        <line>60</line>
+        <index>3591</index>
+        <endIndex>3634</endIndex>
+        <startLine>60</startLine>
+        <startColumn>13</startColumn>
+        <endLine>60</endLine>
+        <endColumn>56</endColumn>
+        <warning>False</warning>
+      </violation>
+    </violations>
   </sourcecode>
   <sourcecode name="EncryptPasswordHelper.cs" parser="StyleCop.CSharp.CsParser">
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-07-31 12:53:10.994</sourceFile>
+      <sourceFile>2019-09-11 13:11:58.859</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -568,7 +599,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-06-23 22:27:54.000</sourceFile>
+      <sourceFile>2019-09-11 13:11:58.861</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -591,7 +622,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-07-31 12:52:13.836</sourceFile>
+      <sourceFile>2019-09-17 20:48:26.312</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -608,13 +639,29 @@
       <StyleCop.CSharp.SpacingRules>2019-05-22 11:14:37.459</StyleCop.CSharp.SpacingRules>
       <StyleCop.CSharp.SpacingRules.FilesHashCode>0</StyleCop.CSharp.SpacingRules.FilesHashCode>
     </timestamps>
-    <violations />
+    <violations>
+      <violation namespace="StyleCop.CSharp.LayoutRules" rule="CodeMustNotContainMultipleBlankLinesInARow" ruleCheckId="SA1507">
+        <context>The code must not contain multiple blank lines in a row.</context>
+        <line>311</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.LayoutRules" rule="ElementsMustBeSeparatedByBlankLine" ruleCheckId="SA1516">
+        <context>Adjacent elements must be separated by a blank line.</context>
+        <line>128</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.LayoutRules" rule="ElementDocumentationHeaderMustBePrecededByBlankLine" ruleCheckId="SA1514">
+        <context>A documentation header must be preceded by a blank line or must be the first item in its scope.</context>
+        <line>121</line>
+        <warning>False</warning>
+      </violation>
+    </violations>
   </sourcecode>
   <sourcecode name="SolutionManagementHelper.cs" parser="StyleCop.CSharp.CsParser">
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-07-30 11:02:43.946</sourceFile>
+      <sourceFile>2019-09-11 13:11:58.864</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -633,11 +680,207 @@
     </timestamps>
     <violations />
   </sourcecode>
+  <sourcecode name="VersionManagementHelper.cs" parser="StyleCop.CSharp.CsParser">
+    <timestamps>
+      <styleCop>2019-05-22 11:14:37.459</styleCop>
+      <settingsFile>2019-05-22 11:14:37.429</settingsFile>
+      <sourceFile>2019-09-18 11:26:58.517</sourceFile>
+      <parser>2019-05-22 11:14:37.459</parser>
+      <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
+      <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
+      <StyleCop.CSharp.LayoutRules>2019-05-22 11:14:37.459</StyleCop.CSharp.LayoutRules>
+      <StyleCop.CSharp.LayoutRules.FilesHashCode>0</StyleCop.CSharp.LayoutRules.FilesHashCode>
+      <StyleCop.CSharp.MaintainabilityRules>2019-05-22 11:14:37.459</StyleCop.CSharp.MaintainabilityRules>
+      <StyleCop.CSharp.MaintainabilityRules.FilesHashCode>0</StyleCop.CSharp.MaintainabilityRules.FilesHashCode>
+      <StyleCop.CSharp.NamingRules>2019-05-22 11:14:37.459</StyleCop.CSharp.NamingRules>
+      <StyleCop.CSharp.NamingRules.FilesHashCode>0</StyleCop.CSharp.NamingRules.FilesHashCode>
+      <StyleCop.CSharp.OrderingRules>2019-05-22 11:14:37.459</StyleCop.CSharp.OrderingRules>
+      <StyleCop.CSharp.OrderingRules.FilesHashCode>0</StyleCop.CSharp.OrderingRules.FilesHashCode>
+      <StyleCop.CSharp.ReadabilityRules>2019-05-22 11:14:37.459</StyleCop.CSharp.ReadabilityRules>
+      <StyleCop.CSharp.ReadabilityRules.FilesHashCode>0</StyleCop.CSharp.ReadabilityRules.FilesHashCode>
+      <StyleCop.CSharp.SpacingRules>2019-05-22 11:14:37.459</StyleCop.CSharp.SpacingRules>
+      <StyleCop.CSharp.SpacingRules.FilesHashCode>0</StyleCop.CSharp.SpacingRules.FilesHashCode>
+    </timestamps>
+    <violations>
+      <violation namespace="StyleCop.CSharp.DocumentationRules" rule="FileMustHaveHeader" ruleCheckId="SA1633">
+        <context>The file has no header, the header Xml is invalid, or the header is not located at the top of the file.</context>
+        <line>1</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.OrderingRules" rule="UsingDirectivesMustBePlacedWithinNamespace" ruleCheckId="SA1200">
+        <context>All using directives must be placed inside of the namespace.</context>
+        <line>1</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.OrderingRules" rule="UsingDirectivesMustBePlacedWithinNamespace" ruleCheckId="SA1200">
+        <context>All using directives must be placed inside of the namespace.</context>
+        <line>2</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.OrderingRules" rule="UsingDirectivesMustBePlacedWithinNamespace" ruleCheckId="SA1200">
+        <context>All using directives must be placed inside of the namespace.</context>
+        <line>3</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.OrderingRules" rule="UsingDirectivesMustBePlacedWithinNamespace" ruleCheckId="SA1200">
+        <context>All using directives must be placed inside of the namespace.</context>
+        <line>4</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.OrderingRules" rule="UsingDirectivesMustBePlacedWithinNamespace" ruleCheckId="SA1200">
+        <context>All using directives must be placed inside of the namespace.</context>
+        <line>5</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.DocumentationRules" rule="ElementsMustBeDocumented" ruleCheckId="SA1600">
+        <context>The class must have a documentation header.</context>
+        <line>14</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.LayoutRules" rule="ElementsMustBeSeparatedByBlankLine" ruleCheckId="SA1516">
+        <context>Adjacent elements must be separated by a blank line.</context>
+        <line>14</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.LayoutRules" rule="OpeningCurlyBracketsMustNotBeFollowedByBlankLine" ruleCheckId="SA1505">
+        <context>An opening curly bracket must not be followed by a blank line.</context>
+        <line>15</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.LayoutRules" rule="CodeMustNotContainMultipleBlankLinesInARow" ruleCheckId="SA1507">
+        <context>The code must not contain multiple blank lines in a row.</context>
+        <line>201</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.DocumentationRules" rule="ElementsMustBeDocumented" ruleCheckId="SA1600">
+        <context>The method must have a documentation header.</context>
+        <line>28</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.LayoutRules" rule="ClosingCurlyBracketMustBeFollowedByBlankLine" ruleCheckId="SA1513">
+        <context>Statements or elements wrapped in curly brackets must be followed by a blank line.</context>
+        <line>74</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.ReadabilityRules" rule="PrefixCallsCorrectly" ruleCheckId="SA1126">
+        <context>The call to CloneASolution must begin with the 'this.', 'base.', 'object.' or 'VersionManagementHelper.' or 'DevOpsBusinessBase.' prefix to indicate the intended method call. </context>
+        <line>75</line>
+        <index>3335</index>
+        <endIndex>3348</endIndex>
+        <startLine>75</startLine>
+        <startColumn>13</startColumn>
+        <endLine>75</endLine>
+        <endColumn>26</endColumn>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.DocumentationRules" rule="ElementsMustBeDocumented" ruleCheckId="SA1600">
+        <context>The method must have a documentation header.</context>
+        <line>78</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.LayoutRules" rule="OpeningCurlyBracketsMustNotBeFollowedByBlankLine" ruleCheckId="SA1505">
+        <context>An opening curly bracket must not be followed by a blank line.</context>
+        <line>109</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.LayoutRules" rule="ClosingCurlyBracketMustBeFollowedByBlankLine" ruleCheckId="SA1513">
+        <context>Statements or elements wrapped in curly brackets must be followed by a blank line.</context>
+        <line>122</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.MaintainabilityRules" rule="StatementMustNotUseUnnecessaryParenthesis" ruleCheckId="SA1119">
+        <context>The line contains unnecessary parenthesis.</context>
+        <line>111</line>
+        <index>5031</index>
+        <endIndex>5051</endIndex>
+        <startLine>111</startLine>
+        <startColumn>36</startColumn>
+        <endLine>111</endLine>
+        <endColumn>56</endColumn>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.ReadabilityRules" rule="PrefixCallsCorrectly" ruleCheckId="SA1126">
+        <context>The call to CloneAPatch must begin with the 'this.', 'base.', 'object.' or 'VersionManagementHelper.' or 'DevOpsBusinessBase.' prefix to indicate the intended method call. </context>
+        <line>123</line>
+        <index>5515</index>
+        <endIndex>5525</endIndex>
+        <startLine>123</startLine>
+        <startColumn>13</startColumn>
+        <endLine>123</endLine>
+        <endColumn>23</endColumn>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.LayoutRules" rule="ClosingCurlyBracketMustBeFollowedByBlankLine" ruleCheckId="SA1513">
+        <context>Statements or elements wrapped in curly brackets must be followed by a blank line.</context>
+        <line>149</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.LayoutRules" rule="ClosingCurlyBracketMustBeFollowedByBlankLine" ruleCheckId="SA1513">
+        <context>Statements or elements wrapped in curly brackets must be followed by a blank line.</context>
+        <line>186</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.LayoutRules" rule="ClosingCurlyBracketsMustNotBePrecededByBlankLine" ruleCheckId="SA1508">
+        <context>A closing curly bracket must not be preceded by a blank line.</context>
+        <line>231</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.ReadabilityRules" rule="CodeMustNotContainEmptyStatements" ruleCheckId="SA1106">
+        <context>The code contains an extra semicolon.</context>
+        <line>215</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.ReadabilityRules" rule="PrefixCallsCorrectly" ruleCheckId="SA1126">
+        <context>The call to ValidateVersionMember must begin with the 'this.', 'base.', 'object.' or 'VersionManagementHelper.' or 'DevOpsBusinessBase.' prefix to indicate the intended method call. </context>
+        <line>220</line>
+        <index>11597</index>
+        <endIndex>11617</endIndex>
+        <startLine>220</startLine>
+        <startColumn>29</startColumn>
+        <endLine>220</endLine>
+        <endColumn>49</endColumn>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.ReadabilityRules" rule="PrefixCallsCorrectly" ruleCheckId="SA1126">
+        <context>The call to ValidateVersionMemberForClone must begin with the 'this.', 'base.', 'object.' or 'VersionManagementHelper.' or 'DevOpsBusinessBase.' prefix to indicate the intended method call. </context>
+        <line>227</line>
+        <index>11975</index>
+        <endIndex>12003</endIndex>
+        <startLine>227</startLine>
+        <startColumn>29</startColumn>
+        <endLine>227</endLine>
+        <endColumn>57</endColumn>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.SpacingRules" rule="SemicolonsMustBeSpacedCorrectly" ruleCheckId="SA1002">
+        <context>Invalid spacing around the semicolon.</context>
+        <line>215</line>
+        <index>11380</index>
+        <endIndex>11380</endIndex>
+        <startLine>215</startLine>
+        <startColumn>225</startColumn>
+        <endLine>215</endLine>
+        <endColumn>225</endColumn>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.ReadabilityRules" rule="PrefixCallsCorrectly" ruleCheckId="SA1126">
+        <context>The call to CheckMasterSolutionForCloneRequest must begin with the 'this.', 'base.', 'object.' or 'VersionManagementHelper.' or 'DevOpsBusinessBase.' prefix to indicate the intended method call. </context>
+        <line>256</line>
+        <index>13093</index>
+        <endIndex>13126</endIndex>
+        <startLine>256</startLine>
+        <startColumn>17</startColumn>
+        <endLine>256</endLine>
+        <endColumn>50</endColumn>
+        <warning>False</warning>
+      </violation>
+    </violations>
+  </sourcecode>
   <sourcecode name="AssemblyInfo.cs" parser="StyleCop.CSharp.CsParser">
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-06-23 22:27:54.000</sourceFile>
+      <sourceFile>2019-09-11 13:11:58.867</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -660,7 +903,7 @@
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-06-23 22:27:54.000</sourceFile>
+      <sourceFile>2019-09-11 13:11:58.868</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
@@ -679,11 +922,70 @@
     </timestamps>
     <violations />
   </sourcecode>
+  <sourcecode name="VersionManagement.cs" parser="StyleCop.CSharp.CsParser">
+    <timestamps>
+      <styleCop>2019-05-22 11:14:37.459</styleCop>
+      <settingsFile>2019-05-22 11:14:37.429</settingsFile>
+      <sourceFile>2019-09-12 14:39:02.281</sourceFile>
+      <parser>2019-05-22 11:14:37.459</parser>
+      <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
+      <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>
+      <StyleCop.CSharp.LayoutRules>2019-05-22 11:14:37.459</StyleCop.CSharp.LayoutRules>
+      <StyleCop.CSharp.LayoutRules.FilesHashCode>0</StyleCop.CSharp.LayoutRules.FilesHashCode>
+      <StyleCop.CSharp.MaintainabilityRules>2019-05-22 11:14:37.459</StyleCop.CSharp.MaintainabilityRules>
+      <StyleCop.CSharp.MaintainabilityRules.FilesHashCode>0</StyleCop.CSharp.MaintainabilityRules.FilesHashCode>
+      <StyleCop.CSharp.NamingRules>2019-05-22 11:14:37.459</StyleCop.CSharp.NamingRules>
+      <StyleCop.CSharp.NamingRules.FilesHashCode>0</StyleCop.CSharp.NamingRules.FilesHashCode>
+      <StyleCop.CSharp.OrderingRules>2019-05-22 11:14:37.459</StyleCop.CSharp.OrderingRules>
+      <StyleCop.CSharp.OrderingRules.FilesHashCode>0</StyleCop.CSharp.OrderingRules.FilesHashCode>
+      <StyleCop.CSharp.ReadabilityRules>2019-05-22 11:14:37.459</StyleCop.CSharp.ReadabilityRules>
+      <StyleCop.CSharp.ReadabilityRules.FilesHashCode>0</StyleCop.CSharp.ReadabilityRules.FilesHashCode>
+      <StyleCop.CSharp.SpacingRules>2019-05-22 11:14:37.459</StyleCop.CSharp.SpacingRules>
+      <StyleCop.CSharp.SpacingRules.FilesHashCode>0</StyleCop.CSharp.SpacingRules.FilesHashCode>
+    </timestamps>
+    <violations>
+      <violation namespace="StyleCop.CSharp.DocumentationRules" rule="FileMustHaveHeader" ruleCheckId="SA1633">
+        <context>The file has no header, the header Xml is invalid, or the header is not located at the top of the file.</context>
+        <line>1</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.OrderingRules" rule="UsingDirectivesMustBePlacedWithinNamespace" ruleCheckId="SA1200">
+        <context>All using directives must be placed inside of the namespace.</context>
+        <line>1</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.OrderingRules" rule="UsingDirectivesMustBePlacedWithinNamespace" ruleCheckId="SA1200">
+        <context>All using directives must be placed inside of the namespace.</context>
+        <line>2</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.OrderingRules" rule="UsingDirectivesMustBePlacedWithinNamespace" ruleCheckId="SA1200">
+        <context>All using directives must be placed inside of the namespace.</context>
+        <line>3</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.OrderingRules" rule="UsingDirectivesMustBePlacedWithinNamespace" ruleCheckId="SA1200">
+        <context>All using directives must be placed inside of the namespace.</context>
+        <line>4</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.OrderingRules" rule="UsingDirectivesMustBePlacedWithinNamespace" ruleCheckId="SA1200">
+        <context>All using directives must be placed inside of the namespace.</context>
+        <line>5</line>
+        <warning>False</warning>
+      </violation>
+      <violation namespace="StyleCop.CSharp.LayoutRules" rule="OpeningCurlyBracketsMustNotBeFollowedByBlankLine" ruleCheckId="SA1505">
+        <context>An opening curly bracket must not be followed by a blank line.</context>
+        <line>8</line>
+        <warning>False</warning>
+      </violation>
+    </violations>
+  </sourcecode>
   <sourcecode name="Entities.cs" parser="StyleCop.CSharp.CsParser">
     <timestamps>
       <styleCop>2019-05-22 11:14:37.459</styleCop>
       <settingsFile>2019-05-22 11:14:37.429</settingsFile>
-      <sourceFile>2019-07-30 11:02:43.939</sourceFile>
+      <sourceFile>2019-09-17 17:08:12.314</sourceFile>
       <parser>2019-05-22 11:14:37.459</parser>
       <StyleCop.CSharp.DocumentationRules>2019-05-22 11:14:37.459</StyleCop.CSharp.DocumentationRules>
       <StyleCop.CSharp.DocumentationRules.FilesHashCode>1953925138</StyleCop.CSharp.DocumentationRules.FilesHashCode>

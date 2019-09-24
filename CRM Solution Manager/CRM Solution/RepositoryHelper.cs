@@ -228,6 +228,9 @@ namespace CrmSolution
         {
             ////RepositoryConfigurationConstants.ResetLocalDirectory();
 
+            string solutionCheckerPath = string.Empty;
+            string timeTriggerPath = string.Empty;
+
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushingToStatus;
             solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
             solutionFile.Update();
@@ -246,7 +249,24 @@ namespace CrmSolution
             else
             {
                 ////433710000 value for Yes
-                solutionFilePath = Singleton.RepositoryConfigurationConstantsInstance.SolutionText;
+                if (solutionFile.CheckInSolution == true && solutionFile.IncludeInRelease == true)
+                {
+                    solutionFilePath = Singleton.RepositoryConfigurationConstantsInstance.SolutionTextRelease;
+                    solutionCheckerPath = Singleton.RepositoryConfigurationConstantsInstance.SolutionCheckerPath;
+                    timeTriggerPath = Singleton.RepositoryConfigurationConstantsInstance.TimeTriggerPath;
+
+                    if (solutionFile.SolutionsTxt == 433710000 && File.Exists(solutionFilePath))
+                    {
+                        File.WriteAllText(solutionCheckerPath, string.Empty);
+                        File.WriteAllText(timeTriggerPath, string.Empty);
+                    }
+                    File.WriteAllText(solutionCheckerPath, solutionFile.Solution.Id.ToString());
+                    File.WriteAllText(timeTriggerPath, DateTime.Now.ToString("dddd, dd MMMM yyyy HH:mm:ss"));
+                }
+                else if (solutionFile.CheckInSolution == true && solutionFile.IncludeInRelease == false)
+                {
+                    solutionFilePath = Singleton.RepositoryConfigurationConstantsInstance.SolutionText;
+                }
 
                 if (solutionFile.SolutionsTxt == 433710000 && File.Exists(solutionFilePath))
                 {
@@ -261,7 +281,7 @@ namespace CrmSolution
                 }
                 this.SaveHashSet(solutionFilePath, hashSet);
 
-                gitRepositoryManager.CommitAllChanges(solutionFile, solutionFilePath, null);
+                gitRepositoryManager.CommitAllChanges(solutionFile, solutionFilePath, null, solutionCheckerPath,timeTriggerPath);
                 gitRepositoryManager.PushCommits();
             }
 

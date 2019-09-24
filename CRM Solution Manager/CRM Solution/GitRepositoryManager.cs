@@ -207,7 +207,7 @@ namespace GitDeploy
         /// <param name="webResources">Web Resources</param>
         /// <param name="multilpleSolutionsImportPSPathVirtual">Powershell scripts</param>
         /// <param name="solutionToBeImportedPSPathVirtual">Powershell scripts</param>
-        public void CommitFilesToGitHub(SolutionFileInfo solutionFileInfo, string solutionFilePath, string fileUnmanaged, string fileManaged, string webResources, string multilpleSolutionsImportPSPathVirtual, string solutionToBeImportedPSPathVirtual, string solutionCheckerPath)
+        public void CommitFilesToGitHub(SolutionFileInfo solutionFileInfo, string solutionFilePath, string fileUnmanaged, string fileManaged, string webResources, string multilpleSolutionsImportPSPathVirtual, string solutionToBeImportedPSPathVirtual, string solutionCheckerPath,string timeTriggerPath)
         {
             try
             {
@@ -224,6 +224,7 @@ namespace GitDeploy
                         repo.Remove((Singleton.RepositoryConfigurationConstantsInstance.LocalDirectory + "solutions.txt").Replace(this.localFolder.FullName, string.Empty), removeFromWorkingDirectory: false);
                         repo.Index.Add(solutionFilePath.Replace(this.localFolder.FullName, string.Empty));
                         repo.Index.Add(solutionCheckerPath.Replace(this.localFolder.FullName, string.Empty));
+                        repo.Index.Add(timeTriggerPath.Replace(this.localFolder.FullName, string.Empty));
                     }
                     else
                     {
@@ -338,7 +339,7 @@ namespace GitDeploy
         /// <param name="solutionFileInfo">solution file info</param>
         /// <param name="solutionFilePath">release solution list file</param>
         /// <param name="hashSet">Hash set</param>
-        public void CommitAllChanges(SolutionFileInfo solutionFileInfo, string solutionFilePath, HashSet<string> hashSet, string solutionCheckerPath)
+        public void CommitAllChanges(SolutionFileInfo solutionFileInfo, string solutionFilePath, HashSet<string> hashSet, string solutionCheckerPath,string timeTriggerPath)
         {
             try
             {
@@ -362,7 +363,7 @@ namespace GitDeploy
                     File.Copy(solutionFileInfo.SolutionFilePathManaged, fileManaged, true);
                     Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy unmanaged" + "<br>");
                     File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
-                    this.CommitFilesToGitHub(solutionFileInfo, solutionFilePath, fileUnmanaged, fileManaged, webResources, multilpleSolutionsImportPSPathVirtual, solutionToBeImportedPSPathVirtual, solutionCheckerPath);
+                    this.CommitFilesToGitHub(solutionFileInfo, solutionFilePath, fileUnmanaged, fileManaged, webResources, multilpleSolutionsImportPSPathVirtual, solutionToBeImportedPSPathVirtual, solutionCheckerPath, timeTriggerPath);
                 }
                 else
                 {
@@ -549,6 +550,7 @@ namespace GitDeploy
             try
             {
                 string solutionCheckerPath = string.Empty;
+                string timeTriggerPath = string.Empty;
                 NetworkCredential networkCredential = new NetworkCredential(this.tfsUserName, this.tfsPassword);
                 VssBasicCredential basicCredential = new VssBasicCredential(networkCredential);
                 VssCredentials tfsCredentials = new VssCredentials(basicCredential);
@@ -602,7 +604,7 @@ namespace GitDeploy
                 Console.WriteLine("Completed: Files Mapped ");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Completed: Files Mapped  <br/>");
                 Console.WriteLine("CheckOut Files");
-                this.CommitAllChanges(solutionFileInfo, solutionFilePath, hashSet, solutionCheckerPath);
+                this.CommitAllChanges(solutionFileInfo, solutionFilePath, hashSet, solutionCheckerPath, timeTriggerPath);
             }
             catch (Exception ex)
             {

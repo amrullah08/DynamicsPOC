@@ -245,6 +245,11 @@ namespace CrmSolution
         public const string SolutionCheckerPath = "SoulutionCheckerConfigFile";
 
         /// <summary>
+        ///  solution text file path for Checkin
+        /// </summary>
+        public const string TimeTriggerPath = "TriggerFile";
+
+        /// <summary>
         ///  multiple solutions import
         /// </summary>
         public const string MultilpleSolutionsImport = "MultilpleSolutionsImport";
@@ -258,6 +263,11 @@ namespace CrmSolution
         ///  solution packager relative path
         /// </summary>
         public const string SolutionPackagerRelativePath = "SolutionPackagerRelativePath";
+
+        /// <summary>
+        ///  solution packager relative path
+        /// </summary>
+        public const string EncryptionKey = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
         /// <summary>
         ///  sleep timeout in millis

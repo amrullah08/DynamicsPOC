@@ -5,7 +5,7 @@
 //     Changes to this file may cause incorrect behavior and will be lost if
 //     the code is regenerated.
 // </auto-generated>
-// Created via this command line: "C:\Users\m-jkrishnan\AppData\Roaming\MscrmTools\XrmToolBox\Plugins\DLaB.EarlyBoundGenerator\crmsvcutil.exe" /url:"https://flyhighalways.api.crm.dynamics.com/XRMServices/2011/Organization.svc" /namespace:"SolutionConstants" /out:"C:\Users\m-jkrishnan\AppData\Roaming\MscrmTools\XrmToolBox\Settings\EBG\Entities.cs" /servicecontextname:"CrmServiceContext" /codecustomization:"DLaB.CrmSvcUtilExtensions.Entity.CustomizeCodeDomService,DLaB.CrmSvcUtilExtensions" /codegenerationservice:"DLaB.CrmSvcUtilExtensions.Entity.CustomCodeGenerationService,DLaB.CrmSvcUtilExtensions" /codewriterfilter:"DLaB.CrmSvcUtilExtensions.Entity.CodeWriterFilterService,DLaB.CrmSvcUtilExtensions" /namingservice:"DLaB.CrmSvcUtilExtensions.NamingService,DLaB.CrmSvcUtilExtensions" /metadataproviderservice:"DLaB.CrmSvcUtilExtensions.Entity.MetadataProviderService,DLaB.CrmSvcUtilExtensions" /username:"Fly@FlyHighAlways.onmicrosoft.com" /password:"********" 
+// Created via this command line: "C:\Users\m-jkrishnan\AppData\Roaming\MscrmTools\XrmToolBox\Plugins\DLaB.EarlyBoundGenerator\crmsvcutil.exe" /url:"https://igdcicd2.api.crm8.dynamics.com/XRMServices/2011/Organization.svc" /namespace:"SolutionConstants" /out:"C:\Users\m-jkrishnan\AppData\Roaming\MscrmTools\XrmToolBox\Settings\EBG\Entities.cs" /servicecontextname:"CrmServiceContext" /codecustomization:"DLaB.CrmSvcUtilExtensions.Entity.CustomizeCodeDomService,DLaB.CrmSvcUtilExtensions" /codegenerationservice:"DLaB.CrmSvcUtilExtensions.Entity.CustomCodeGenerationService,DLaB.CrmSvcUtilExtensions" /codewriterfilter:"DLaB.CrmSvcUtilExtensions.Entity.CodeWriterFilterService,DLaB.CrmSvcUtilExtensions" /namingservice:"DLaB.CrmSvcUtilExtensions.NamingService,DLaB.CrmSvcUtilExtensions" /metadataproviderservice:"DLaB.CrmSvcUtilExtensions.Entity.MetadataProviderService,DLaB.CrmSvcUtilExtensions" /username:"igdsa36@IGDCRM.onmicrosoft.com" /password:"****************" 
 //------------------------------------------------------------------------------
 
 [assembly: Microsoft.Xrm.Sdk.Client.ProxyTypesAssemblyAttribute()]
@@ -598,7 +598,7 @@ namespace SolutionConstants
 		
 		public const string PrimaryNameAttribute = "syed_name";
 		
-		public const int EntityTypeCode = 10280;
+		public const int EntityTypeCode = 10072;
 		
 		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
 		
@@ -1120,7 +1120,7 @@ namespace SolutionConstants
 		
 		public const string PrimaryNameAttribute = "syed_name";
 		
-		public const int EntityTypeCode = 10281;
+		public const int EntityTypeCode = 10065;
 		
 		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
 		
@@ -1391,6 +1391,26 @@ namespace SolutionConstants
 		}
 		
 		/// <summary>
+		/// 
+		/// </summary>
+		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_checkdependency")]
+		public System.Nullable<bool> syed_CheckDependency
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetAttributeValue<System.Nullable<bool>>("syed_checkdependency");
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_CheckDependency");
+				this.SetAttributeValue("syed_checkdependency", value);
+				this.OnPropertyChanged("syed_CheckDependency");
+			}
+		}
+		
+		/// <summary>
 		/// Unique identifier for entity instances
 		/// </summary>
 		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_deploymentinstanceid")]
@@ -1450,6 +1470,26 @@ namespace SolutionConstants
 				this.OnPropertyChanging("syed_DynamicsSourceControl");
 				this.SetAttributeValue("syed_dynamicssourcecontrol", value);
 				this.OnPropertyChanged("syed_DynamicsSourceControl");
+			}
+		}
+		
+		/// <summary>
+		/// 
+		/// </summary>
+		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_import")]
+		public System.Nullable<bool> syed_Import
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetAttributeValue<System.Nullable<bool>>("syed_import");
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_Import");
+				this.SetAttributeValue("syed_import", value);
+				this.OnPropertyChanged("syed_Import");
 			}
 		}
 		
@@ -1662,7 +1702,7 @@ namespace SolutionConstants
 		
 		public const string PrimaryNameAttribute = "syed_name";
 		
-		public const int EntityTypeCode = 10282;
+		public const int EntityTypeCode = 10054;
 		
 		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
 		
@@ -2364,7 +2404,7 @@ namespace SolutionConstants
 		
 		public const string PrimaryNameAttribute = "syed_name";
 		
-		public const int EntityTypeCode = 10283;
+		public const int EntityTypeCode = 10055;
 		
 		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
 		
@@ -3066,7 +3106,7 @@ namespace SolutionConstants
 		
 		public const string PrimaryNameAttribute = "syed_name";
 		
-		public const int EntityTypeCode = 10284;
+		public const int EntityTypeCode = 10056;
 		
 		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
 		
@@ -3878,7 +3918,7 @@ namespace SolutionConstants
 		
 		public const string PrimaryNameAttribute = "syed_name";
 		
-		public const int EntityTypeCode = 10285;
+		public const int EntityTypeCode = 10073;
 		
 		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
 		
@@ -4285,6 +4325,66 @@ namespace SolutionConstants
 				this.OnPropertyChanging("syed_DeploymentInstance");
 				this.SetAttributeValue("syed_deploymentinstance", value);
 				this.OnPropertyChanged("syed_DeploymentInstance");
+			}
+		}
+		
+		/// <summary>
+		/// 
+		/// </summary>
+		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_devopsbuildurl")]
+		public string syed_DevOpsBuildURL
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetAttributeValue<string>("syed_devopsbuildurl");
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_DevOpsBuildURL");
+				this.SetAttributeValue("syed_devopsbuildurl", value);
+				this.OnPropertyChanged("syed_DevOpsBuildURL");
+			}
+		}
+		
+		/// <summary>
+		/// 
+		/// </summary>
+		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_devopsreleaseurl")]
+		public string syed_DevOpsReleaseURL
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetAttributeValue<string>("syed_devopsreleaseurl");
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_DevOpsReleaseURL");
+				this.SetAttributeValue("syed_devopsreleaseurl", value);
+				this.OnPropertyChanged("syed_DevOpsReleaseURL");
+			}
+		}
+		
+		/// <summary>
+		/// 
+		/// </summary>
+		[Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute("syed_exceptiondetails")]
+		public string syed_ExceptionDetails
+		{
+			[System.Diagnostics.DebuggerNonUserCode()]
+			get
+			{
+				return this.GetAttributeValue<string>("syed_exceptiondetails");
+			}
+			[System.Diagnostics.DebuggerNonUserCode()]
+			set
+			{
+				this.OnPropertyChanging("syed_ExceptionDetails");
+				this.SetAttributeValue("syed_exceptiondetails", value);
+				this.OnPropertyChanged("syed_ExceptionDetails");
 			}
 		}
 		

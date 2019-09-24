@@ -75,7 +75,7 @@ namespace SolutionManagement
             if (versionUpdate.Count > 0)
             {
                 versionNumber = string.Empty;
-                for (int version = 1; version <= versionUpdate.Count; version++)
+                for (int version = 1; version <= 4; version++)
                 {
                     if (version == 2)
                     {
@@ -132,7 +132,7 @@ namespace SolutionManagement
                 for (int version = 1; version <= 4; version++)
                 {
 
-                    if (version == 4)
+                    if (version == 3)
                     {
                         if (versionUpdate.Count == 2)
                         {
@@ -144,7 +144,7 @@ namespace SolutionManagement
                             versionNumber = versionNumber + increasedVersion.ToString();
                         }
                     }
-                    else if (version == 2 || version == 3)
+                    else if (version == 2 || version == 4)
                     {
                         if (versionUpdate.Count == 2)
                         {
@@ -200,12 +200,16 @@ namespace SolutionManagement
                         ExecuteOperations.UpdateSolutionDetail(CrmService, syed_Mastersolutions, syed_Solutiondetail);
                         break;
                     }
+
                     WebJobsLog.AppendLine("Cloned solution - sucessfully " + syed_Solutiondetail.syed_ListofSolutions);
+                    UpdateExceptionDetails(syed_Solutiondetail.syed_ListofSolutionId.Id.ToString(), WebJobsLog.ToString(), "Queued");
                 }
             }
             catch (Exception ex)
             {
-                WebJobsLog.AppendLine("Exception occured in clone solution- " + syed_Solutiondetail.syed_ListofSolutions + ex.Message);
+                WebJobsLog.AppendLine("Exception occured in clone solution- " + syed_Solutiondetail.syed_ListofSolutions + ", " + ex.Message);
+                UpdateExceptionDetails(syed_Solutiondetail.syed_ListofSolutionId.Id.ToString(), WebJobsLog.ToString(), "Draft");
+                throw new InvalidPluginExecutionException(ex.Message);
             }
         }
 
@@ -248,12 +252,14 @@ namespace SolutionManagement
                         break;
                     }
                     WebJobsLog.AppendLine("Patch created - sucessfully " + syed_Solutiondetail.syed_ListofSolutions);
+                    UpdateExceptionDetails(syed_Solutiondetail.syed_ListofSolutionId.Id.ToString(), WebJobsLog.ToString(), "Queued");
                 }
             }
             catch (Exception ex)
             {
-                WebJobsLog.AppendLine("Exception occured in clone a patch- " + syed_Solutiondetail.syed_ListofSolutions + ex.Message);
-                CrmContext.OutputParameters["ErrorMessage"] = WebJobsLog;
+                WebJobsLog.AppendLine("Exception occured in clone a patch- " + syed_Solutiondetail.syed_ListofSolutions + ", " + ex.Message);
+                UpdateExceptionDetails(syed_Solutiondetail.syed_ListofSolutionId.Id.ToString(), WebJobsLog.ToString(), "Draft");
+                throw new InvalidPluginExecutionException(ex.Message);
             }
         }
 
@@ -261,15 +267,16 @@ namespace SolutionManagement
         /// To create Dynamics source control and create associated solution details.
         /// </summary>
         /// <param name="service">Organization service</param>
-        /// <param name="solutionId">CRM Solution id</param>
+        /// <param name="solutionId">Dynamics Source Control id</param>
         /// <param name="tracingService">Tracing Service to trace error</param>
         public void CheckMasterSolutionForCloneRequest(string solutionId)
         {
-            EntityCollection masterSolutions = SolutionHelper.RetrieveMasterSolutionBySolutionOptions(CrmService, solutionId, CrmTracingService);
-            foreach (syed_solutiondetail syed_Solutiondetail in masterSolutions.Entities)
+            try
             {
-                try
+                EntityCollection masterSolutions = SolutionHelper.RetrieveMasterSolutionBySolutionOptions(CrmService, solutionId, CrmTracingService);
+                foreach (syed_solutiondetail syed_Solutiondetail in masterSolutions.Entities)
                 {
+
                     syed_mastersolutions crmSolution = CrmService.Retrieve(syed_mastersolutions.EntityLogicalName, syed_Solutiondetail.syed_CRMSolutionsId.Id, new ColumnSet("syed_solutionid")).ToEntity<syed_mastersolutions>();
                     if (syed_Solutiondetail.syed_SolutionOptions.Value == 433710001)
                     {
@@ -285,13 +292,22 @@ namespace SolutionManagement
                             this.ValidateVersionMemberForClone(syed_Solutiondetail, new Guid(crmSolution.syed_SolutionId));
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    WebJobsLog.AppendLine(ex.Message);
-                    CrmContext.OutputParameters["ErrorMessage"] = WebJobsLog;
+
                 }
             }
+            catch (Exception ex)
+            {
+                throw new InvalidPluginExecutionException(ex.Message);
+            }
+        }
+
+        public void UpdateExceptionDetails(string solutionId, string message, string status)
+        {
+            syed_sourcecontrolqueue syed_Sourcecontrolqueue = CrmService.Retrieve(syed_sourcecontrolqueue.EntityLogicalName, new Guid(solutionId), new ColumnSet(true)).ToEntity<syed_sourcecontrolqueue>();
+            syed_Sourcecontrolqueue.syed_ExceptionDetails = syed_Sourcecontrolqueue.syed_ExceptionDetails + message;
+            syed_Sourcecontrolqueue.syed_Status = status;
+            syed_Sourcecontrolqueue.Id = new Guid(solutionId);
+            CrmService.Update(syed_Sourcecontrolqueue);
         }
 
         /// <summary>
@@ -311,6 +327,7 @@ namespace SolutionManagement
                 }
 
                 string dynamicsSourceControlId = (string)objDynamicsSourceControlId;
+                UpdateExceptionDetails(dynamicsSourceControlId, string.Empty, "Draft");
                 this.CheckMasterSolutionForCloneRequest(dynamicsSourceControlId);
                 CrmContext.OutputParameters["ErrorMessage"] = WebJobsLog.ToString();
             }

@@ -139,9 +139,15 @@ SYED.SourceControlQueue.EventHandler =
             }
         },
 
-        CallAction: function (selectedId) {
+        CallAction: function (executionContext, selectedId) {
             try {
                 debugger;
+
+                var formContext = null;
+                if (Xrm.Internal.isUci())
+                    formContext = executionContext;
+                else
+                    formContext = executionContext.getFormContext();
 
                 selectedId = selectedId.replace("{", "").replace("}", "").toUpperCase();
                 var parameters = {};
@@ -188,10 +194,20 @@ SYED.SourceControlQueue.EventHandler =
                 var formType = formContext.ui.getFormType();
 
                 if (formType != "1") {
-                    Xrm.WebApi.online.retrieveMultipleRecords("syed_solutiondetail", "?$select=_syed_crmsolutionsid_value&$filter=_syed_listofsolutionid_value eq " + sourceControlQueueId + "").then(
+
+                    Xrm.WebApi.online.retrieveMultipleRecords("syed_solutiondetail", "?$select=_syed_crmsolutionsid_value,syed_solutionoptions&$filter=_syed_listofsolutionid_value eq " + sourceControlQueueId + "").then(
                         function success(results) {
                             if (results.entities.length > 0) {
-                                SYED.SourceControlQueue.EventHandler.CallAction(sourceControlQueueId.toLocaleString());
+                                for (var i = 0; i < results.entities.length; i++) {
+                                    var syed_solutionoptions = results.entities[i]["syed_solutionoptions"];
+                                    if (syed_solutionoptions == "433710001" || syed_solutionoptions == "433710002") {
+                                        SYED.SourceControlQueue.EventHandler.CallAction(executionContext, sourceControlQueueId.toLocaleString());
+                                    }
+                                    else {
+                                        formContext.getAttribute("syed_status").setValue("Queued");
+                                        SYED.SourceControlQueue.EventHandler.SavePage(executionContext);
+                                    }
+                                }
                             }
                             else {
                                 formContext.ui.setFormNotification('To Submit, Please select Master Solution', 'ERROR', 'SUBMIT');

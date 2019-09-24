@@ -69,6 +69,11 @@ namespace CrmSolution
         private string solutionText;
 
         /// <summary>
+        /// Time Trigger text file 
+        /// </summary>
+        private string timeTriggerPath;
+
+        /// <summary>
         /// solution text file 
         /// </summary>
         private string solutionCheckerPath;
@@ -200,6 +205,21 @@ namespace CrmSolution
             get
             {
                 return this.solutionCheckerPath;
+            }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets solution checker path file
+        /// </summary>
+        public string TimeTriggerPath
+        {
+            get
+            {
+                return this.timeTriggerPath;
             }
 
             set
@@ -354,8 +374,15 @@ namespace CrmSolution
                         {
                             this.solutionCheckerPath = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
                         }
-
                         break;
+
+                    case Constants.TimeTriggerPath:
+                        if (!string.IsNullOrEmpty(setting.GetAttributeValue<string>("syed_value")))
+                        {
+                            this.timeTriggerPath = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
+                        }
+                        break;
+
                     case Constants.SolutionTextPathForRelease:
                         if (!string.IsNullOrEmpty(setting.GetAttributeValue<string>("syed_value")))
                         {

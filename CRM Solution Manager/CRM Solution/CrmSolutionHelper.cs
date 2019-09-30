@@ -201,13 +201,7 @@ namespace CrmSolution
             {
                 string fetchXML = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
                                       <entity name='syed_solutiondetail'>
-                                        <attribute name='syed_solutiondetailid' />
-                                        <attribute name='syed_name' />
-                                        <attribute name='createdon' />
-                                        <attribute name='syed_order' />
-                                        <attribute name='syed_solutionid' />
-                                        <attribute name='syed_exportas' />
-                                        <attribute name='syed_listofsolutions' />
+                                          <all-attributes />
                                         <order attribute='syed_order' descending='false' />
                                         <filter type='and'>
                                           <condition attribute='syed_listofsolutionid' operator='eq'  uitype='syed_sourcecontrolqueue'  value='" + sourceControlId + @"' />
@@ -526,6 +520,7 @@ namespace CrmSolution
             EntityCollection deploymentInstance = this.FetchDeplopymentInstance(serviceProxy, sourceControl.Id);
             bool checkDependency = false;
             bool import = false;
+            bool clearPassword = false;
             var checkTarget = false;
             if (deploymentInstance.Entities.Count > 0)
             {
@@ -534,17 +529,19 @@ namespace CrmSolution
                     ClientCredentials clientCredentials = new ClientCredentials();
                     clientCredentials.UserName.UserName = instance.Attributes["syed_name"].ToString();
                     clientCredentials.UserName.Password = this.DecryptString(instance.Attributes["syed_password"].ToString());
+                    clearPassword = (bool)instance.Attributes["syed_clearpassword"];
                     ////Resetting password
-                    instance.Attributes["syed_password"] = "Reset_Password";
+                    if (clearPassword == true)
+                    {
+                        instance.Attributes["syed_password"] = "Reset_Password";
+                    }
                     checkDependency = (bool)instance.Attributes["syed_checkdependency"];
                     import = (bool)instance.Attributes["syed_import"];
                     serviceProxy.Update(instance);
                     OrganizationServiceProxy targetserviceProxy = new OrganizationServiceProxy(new Uri(instance.Attributes["syed_instanceurl"].ToString()), null, clientCredentials, null);
                     targetserviceProxy.EnableProxyTypes();
                     List<EntityCollection> componentDependency = this.GetDependentComponents(serviceProxy, new Guid(solutionFile.MasterSolutionId), solutionFile.SolutionUniqueName);
-
                     SolutionManager sol = new SolutionManager(serviceProxy);
-
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Dependent Components in Source Instance</th><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Required Components</th></tr>");
 
                     if (componentDependency.Count > 0)

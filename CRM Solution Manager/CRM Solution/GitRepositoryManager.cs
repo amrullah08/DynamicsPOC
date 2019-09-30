@@ -207,14 +207,17 @@ namespace GitDeploy
         /// <param name="webResources">Web Resources</param>
         /// <param name="multilpleSolutionsImportPSPathVirtual">Powershell scripts</param>
         /// <param name="solutionToBeImportedPSPathVirtual">Powershell scripts</param>
-        public void CommitFilesToGitHub(SolutionFileInfo solutionFileInfo, string solutionFilePath, string fileUnmanaged, string fileManaged, string webResources, string multilpleSolutionsImportPSPathVirtual, string solutionToBeImportedPSPathVirtual, string solutionCheckerPath,string timeTriggerPath)
+        public void CommitFilesToGitHub(SolutionFileInfo solutionFileInfo, string solutionFilePath, string fileUnmanaged, string fileManaged, string webResources, string multilpleSolutionsImportPSPathVirtual, string solutionToBeImportedPSPathVirtual, string solutionCheckerPath, string timeTriggerPath)
         {
             try
             {
                 using (var repo = new Repository(this.localFolder.FullName))
                 {
-                    this.AddRepositoryIndexes(fileUnmanaged, repo);
-                    this.AddRepositoryIndexes(fileManaged, repo);
+                    if (solutionFileInfo.DoYouWantToCheckInSolutionZipFiles == true)
+                    {
+                        this.AddRepositoryIndexes(fileUnmanaged, repo);
+                        this.AddRepositoryIndexes(fileManaged, repo);
+                    }
                     this.AddWebResourcesToRepository(webResources, repo);
                     //// todo: add extracted solution files to repository
                     this.AddExtractedSolutionToRepository(solutionFileInfo, repo);
@@ -339,16 +342,22 @@ namespace GitDeploy
         /// <param name="solutionFileInfo">solution file info</param>
         /// <param name="solutionFilePath">release solution list file</param>
         /// <param name="hashSet">Hash set</param>
-        public void CommitAllChanges(SolutionFileInfo solutionFileInfo, string solutionFilePath, HashSet<string> hashSet, string solutionCheckerPath,string timeTriggerPath)
+        public void CommitAllChanges(SolutionFileInfo solutionFileInfo, string solutionFilePath, HashSet<string> hashSet, string solutionCheckerPath, string timeTriggerPath)
         {
             try
             {
+                string fileUnmanaged = string.Empty;
+                string fileManaged = string.Empty;
                 string multilpleSolutionsImportPSPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\MultilpleSolutionsImport.ps1";
                 string multilpleSolutionsImportPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.MultilpleSolutionsImport;
                 string solutionToBeImportedPSPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\SolutionToBeImported.ps1";
                 string solutionToBeImportedPSPathVirtual = this.localFolder + Singleton.CrmConstantsInstance.SolutionToBeImported;
-                string fileUnmanaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_.zip";
-                string fileManaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_managed_.zip";
+                if (solutionFileInfo.DoYouWantToCheckInSolutionZipFiles == true)
+                {
+                    fileUnmanaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_.zip";
+                    fileManaged = this.solutionlocalFolder + solutionFileInfo.SolutionUniqueName + "_managed_.zip";
+                }
+
                 string webResources = solutionFileInfo.SolutionExtractionPath + "\\WebResources";
 
                 if (this.workspace == null && solutionFileInfo.Repository != Constants.SourceControlAzureDevOpsServer)
@@ -359,10 +368,13 @@ namespace GitDeploy
                     File.Copy(solutionToBeImportedPSPath, solutionToBeImportedPSPathVirtual, true);
                     Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Committing solutions" + "<br>");
                     Console.WriteLine("Committing solutions");
-                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy managed" + "<br>");
-                    File.Copy(solutionFileInfo.SolutionFilePathManaged, fileManaged, true);
-                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy unmanaged" + "<br>");
-                    File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
+                    if (solutionFileInfo.DoYouWantToCheckInSolutionZipFiles == true)
+                    {
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy managed" + "<br>");
+                        File.Copy(solutionFileInfo.SolutionFilePathManaged, fileManaged, true);
+                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy unmanaged" + "<br>");
+                        File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
+                    }
                     this.CommitFilesToGitHub(solutionFileInfo, solutionFilePath, fileUnmanaged, fileManaged, webResources, multilpleSolutionsImportPSPathVirtual, solutionToBeImportedPSPathVirtual, solutionCheckerPath, timeTriggerPath);
                 }
                 else

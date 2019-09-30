@@ -74,6 +74,7 @@ namespace CrmSolution
                 this.SolutionUniqueName = solutionDetail.GetAttributeValue<string>("syed_listofsolutions");
                 this.MasterSolutionId = solutionDetail.GetAttributeValue<string>("syed_solutionid");
                 this.ExportAsManaged = solutionDetail.GetAttributeValue<bool>("syed_exportas");
+                this.DoYouWantToCheckInSolutionZipFiles = solutionDetail.GetAttributeValue<bool>("syed_doyouwanttocheckinsolutionzipfiles");
             }
             else
             {
@@ -187,6 +188,11 @@ namespace CrmSolution
         /// Gets or sets a value indicating whether solution needs to be exported as managed or not
         /// </summary>
         public bool ExportAsManaged { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether Do you want to Check In Solution Zip Files ?
+        /// </summary>
+        public bool DoYouWantToCheckInSolutionZipFiles { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether solution needs to be checked in

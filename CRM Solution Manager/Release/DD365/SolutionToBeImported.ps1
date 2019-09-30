@@ -18,3 +18,4 @@ $newlineDelimitedConfigValue = $dynamicsSourceControlId -replace ';', "%0D%0A"
 
 Write-Host "##vso[task.setvariable variable=SolutionsFileName]$newlineDelimited"
 Write-Host "##vso[task.setvariable variable=ConfigIds]$newlineDelimitedConfigValue"
+

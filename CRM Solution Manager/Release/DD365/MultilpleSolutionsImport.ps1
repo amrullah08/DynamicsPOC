@@ -22,17 +22,12 @@ $ErrorActionPreference = "Stop"
 Write-Verbose 'Entering ImportSolution.ps1'
 Write-Output "Start Multiple solution import..."
  
-# $dllnames = get-childitem $dllPath
- #write-Output $dllnames
- 
-#Install-Module -Name Xrm.Framework.CI.PowerShell.Cmdlets
 
  if(-Not (Get-Module -ListAvailable -Name Xrm.Framework.CI.PowerShell.Cmdlets))
 {
     $dllname=-Join($dllPath,"/Microsoft.Xrm.Sdk.dll")
     Import-Module $dllname     
-    #Add-Type -Path $dllname
-    #[void][System.Reflection.Assembly]::LoadFile($dllname)
+   
     
      $dllname=-Join($dllPath,"/Microsoft.Crm.Sdk.Proxy.dll")
      Import-Module $dllname     
@@ -117,7 +112,7 @@ $solutionInfo = Get-XrmSolutionInfoFromZip -SolutionFilePath $file.FullName
             throw "Import Failed"
         }
 
-        #parse the importexportxml and look for result notes with result="failure"
+         
         $importFailed = $false
         $importjobXml = [xml]$importJob.Data
         $failureNodes = $importjobXml.SelectNodes("//*[@result='failure']")
@@ -137,7 +132,7 @@ $solutionInfo = Get-XrmSolutionInfoFromZip -SolutionFilePath $file.FullName
         {
            Write-Host "The import result of all components is 'success'."
         }
-        #end parse the importexportxml and look for result notes with result="failure"
+        
                                               
         $solution = Get-XrmSolution -ConnectionString "$CrmConnectionString" -UniqueSolutionName $solutionInfo.UniqueName
 
@@ -157,4 +152,3 @@ $solutionInfo = Get-XrmSolutionInfoFromZip -SolutionFilePath $file.FullName
 }
 Write-Verbose 'Leaving ImportSolution.ps1'
 
-#NOTE :- $ solutionListFile , $solutionImportPath need to be passed to ps1 script as argument.

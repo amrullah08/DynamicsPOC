@@ -1,4 +1,4 @@
-#[void][System.Reflection.Assembly]::LoadFile("D:\PS to save entity\microsoft.xrm.sdk.dll")
+﻿#[void][System.Reflection.Assembly]::LoadFile("D:\PS to save entity\microsoft.xrm.sdk.dll")
 
 #[void][System.Reflection.Assembly]::LoadFile("D:\PS to save entity\microsoft.crm.sdk.proxy.dll")
 

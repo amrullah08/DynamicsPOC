@@ -2,6 +2,7 @@
 # Filename: ImportSolution.ps1.
 #
 param(
+$dllPath,
 $solutionListFile,
 $solutionImportPath,
 $crmConnectionString,
@@ -19,17 +20,38 @@ $logFilename
 $ErrorActionPreference = "Stop"
 
 Write-Verbose 'Entering ImportSolution.ps1'
+Write-Output "Start Multiple solution import..."
  
-if(-Not (Get-Module -ListAvailable -Name Xrm.Framework.CI.PowerShell.Cmdlets))
+# $dllnames = get-childitem $dllPath
+ #write-Output $dllnames
+ 
+#Install-Module -Name Xrm.Framework.CI.PowerShell.Cmdlets
+
+ if(-Not (Get-Module -ListAvailable -Name Xrm.Framework.CI.PowerShell.Cmdlets))
 {
-Import-Module $env:DOWNLOADSECUREFILE1_SECUREFILEPATH
-Import-Module $env:DOWNLOADSECUREFILE2_SECUREFILEPATH
-Import-Module $env:DOWNLOADSECUREFILE3_SECUREFILEPATH
-Import-Module $env:DOWNLOADSECUREFILE4_SECUREFILEPATH
-Import-Module $env:DOWNLOADSECUREFILE5_SECUREFILEPATH
-Import-Module $env:DOWNLOADSECUREFILE6_SECUREFILEPATH
-Import-Module $env:DOWNLOADSECUREFILE7_SECUREFILEPATH
-}
+    $dllname=-Join($dllPath,"/Microsoft.Xrm.Sdk.dll")
+    Import-Module $dllname     
+    #Add-Type -Path $dllname
+    #[void][System.Reflection.Assembly]::LoadFile($dllname)
+    
+     $dllname=-Join($dllPath,"/Microsoft.Crm.Sdk.Proxy.dll")
+     Import-Module $dllname     
+     
+      $dllname=-Join($dllPath,"/Microsoft.IdentityModel.Clients.ActiveDirectory.dll")
+      Import-Module $dllname     
+     
+     $dllname=-Join($dllPath,"/Microsoft.Xrm.Sdk.Deployment.dll")
+     Import-Module $dllname     
+     
+     $dllname=-Join($dllPath,"/Microsoft.Xrm.Tooling.Connector.dll")
+     Import-Module $dllname     
+          
+     $dllname=-Join($dllPath,"/Xrm.Framework.CI.Common.dll")
+     Import-Module $dllname     
+     
+     $dllname=-Join($dllPath,"/Xrm.Framework.CI.PowerShell.Cmdlets.dll")
+     Import-Module $dllname     
+ }
 
 Write-Host $solutionImportPath
 Write-Host $solution

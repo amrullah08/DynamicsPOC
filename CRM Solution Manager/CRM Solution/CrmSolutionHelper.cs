@@ -201,13 +201,7 @@ namespace CrmSolution
             {
                 string fetchXML = @"<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>
                                       <entity name='syed_solutiondetail'>
-                                        <attribute name='syed_solutiondetailid' />
-                                        <attribute name='syed_name' />
-                                        <attribute name='createdon' />
-                                        <attribute name='syed_order' />
-                                        <attribute name='syed_solutionid' />
-                                        <attribute name='syed_exportas' />
-                                        <attribute name='syed_listofsolutions' />
+                                          <all-attributes />
                                         <order attribute='syed_order' descending='false' />
                                         <filter type='and'>
                                           <condition attribute='syed_listofsolutionid' operator='eq'  uitype='syed_sourcecontrolqueue'  value='" + sourceControlId + @"' />

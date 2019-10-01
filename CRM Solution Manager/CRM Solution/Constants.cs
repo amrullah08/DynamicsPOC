@@ -27,7 +27,7 @@ namespace CrmSolution
         /// <summary>
         ///  arguments for TU
         /// </summary>
-        public const string ArgumentTU = "TU";
+        public const string ArgumentTU = "TU=";
               
         /// <summary>
         ///  arguments for GP

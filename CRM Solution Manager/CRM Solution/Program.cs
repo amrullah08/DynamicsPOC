@@ -10,6 +10,10 @@ namespace CrmSolution
     using Microsoft.Xrm.Sdk;
     using System;
     using System.Configuration;
+    using Microsoft.Azure.KeyVault;
+    using Microsoft.Azure.KeyVault.Models;
+    using Microsoft.IdentityModel.Clients.ActiveDirectory;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Main entry point of the program
@@ -23,38 +27,39 @@ namespace CrmSolution
         private static void Main(string[] args)
         {
             string mode = string.Empty;
-
             if (args != null && args.Length != 0)
             {
+                KeyVaultClient kvc = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(GetToken));
+
                 foreach (string item in args)
                 {
                     if (item.StartsWith(Constants.ArgumentDU, StringComparison.InvariantCulture))
                     {
-                        ConfigurationManager.AppSettings["DynamicsUserName"] = item.Replace(Constants.ArgumentDU, "");
+                        ConfigurationManager.AppSettings["DynamicsUserName"] = DoVault(item.Replace(Constants.ArgumentDU, ""), kvc);
                     }
                     else if (item.StartsWith(Constants.ArgumentD365, StringComparison.InvariantCulture))
                     {
-                        ConfigurationManager.AppSettings["OrgServiceUrl"] = item.Replace(Constants.ArgumentD365, "");
+                        ConfigurationManager.AppSettings["OrgServiceUrl"] = DoVault(item.Replace(Constants.ArgumentD365, ""), kvc);
                     }
                     else if (item.StartsWith(Constants.ArgumentDP, StringComparison.InvariantCulture))
                     {
-                        ConfigurationManager.AppSettings["DynamicsPassword"] = item.Replace(Constants.ArgumentDP, "");
+                        ConfigurationManager.AppSettings["DynamicsPassword"] = DoVault(item.Replace(Constants.ArgumentDP, ""), kvc);
                     }
                     else if (item.StartsWith(Constants.ArgumentGU, StringComparison.InvariantCulture))
                     {
-                        ConfigurationManager.AppSettings["GitUserName"] = item.Replace(Constants.ArgumentGU, "");
+                        ConfigurationManager.AppSettings["GitUserName"] = DoVault(item.Replace(Constants.ArgumentGU, ""), kvc);
                     }
                     else if (item.StartsWith(Constants.ArgumentGP, StringComparison.InvariantCulture))
                     {
-                        ConfigurationManager.AppSettings["GitPassword"] = item.Replace(Constants.ArgumentGP, "");
+                        ConfigurationManager.AppSettings["GitPassword"] = DoVault(item.Replace(Constants.ArgumentGP, ""), kvc);
                     }
                     else if (item.StartsWith(Constants.ArgumentTU, StringComparison.InvariantCulture))
                     {
-                        ConfigurationManager.AppSettings["TFSUserName"] = item.Replace(Constants.ArgumentTU, "");
+                        ConfigurationManager.AppSettings["TFSUserName"] = DoVault(item.Replace(Constants.ArgumentTU, ""), kvc);
                     }
                     else if (item.StartsWith(Constants.ArgumentTP, StringComparison.InvariantCulture))
                     {
-                        ConfigurationManager.AppSettings["TFSPassword"] = item.Replace(Constants.ArgumentTP, "");
+                        ConfigurationManager.AppSettings["TFSPassword"] = DoVault(item.Replace(Constants.ArgumentTP, ""), kvc);
                     }
                     else if (item.StartsWith(Constants.ArgumentAR, StringComparison.InvariantCulture))
                     {
@@ -81,6 +86,35 @@ namespace CrmSolution
             configurationSettings.SetRepositoryConfigurationProperties(configurationSettingsList);
 
             Singleton.RepositoryHelperInstance.TryUpdateToRepository(solutionUniqueName, committerName, committerEmail, authorEmail, mode);
+        }
+        public static string DoVault(string Name, KeyVaultClient kvc)
+        {
+            string secret = Task.Run(() => kvc.GetSecretAsync(ConfigurationManager.AppSettings["BASESECRETURI"], Name)).ConfigureAwait(false).GetAwaiter().GetResult().Value;
+            return secret;
+        }
+
+        public static async Task<string> GetToken(string authority, string resource, string scope)
+        {
+            AuthenticationResult result = null;
+            try
+            {
+                string CLIENTSECRET = ConfigurationManager.AppSettings["CLIENTSECRET"];
+                string CLIENTID = ConfigurationManager.AppSettings["CLIENTIDKEY"];
+
+                var authContext = new AuthenticationContext(authority);
+                ClientCredential clientCred = new ClientCredential(CLIENTID, CLIENTSECRET);
+                result = await authContext.AcquireTokenAsync(resource, clientCred);
+
+                if (result == null)
+                    throw new InvalidOperationException("Failed to obtain the JWT token");
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine("tracing" + ex.Message);
+            }
+
+            return result.AccessToken;
         }
     }
 }

@@ -129,7 +129,7 @@ namespace CrmSolution
         {
             get
             {
-                return ConfigurationManager.AppSettings["TFSUserName"];
+                return ConfigurationManager.AppSettings["TFSUser"];
             }
 
             set

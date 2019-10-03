@@ -11,7 +11,6 @@ namespace CrmSolution
     using System;
     using System.Configuration;
     using Microsoft.Azure.KeyVault;
-    using Microsoft.Azure.KeyVault.Models;
     using Microsoft.IdentityModel.Clients.ActiveDirectory;
     using System.Threading.Tasks;
 

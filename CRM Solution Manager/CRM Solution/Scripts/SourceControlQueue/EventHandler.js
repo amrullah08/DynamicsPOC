@@ -164,7 +164,7 @@ SYED.SourceControlQueue.EventHandler =
                         req.onreadystatechange = null;
                         if (this.status === 200) {
                             var results = JSON.parse(this.response);
-                            formContext.getAttribute("syed_status").setValue("Queued");
+                           // formContext.getAttribute("syed_status").setValue("Queued");
                             SYED.SourceControlQueue.EventHandler.SavePage(executionContext);
                         } else {
                             Xrm.Utility.alertDialog(this.statusText);
@@ -200,7 +200,7 @@ SYED.SourceControlQueue.EventHandler =
                             if (results.entities.length > 0) {
                                 for (var i = 0; i < results.entities.length; i++) {
                                     var syed_solutionoptions = results.entities[i]["syed_solutionoptions"];
-                                    if (syed_solutionoptions == "433710001" || syed_solutionoptions == "433710002") {
+                                    if (syed_solutionoptions == "433710001" || syed_solutionoptions == "433710002" || syed_solutionoptions == "433710000") {
                                         SYED.SourceControlQueue.EventHandler.CallAction(executionContext, sourceControlQueueId.toLocaleString());
                                     }
                                     else {

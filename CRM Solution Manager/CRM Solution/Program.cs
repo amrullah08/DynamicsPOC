@@ -11,7 +11,6 @@ namespace CrmSolution
     using System;
     using System.Configuration;
     using Microsoft.Azure.KeyVault;
-    using Microsoft.Azure.KeyVault.Models;
     using Microsoft.IdentityModel.Clients.ActiveDirectory;
     using System.Threading.Tasks;
 
@@ -35,15 +34,15 @@ namespace CrmSolution
                 {
                     if (item.StartsWith(Constants.ArgumentDU, StringComparison.InvariantCulture))
                     {
-                        ConfigurationManager.AppSettings["DynamicsUserName"] = DoVault(item.Replace(Constants.ArgumentDU, ""), kvc);
+                        ConfigurationManager.AppSettings["CRMSourceUserName"] = DoVault(item.Replace(Constants.ArgumentDU, ""), kvc);
                     }
                     else if (item.StartsWith(Constants.ArgumentD365, StringComparison.InvariantCulture))
                     {
-                        ConfigurationManager.AppSettings["OrgServiceUrl"] = DoVault(item.Replace(Constants.ArgumentD365, ""), kvc);
+                        ConfigurationManager.AppSettings["CRMSourceInstanceUrl"] = DoVault(item.Replace(Constants.ArgumentD365, ""), kvc);
                     }
                     else if (item.StartsWith(Constants.ArgumentDP, StringComparison.InvariantCulture))
                     {
-                        ConfigurationManager.AppSettings["DynamicsPassword"] = DoVault(item.Replace(Constants.ArgumentDP, ""), kvc);
+                        ConfigurationManager.AppSettings["CRMSourcePassword"] = DoVault(item.Replace(Constants.ArgumentDP, ""), kvc);
                     }
                     else if (item.StartsWith(Constants.ArgumentGU, StringComparison.InvariantCulture))
                     {
@@ -55,7 +54,7 @@ namespace CrmSolution
                     }
                     else if (item.StartsWith(Constants.ArgumentTU, StringComparison.InvariantCulture))
                     {
-                        ConfigurationManager.AppSettings["TFSUserName"] = DoVault(item.Replace(Constants.ArgumentTU, ""), kvc);
+                        ConfigurationManager.AppSettings["TFSUser"] = DoVault(item.Replace(Constants.ArgumentTU, ""), kvc);
                     }
                     else if (item.StartsWith(Constants.ArgumentTP, StringComparison.InvariantCulture))
                     {
@@ -98,8 +97,8 @@ namespace CrmSolution
             AuthenticationResult result = null;
             try
             {
-                string CLIENTSECRET = ConfigurationManager.AppSettings["CLIENTSECRET"];
-                string CLIENTID = ConfigurationManager.AppSettings["CLIENTIDKEY"];
+                string CLIENTSECRET = ConfigurationManager.AppSettings["ClientApplicationSecret"];
+                string CLIENTID = ConfigurationManager.AppSettings["SolutionCheckerAppClientId"];
 
                 var authContext = new AuthenticationContext(authority);
                 ClientCredential clientCred = new ClientCredential(CLIENTID, CLIENTSECRET);

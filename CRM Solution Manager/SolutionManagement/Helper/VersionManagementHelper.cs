@@ -45,31 +45,82 @@ namespace SolutionManagement
         {
         }
 
+        public void UpdateVersionNumber(syed_solutiondetail syed_Solutiondetail, Guid solId)
+        {
+            string versionNumber = string.Empty;
+            int increasedVersion = 0;
+            string parentSolutionName = string.Empty;
+            List<int> versionUpdate = null;
+            Solution solution = CrmService.Retrieve(Solution.EntityLogicalName, solId, new ColumnSet(true)).ToEntity<Solution>();
+
+            if (solution != null)
+            {
+                versionUpdate = solution.Version.Split('.').Select(int.Parse).ToList();
+                parentSolutionName = solution.UniqueName;
+            }
+            if (versionUpdate.Count > 0)
+            {
+                versionNumber = string.Empty;
+                for (int version = 1; version <= 4; version++)
+                {
+                    if (version == 4)
+                    {
+                        if (versionUpdate.Count == 2)
+                        {
+                            versionNumber = versionNumber + "1";
+                        }
+                        else
+                        {
+                            increasedVersion = versionUpdate[version - 1] + 1;
+                            versionNumber = versionNumber + increasedVersion.ToString();
+                        }
+                    }
+                    else if (version == 2 || version == 3)
+                    {
+                        if (versionUpdate.Count == 2)
+                        {
+                            versionNumber = versionNumber + "0" + ".";
+                        }
+                        else
+                        {
+                            versionNumber = versionNumber + versionUpdate[version - 1].ToString() + ".";
+                        }
+                    }
+                    else
+                    {
+                        versionNumber = versionNumber + versionUpdate[version - 1].ToString() + ".";
+                    }
+                }
+            }
+
+            if (syed_Solutiondetail.syed_NewVersion != null && syed_Solutiondetail.syed_NewVersion != string.Empty)
+            {
+                solution.Version = syed_Solutiondetail.syed_NewVersion;
+                syed_Solutiondetail.syed_NewVersion = versionNumber;
+            }
+            else
+            {
+                solution.Version = versionNumber;
+                syed_Solutiondetail.syed_NewVersion = versionNumber;
+            }
+            CrmService.Update(solution);
+            CrmService.Update(syed_Solutiondetail);
+            syed_mastersolutions syed_Mastersolutions = CrmService.Retrieve(syed_mastersolutions.EntityLogicalName.ToString(), syed_Solutiondetail.syed_CRMSolutionsId.Id, new ColumnSet(true)).ToEntity<syed_mastersolutions>();
+            ExecuteOperations.UpdateMasterSolution(CrmService, solution, syed_Mastersolutions);
+            WebJobsLog.AppendLine("Version Updated - sucessfully " + syed_Solutiondetail.syed_ListofSolutions);
+            UpdateExceptionDetails(syed_Solutiondetail.syed_ListofSolutionId.Id.ToString(), WebJobsLog.ToString(), "Queued");
+        }
         public void ValidateVersionMemberForClone(syed_solutiondetail syed_Solutiondetail, Guid solId)
         {
             string versionNumber = string.Empty;
             int increasedVersion = 0;
             string parentSolutionName = string.Empty;
             List<int> versionUpdate = null;
-            EntityCollection verionCollection = SolutionHelper.RetrieveSolutionById(CrmService, solId, CrmTracingService);
-            if (verionCollection != null && verionCollection.Entities.Count > 0)
+            Solution solution = CrmService.Retrieve(Solution.EntityLogicalName, solId, new ColumnSet(true)).ToEntity<Solution>();
+            if (solution != null)
             {
-                foreach (Solution sol in verionCollection.Entities)
-                {
-                    versionUpdate = sol.Version.Split('.').Select(int.Parse).ToList();
-                    parentSolutionName = sol.UniqueName;
-                    break;
-                }
-            }
-            else
-            {
-                EntityCollection solutionCollection = SolutionHelper.RetrieveSolutionById(CrmService, solId, CrmTracingService);
-                foreach (Solution sol in solutionCollection.Entities)
-                {
-                    versionUpdate = sol.Version.Split('.').Select(int.Parse).ToList();
-                    parentSolutionName = sol.UniqueName;
-                    break;
-                }
+                versionUpdate = solution.Version.Split('.').Select(int.Parse).ToList();
+                parentSolutionName = solution.UniqueName;
             }
 
             if (versionUpdate.Count > 0)
@@ -131,7 +182,6 @@ namespace SolutionManagement
                 versionNumber = string.Empty;
                 for (int version = 1; version <= 4; version++)
                 {
-
                     if (version == 3)
                     {
                         if (versionUpdate.Count == 2)
@@ -195,8 +245,8 @@ namespace SolutionManagement
                     EntityCollection solutionCollection = SolutionHelper.RetrieveSolutionById(CrmService, cloneAsSolutionResponse.SolutionId, CrmTracingService);
                     foreach (Solution sol in solutionCollection.Entities)
                     {
-                        Guid id = ExecuteOperations.CreateMasterSolution(CrmService, sol);
-                        syed_mastersolutions syed_Mastersolutions = CrmService.Retrieve(syed_mastersolutions.EntityLogicalName.ToString(), id, new ColumnSet(true)).ToEntity<syed_mastersolutions>();
+                        syed_mastersolutions syed_Mastersolutions = CrmService.Retrieve(syed_mastersolutions.EntityLogicalName.ToString(), syed_Solutiondetail.syed_CRMSolutionsId.Id, new ColumnSet(true)).ToEntity<syed_mastersolutions>();
+                        ExecuteOperations.UpdateMasterSolution(CrmService, sol, syed_Mastersolutions);
                         ExecuteOperations.UpdateSolutionDetail(CrmService, syed_Mastersolutions, syed_Solutiondetail);
                         break;
                     }
@@ -278,21 +328,21 @@ namespace SolutionManagement
                 {
 
                     syed_mastersolutions crmSolution = CrmService.Retrieve(syed_mastersolutions.EntityLogicalName, syed_Solutiondetail.syed_CRMSolutionsId.Id, new ColumnSet("syed_solutionid")).ToEntity<syed_mastersolutions>();
-                    if (syed_Solutiondetail.syed_SolutionOptions.Value == 433710001)
+                    if (crmSolution != null)
                     {
-                        if (crmSolution != null)
+                        if (syed_Solutiondetail.syed_SolutionOptions.Value == 433710001)
                         {
                             this.ValidateVersionMember(syed_Solutiondetail, new Guid(crmSolution.syed_SolutionId));
                         }
-                    }
-                    else if (syed_Solutiondetail.syed_SolutionOptions.Value == 433710002)
-                    {
-                        if (crmSolution != null)
+                        else if (syed_Solutiondetail.syed_SolutionOptions.Value == 433710002)
                         {
                             this.ValidateVersionMemberForClone(syed_Solutiondetail, new Guid(crmSolution.syed_SolutionId));
                         }
+                        else if (syed_Solutiondetail.syed_SolutionOptions.Value == 433710000)
+                        {
+                            this.UpdateVersionNumber(syed_Solutiondetail, new Guid(crmSolution.syed_SolutionId));
+                        }
                     }
-
                 }
             }
             catch (Exception ex)

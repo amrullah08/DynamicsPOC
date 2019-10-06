@@ -72,7 +72,7 @@ namespace CrmSolution
         {
             get
             {
-                return ConfigurationManager.AppSettings["OrgServiceUrl"];
+                return ConfigurationManager.AppSettings["CRMSourceInstanceUrl"];
             }
         }
 
@@ -83,7 +83,7 @@ namespace CrmSolution
         {
             get
             {
-                return ConfigurationManager.AppSettings["DynamicsUserName"];
+                return ConfigurationManager.AppSettings["CRMSourceUserName"];
             }
         }
 
@@ -94,7 +94,7 @@ namespace CrmSolution
         {
             get
             {
-                return ConfigurationManager.AppSettings["DynamicsPassword"];
+                return ConfigurationManager.AppSettings["CRMSourcePassword"];
             }
         }
 

@@ -205,8 +205,10 @@ namespace GitDeploy
         /// <param name="fileUnmanaged">unmanaged file</param>
         /// <param name="fileManaged">managed file</param>
         /// <param name="webResources">Web Resources</param>
-        /// <param name="multilpleSolutionsImportPSPathVirtual">Powershell scripts</param>
-        /// <param name="solutionToBeImportedPSPathVirtual">Powershell scripts</param>
+        /// <param name="multilpleSolutionsImportPSPathVirtual">PowerShell scripts</param>
+        /// <param name="solutionToBeImportedPSPathVirtual">PowerShell scripts for Import</param>
+        /// <param name="solutionCheckerPath">Solution Checker Path</param>
+        /// <param name="timeTriggerPath">Time Trigger Path</param>
         public void CommitFilesToGitHub(SolutionFileInfo solutionFileInfo, string solutionFilePath, string fileUnmanaged, string fileManaged, string webResources, string multilpleSolutionsImportPSPathVirtual, string solutionToBeImportedPSPathVirtual, string solutionCheckerPath, string timeTriggerPath)
         {
             try
@@ -218,6 +220,7 @@ namespace GitDeploy
                         this.AddRepositoryIndexes(fileUnmanaged, repo);
                         this.AddRepositoryIndexes(fileManaged, repo);
                     }
+
                     this.AddWebResourcesToRepository(webResources, repo);
                     //// todo: add extracted solution files to repository
                     this.AddExtractedSolutionToRepository(solutionFileInfo, repo);
@@ -253,7 +256,7 @@ namespace GitDeploy
                         commitIds = string.Empty;
                     }
 
-                    commitIds += string.Format("Commit Info <br/><a href='{0}/commit/{1}'>{2}</a>", this.repoUrl.Replace(".git", ""), commit.Id.Sha, commit.Message);
+                    commitIds += string.Format("Commit Info <br/><a href='{0}/commit/{1}'>{2}</a>", this.repoUrl.Replace(".git", string.Empty), commit.Id.Sha, commit.Message);
                     solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForCommitIds] = commitIds;
                 }
             }
@@ -272,8 +275,8 @@ namespace GitDeploy
         /// <param name="fileUnmanaged">unmanaged file</param>
         /// <param name="fileManaged">managed file</param>
         /// <param name="webResources">Web Resources</param>
-        /// <param name="multilpleSolutionsImportPSPathVirtual">Powershell scripts</param>
-        /// <param name="solutionToBeImportedPSPathVirtual">Powershell scripts</param>
+        /// <param name="multilpleSolutionsImportPSPathVirtual">PowerShell scripts</param>
+        /// <param name="solutionToBeImportedPSPathVirtual">PowerShell scripts for Import</param>
         public void CommitFilesToTFS(SolutionFileInfo solutionFileInfo, string solutionFilePath, string fileUnmanaged, string fileManaged, string webResources, string multilpleSolutionsImportPSPathVirtual, string solutionToBeImportedPSPathVirtual)
         {
             try
@@ -305,15 +308,12 @@ namespace GitDeploy
                 this.workspace.DeleteMapping(workfolder);
                 this.workspace.Delete();
                 Console.WriteLine("After CheckIn workspace deleted");
-
                 solutionFileInfo.Update();
                 solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushToRepositorySuccessStatus;
                 solutionFileInfo.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
-
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + "Successfully Pushed files to TFS" + "<br>");
                 Console.WriteLine("Successfully Pushed files to TFS");
                 Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(Singleton.CrmConstantsInstance.ServiceProxy, solutionFileInfo.Solution);
-
             }
             catch (Exception ex)
             {
@@ -322,8 +322,8 @@ namespace GitDeploy
                 bool folderExists = Directory.Exists(this.localFolder.FullName);
                 if (folderExists)
                 {
-                    var fList = Directory.GetFiles(this.localFolder.FullName, "*.*", SearchOption.AllDirectories);
-                    foreach (var f in fList)
+                    var fileList = Directory.GetFiles(this.localFolder.FullName, "*.*", SearchOption.AllDirectories);
+                    foreach (var f in fileList)
                     {
                         File.Delete(f);
                     }
@@ -342,6 +342,8 @@ namespace GitDeploy
         /// <param name="solutionFileInfo">solution file info</param>
         /// <param name="solutionFilePath">release solution list file</param>
         /// <param name="hashSet">Hash set</param>
+        /// <param name="solutionCheckerPath">Solution Checker Path</param>
+        /// <param name="timeTriggerPath">Time Trigger Path</param>
         public void CommitAllChanges(SolutionFileInfo solutionFileInfo, string solutionFilePath, HashSet<string> hashSet, string solutionCheckerPath, string timeTriggerPath)
         {
             try
@@ -375,6 +377,7 @@ namespace GitDeploy
                         Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy unmanaged" + "<br>");
                         File.Copy(solutionFileInfo.SolutionFilePath, fileUnmanaged, true);
                     }
+
                     this.CommitFilesToGitHub(solutionFileInfo, solutionFilePath, fileUnmanaged, fileManaged, webResources, multilpleSolutionsImportPSPathVirtual, solutionToBeImportedPSPathVirtual, solutionCheckerPath, timeTriggerPath);
                 }
                 else
@@ -406,10 +409,10 @@ namespace GitDeploy
                             {
                                 tw.WriteLine(item);
                             }
+
                             tw.Close();
                         }
                     }
-
                     else
                     {
                         File.Create(solutionFilePath);
@@ -485,6 +488,7 @@ namespace GitDeploy
                         File.Copy(solutionToBeImportedPSPath, solutionToBeImportedPSPathVirtual, true);
                         this.workspace.PendAdd(solutionToBeImportedPSPathVirtual, true);
                     }
+
                     this.CommitFilesToTFS(solutionFileInfo, solutionFilePath, fileUnmanaged, fileManaged, webResources, multilpleSolutionsImportPSPathVirtual, solutionToBeImportedPSPathVirtual);
                 }
             }
@@ -550,13 +554,15 @@ namespace GitDeploy
 
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + "Pushed changes" + "<br>");
                 Console.WriteLine("Pushed changes");
-
             }
         }
 
         /// <summary>
-        /// Method updates repository
+        /// Commits for TFS
         /// </summary>
+        /// <param name="solutionFileInfo">solution file info</param>
+        /// <param name="solutionFilePath">release solution list file</param>
+        /// <param name="hashSet">Hash set</param>
         public void ConnectTFSMap(SolutionFileInfo solutionFileInfo, string solutionFilePath, HashSet<string> hashSet)
         {
             try
@@ -576,7 +582,6 @@ namespace GitDeploy
                 this.versionControl.Getting += GitRepositoryManager.OnGetting;
                 this.versionControl.BeforeCheckinPendingChange += GitRepositoryManager.OnBeforeCheckinPendingChange;
                 this.versionControl.NewPendingChange += GitRepositoryManager.OnNewPendingChange;
-
                 this.workspace = this.versionControl.TryGetWorkspace(this.localFolder.FullName);
                 if (this.workspace != null)
                 {
@@ -586,31 +591,26 @@ namespace GitDeploy
                         this.workspace.Undo(this.localFolder.FullName, RecursionType.Full);
                         this.workspace.DeleteMapping(workfolderToDelete);
                     }
+
                     this.workspace.Delete();
                     Console.WriteLine("deleted workspace;");
                     Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" <br/> deleted workspace;");
                 }
 
-
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" <br/>" + this.versionControl.AuthorizedUser);
-
                 Console.WriteLine("workspace create");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("workspace create <br/>");
                 CreateWorkspaceParameters parameters = new CreateWorkspaceParameters(Guid.NewGuid().ToString());
                 parameters.Location = WorkspaceLocation.Server;
-
                 this.workspace = this.versionControl.CreateWorkspace(parameters);
                 Console.WriteLine(" workspace created;");
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("workspace created <br/>");
                 WorkingFolder workfolder = new WorkingFolder(this.branchName, this.localFolder.FullName);
-                // Create a mapping using the Team Project supplied on the command line.
+                //// Create a mapping using the Team Project supplied on the command line.
                 this.workspace.CreateMapping(workfolder);
-
                 Console.WriteLine("Completed: Map;");
-
-                // Get the files from the repository.
+                //// Get the files from the repository.
                 GetRequest request = new GetRequest(new ItemSpec(this.localFolder.FullName, RecursionType.Full), VersionSpec.Latest);
-
                 this.workspace.Get();
                 Console.WriteLine("Got Files");
                 Console.WriteLine("Completed: Files Mapped ");

@@ -14,11 +14,11 @@ namespace CrmSolution
     /// </summary>
     public class Constants
     {
-
         /// <summary>
         ///  arguments for AR
         /// </summary>
         public const string ArgumentAR = "AR=";
+
         /// <summary>
         ///  arguments for TP
         /// </summary>
@@ -28,7 +28,7 @@ namespace CrmSolution
         ///  arguments for TU
         /// </summary>
         public const string ArgumentTU = "TU=";
-              
+
         /// <summary>
         ///  arguments for GP
         /// </summary>
@@ -136,16 +136,16 @@ namespace CrmSolution
 
         /// <summary>
         /// Value for Source Control for GIT
-               /// </summary>
+        /// </summary>
         public const int SourceControlGitHub = 433710000;
 
         /// <summary>
-        /// Value for Source Control for Azure Dev-Ops Server (TFS)
+        /// Value for Source Control for TFS
         /// </summary>
         public const int SourceControlAzureDevOpsServer = 433710001;
 
         /// <summary>
-        /// Value for Source Control for Azure Dev-Ops
+        /// Value for Source Control for GIT
         /// </summary>
         public const int SourceControlAzureDevOps = 433710002;
 
@@ -230,22 +230,22 @@ namespace CrmSolution
         public const string SolutionPackagerPath = "SolutionPackagerPath";
 
         /// <summary>
-        ///  solution text file path for Checkin
+        ///  solution text file path for Check in
         /// </summary>
         public const string SolutionTextPath = "SolutionFile";
 
         /// <summary>
-        ///  solution text file path for Checkin
+        ///  solution text file path for Release
         /// </summary>
         public const string SolutionTextPathForRelease = "SolutionFileRelease";
 
         /// <summary>
-        ///  solution text file path for Checkin
+        ///  Config file path for solution checker
         /// </summary>
         public const string SolutionCheckerPath = "SoulutionCheckerConfigFile";
 
         /// <summary>
-        ///  solution text file path for Checkin
+        ///  Trigger text file path for Check in
         /// </summary>
         public const string TimeTriggerPath = "TriggerFile";
 

@@ -96,6 +96,7 @@ namespace CrmSolution
         /// <param name="committerName">committer name</param>
         /// <param name="committerEmail">committer email</param>
         /// <param name="authorEmail">author email</param>
+        /// <param name="mode">mode for flow</param>
         public void TryUpdateToRepository(string solutionUniqueName, string committerName, string committerEmail, string authorEmail, string mode)
         {
             try
@@ -254,12 +255,12 @@ namespace CrmSolution
                     solutionFilePath = Singleton.RepositoryConfigurationConstantsInstance.SolutionTextRelease;
                     solutionCheckerPath = Singleton.RepositoryConfigurationConstantsInstance.SolutionCheckerPath;
                     timeTriggerPath = Singleton.RepositoryConfigurationConstantsInstance.TimeTriggerPath;
-
                     if (solutionFile.SolutionsTxt == 433710000 && File.Exists(solutionFilePath))
                     {
                         File.WriteAllText(solutionCheckerPath, string.Empty);
                         File.WriteAllText(timeTriggerPath, string.Empty);
                     }
+
                     File.WriteAllText(solutionCheckerPath, solutionFile.Solution.Id.ToString());
                     File.WriteAllText(timeTriggerPath, DateTime.Now.ToString("dddd, dd MMMM yyyy HH:mm:ss"));
                 }
@@ -279,13 +280,11 @@ namespace CrmSolution
                 {
                     hashSet.Add(solutionFile.SolutionFileZipName);
                 }
-                this.SaveHashSet(solutionFilePath, hashSet);
 
-                gitRepositoryManager.CommitAllChanges(solutionFile, solutionFilePath, null, solutionCheckerPath,timeTriggerPath);
+                this.SaveHashSet(solutionFilePath, hashSet);
+                gitRepositoryManager.CommitAllChanges(solutionFile, solutionFilePath, null, solutionCheckerPath, timeTriggerPath);
                 gitRepositoryManager.PushCommits();
             }
-
-
 
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushToRepositorySuccessStatus;
             solutionFile.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();

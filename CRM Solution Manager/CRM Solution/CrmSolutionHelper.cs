@@ -115,6 +115,7 @@ namespace CrmSolution
         /// Method downloads unique solution name
         /// </summary>
         /// <param name="solutionUnqiueName">unique solution name</param>
+        /// <param name="mode">mode of the flow</param>
         /// <returns>returns list of solution file info</returns>
         public List<SolutionFileInfo> DownloadSolutionFile(string solutionUnqiueName, string mode)
         {
@@ -284,7 +285,7 @@ namespace CrmSolution
             ExecuteAsyncResponse importRequestResponse = (ExecuteAsyncResponse)serviceProxy.Execute(importRequest);
 
             string solutionImportResult = string.Empty;
-            while (String.IsNullOrEmpty(solutionImportResult))
+            while (string.IsNullOrEmpty(solutionImportResult))
             {
                 Guid asyncJobId = importRequestResponse.AsyncJobId;
                 Entity job = (Entity)serviceProxy.Retrieve("asyncoperation", asyncJobId, new ColumnSet(new string[] { "asyncoperationid", "statuscode", "message" }));
@@ -535,6 +536,7 @@ namespace CrmSolution
                     {
                         instance.Attributes["syed_password"] = "Reset_Password";
                     }
+
                     checkDependency = (bool)instance.Attributes["syed_checkdependency"];
                     import = (bool)instance.Attributes["syed_import"];
                     serviceProxy.Update(instance);
@@ -619,12 +621,12 @@ namespace CrmSolution
         /// <returns> Decrypted string </returns>
         private string DecryptString(string encryptString)
         {
-            string EncryptionKey = Constants.EncryptionKey;
+            string encryptionKey = Constants.EncryptionKey;
             encryptString = encryptString.Replace(" ", "+");
             byte[] cipherBytes = Convert.FromBase64String(encryptString);
             using (Aes encryptor = Aes.Create())
             {
-                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(encryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
                 encryptor.Key = pdb.GetBytes(32);
                 encryptor.IV = pdb.GetBytes(16);
                 using (MemoryStream ms = new MemoryStream())
@@ -634,9 +636,11 @@ namespace CrmSolution
                         cs.Write(cipherBytes, 0, cipherBytes.Length);
                         cs.Close();
                     }
+
                     encryptString = Encoding.Unicode.GetString(ms.ToArray());
                 }
             }
+
             return encryptString;
         }
 

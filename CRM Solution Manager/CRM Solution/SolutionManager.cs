@@ -181,7 +181,6 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
 
                 Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
             }
-
         }
 
         /// <summary>
@@ -244,7 +243,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedAttribute = (RetrieveAttributeResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(attributeReq);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedAttribute.AttributeMetadata.LogicalName, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedAttribute.AttributeMetadata.LogicalName, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -262,7 +261,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedrelationshipReq = (RetrieveRelationshipResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(relationshipReq);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedrelationshipReq.RelationshipMetadata.SchemaName, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedrelationshipReq.RelationshipMetadata.SchemaName, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -280,7 +279,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedDisplayString = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(displayStringRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedDisplayString.Entity.Contains("name") ? retrievedDisplayString.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedDisplayString.Entity.Contains("name") ? retrievedDisplayString.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -296,7 +295,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedSavedQuery = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(savedQueryRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedSavedQuery.Entity.Contains("name") ? retrievedSavedQuery.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedSavedQuery.Entity.Contains("name") ? retrievedSavedQuery.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -312,7 +311,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedSavedQueryVisualization = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(savedQueryVisualizationRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedSavedQueryVisualization.Entity.Contains("name") ? retrievedSavedQueryVisualization.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedSavedQueryVisualization.Entity.Contains("name") ? retrievedSavedQueryVisualization.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -328,7 +327,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedSystemForm = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(systemFormRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedSystemForm.Entity.Contains("name") ? retrievedSystemForm.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedSystemForm.Entity.Contains("name") ? retrievedSystemForm.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -344,7 +343,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedHierarchyRule = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(hierarchyRuleRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedHierarchyRule.Entity.Contains("name") ? retrievedHierarchyRule.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedHierarchyRule.Entity.Contains("name") ? retrievedHierarchyRule.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -360,7 +359,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedSiteMap = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(siteMapRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedSiteMap.Entity.Contains("name") ? retrievedSiteMap.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedSiteMap.Entity.Contains("name") ? retrievedSiteMap.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -376,7 +375,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedPluginAssembly = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(pluginAssemblyRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedPluginAssembly.Entity.Contains("name") ? retrievedPluginAssembly.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedPluginAssembly.Entity.Contains("name") ? retrievedPluginAssembly.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -392,7 +391,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedPluginTypeRequest = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(pluginTypeRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedPluginTypeRequest.Entity.Contains("name") ? retrievedPluginTypeRequest.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedPluginTypeRequest.Entity.Contains("name") ? retrievedPluginTypeRequest.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -408,7 +407,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedSDKMessageProcessingStep = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(sdkMessageProcessingStepRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedSDKMessageProcessingStep.Entity.Contains("name") ? retrievedSDKMessageProcessingStep.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedSDKMessageProcessingStep.Entity.Contains("name") ? retrievedSDKMessageProcessingStep.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -424,7 +423,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedServiceEndpoint = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(serviceEndpointRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedServiceEndpoint.Entity.Contains("name") ? retrievedServiceEndpoint.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedServiceEndpoint.Entity.Contains("name") ? retrievedServiceEndpoint.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -440,7 +439,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedReport = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(reportRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedReport.Entity.Contains("name") ? retrievedReport.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedReport.Entity.Contains("name") ? retrievedReport.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -456,7 +455,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedRole = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(roleRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedRole.Entity.Contains("name") ? retrievedRole.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedRole.Entity.Contains("name") ? retrievedRole.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -472,7 +471,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedFieldSecurityProfile = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(fieldSecurityProfileRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedFieldSecurityProfile.Entity.Contains("name") ? retrievedFieldSecurityProfile.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedFieldSecurityProfile.Entity.Contains("name") ? retrievedFieldSecurityProfile.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -488,7 +487,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedConnectionRole = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(connectionRoleRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedConnectionRole.Entity.Contains("name") ? retrievedConnectionRole.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedConnectionRole.Entity.Contains("name") ? retrievedConnectionRole.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -504,7 +503,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedWorkflow = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(workflowRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedWorkflow.Entity.Contains("name") ? retrievedWorkflow.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedWorkflow.Entity.Contains("name") ? retrievedWorkflow.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -520,7 +519,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedKBArticleTemplate = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(articleTemplateRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedKBArticleTemplate.Entity.Contains("name") ? retrievedKBArticleTemplate.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedKBArticleTemplate.Entity.Contains("name") ? retrievedKBArticleTemplate.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -536,7 +535,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedMailMergeTemplate = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(mailMergeTemplateRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedMailMergeTemplate.Entity.Contains("name") ? retrievedMailMergeTemplate.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedMailMergeTemplate.Entity.Contains("name") ? retrievedMailMergeTemplate.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -552,7 +551,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedContractTemplate = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(contractTemplateRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedContractTemplate.Entity.Contains("name") ? retrievedContractTemplate.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedContractTemplate.Entity.Contains("name") ? retrievedContractTemplate.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {
@@ -568,7 +567,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     var retrievedEmailTemplate = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(emailTemplateRequest);
                     if (targetService == null)
                     {
-                        this.PrintLog(retrievedEmailTemplate.Entity.Contains("name") ? retrievedEmailTemplate.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails].ToString(), component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
+                        this.PrintLog(retrievedEmailTemplate.Entity.Contains("name") ? retrievedEmailTemplate.Entity.Attributes["name"].ToString() : string.Empty, component.FormattedValues[componentDetails], component.Id, sourceSolution?.Attributes["friendlyname"].ToString() ?? string.Empty, target?.Attributes["friendlyname"].ToString());
                     }
                     else
                     {

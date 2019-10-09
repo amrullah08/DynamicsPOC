@@ -162,7 +162,12 @@ namespace SolutionManagement
                 foreach (Solution sol in verionCollection.Entities)
                 {
                     versionUpdate = sol.Version.Split('.').Select(int.Parse).ToList();
-                    parentSolutionName = sol.ParentSolutionId.Name;
+                    EntityCollection solutionCollection = SolutionHelper.RetrieveSolutionById(CrmService, sol.ParentSolutionId.Id, CrmTracingService);
+                    foreach (Solution solution in solutionCollection.Entities)
+                    {
+                        parentSolutionName = solution.UniqueName;
+                        break;
+                    }
                     break;
                 }
             }
@@ -184,7 +189,7 @@ namespace SolutionManagement
                 {
                     if (version == 3)
                     {
-                        if (versionUpdate.Count == 2)
+                        if (versionUpdate.Count < version)
                         {
                             versionNumber = versionNumber + "1" + ".";
                         }
@@ -196,7 +201,7 @@ namespace SolutionManagement
                     }
                     else if (version == 4)
                     {
-                        if (versionUpdate.Count == 2)
+                        if (versionUpdate.Count < version)
                         {
                             versionNumber = versionNumber + "0";
                         }
@@ -207,7 +212,15 @@ namespace SolutionManagement
                     }
                     else if (version == 2 || version == 1)
                     {
-                        versionNumber = versionNumber + versionUpdate[version - 1].ToString() + ".";
+
+                        if (versionUpdate.Count < version)
+                        {
+                            versionNumber = versionNumber + "0" + ".";
+                        }
+                        else
+                        {
+                            versionNumber = versionNumber + versionUpdate[version - 1].ToString() + ".";
+                        }
                     }
                 }
             }
@@ -241,7 +254,6 @@ namespace SolutionManagement
                         cloneAsSolutionRequest.VersionNumber = versionNumber;
                     }
                     CloneAsSolutionResponse cloneAsSolutionResponse = (CloneAsSolutionResponse)CrmService.Execute(cloneAsSolutionRequest);
-                    syed_Solutiondetail.syed_CRMSolutionsId = new EntityReference(syed_mastersolutions.EntityLogicalName, cloneAsSolutionResponse.SolutionId);
                     EntityCollection solutionCollection = SolutionHelper.RetrieveSolutionById(CrmService, cloneAsSolutionResponse.SolutionId, CrmTracingService);
                     foreach (Solution sol in solutionCollection.Entities)
                     {

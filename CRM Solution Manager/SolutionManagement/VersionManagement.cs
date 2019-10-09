@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿//-----------------------------------------------------------------------
+// <copyright file="VersionManagement.cs" company="Microsoft">
+//     Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+// <author>Jaiyanthi</author>
+//-----------------------------------------------------------------------
 
 namespace SolutionManagement
 {
-
     using System;
     using Microsoft.Xrm.Sdk;
-    using SolutionConstants;
 
     /// <summary>
     /// Class that assist in Version Management

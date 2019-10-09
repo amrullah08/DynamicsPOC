@@ -38,12 +38,13 @@ namespace SolutionManagement
             Guid id = service.Create(masterSolutionUpdate);
             return id;
         }
+
         /// <summary>
         /// Method creates Custom entity CRM Solution Record
         /// </summary>
         /// <param name="service">Organization service</param>
         /// <param name="solution">CRM Solution</param>
-        /// <returns>returns GUID of newly created Custom entity CRM Solution</returns>
+        /// <param name="syed_Mastersolutions">Custom CRM Solution</param>
         public static void UpdateMasterSolution(IOrganizationService service, Solution solution, syed_mastersolutions syed_Mastersolutions)
         {
             syed_mastersolutions masterSolutionUpdate = new syed_mastersolutions();

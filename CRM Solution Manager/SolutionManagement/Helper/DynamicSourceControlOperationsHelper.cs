@@ -36,28 +36,28 @@ namespace SolutionManagement
         /// <param name="tracingService">Tracing Service to trace error</param>
         public static void CreateSolutionDetail(IOrganizationService service, syed_sourcecontrolqueue sourceControlQueue, ITracingService tracingService)
         {
-            //Copy feilds from Template Record.
+            ////Copy feilds from Template Record.
             EntityCollection copyDynamicsTemplate = SolutionHelper.RetrieveDynamicsSourceControlTemplate(service, tracingService);
             foreach (syed_sourcecontrolqueue syed_Sourcecontrolqueue in copyDynamicsTemplate.Entities)
             {
-                syed_sourcecontrolqueue _sourcecontrolqueue = new syed_sourcecontrolqueue();
-                _sourcecontrolqueue.syed_Branch = syed_Sourcecontrolqueue.syed_Branch;
-                _sourcecontrolqueue.syed_RemoteName = syed_Sourcecontrolqueue.syed_RemoteName;
-                _sourcecontrolqueue.syed_RepositoryUrl = syed_Sourcecontrolqueue.syed_RepositoryUrl;
-                _sourcecontrolqueue.syed_SourceControl = syed_Sourcecontrolqueue.syed_SourceControl;
-                _sourcecontrolqueue.Id = sourceControlQueue.Id;
-                _sourcecontrolqueue.syed_IsShedulled = syed_Sourcecontrolqueue.syed_IsShedulled;
-                _sourcecontrolqueue.syed_overwritesolutionstxt = syed_Sourcecontrolqueue.syed_overwritesolutionstxt;
-                _sourcecontrolqueue.syed_RepositoryHtmlDirectory = syed_Sourcecontrolqueue.syed_RepositoryHtmlDirectory;
-                _sourcecontrolqueue.syed_RepositoryImagesDirectory = syed_Sourcecontrolqueue.syed_RepositoryImagesDirectory;
-                _sourcecontrolqueue.syed_RepositoryJsFolder = syed_Sourcecontrolqueue.syed_RepositoryJsFolder;
-                _sourcecontrolqueue.syed_RepositorySolutionFolder = syed_Sourcecontrolqueue.syed_RepositorySolutionFolder;
+                syed_sourcecontrolqueue sourcecontrolqueue = new syed_sourcecontrolqueue();
+                sourcecontrolqueue.syed_Branch = syed_Sourcecontrolqueue.syed_Branch;
+                sourcecontrolqueue.syed_RemoteName = syed_Sourcecontrolqueue.syed_RemoteName;
+                sourcecontrolqueue.syed_RepositoryUrl = syed_Sourcecontrolqueue.syed_RepositoryUrl;
+                sourcecontrolqueue.syed_SourceControl = syed_Sourcecontrolqueue.syed_SourceControl;
+                sourcecontrolqueue.Id = sourceControlQueue.Id;
+                sourcecontrolqueue.syed_IsShedulled = syed_Sourcecontrolqueue.syed_IsShedulled;
+                sourcecontrolqueue.syed_overwritesolutionstxt = syed_Sourcecontrolqueue.syed_overwritesolutionstxt;
+                sourcecontrolqueue.syed_RepositoryHtmlDirectory = syed_Sourcecontrolqueue.syed_RepositoryHtmlDirectory;
+                sourcecontrolqueue.syed_RepositoryImagesDirectory = syed_Sourcecontrolqueue.syed_RepositoryImagesDirectory;
+                sourcecontrolqueue.syed_RepositoryJsFolder = syed_Sourcecontrolqueue.syed_RepositoryJsFolder;
+                sourcecontrolqueue.syed_RepositorySolutionFolder = syed_Sourcecontrolqueue.syed_RepositorySolutionFolder;
 
-                service.Update(_sourcecontrolqueue);
+                service.Update(sourcecontrolqueue);
                 break;
             }
 
-            //Copy Master Solution Record from Template.
+            ////Copy Master Solution Record from Template.
             EntityCollection copyTemplate = SolutionHelper.RetrieveMasterSolutionTemplate(service, tracingService);
             foreach (syed_solutiondetail solutionDetail in copyTemplate.Entities)
             {

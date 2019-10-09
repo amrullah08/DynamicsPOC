@@ -186,26 +186,26 @@ namespace SolutionManagement
                     {
                         if (versionUpdate.Count == 2)
                         {
-                            versionNumber = versionNumber + "1";
+                            versionNumber = versionNumber + "1" + ".";
                         }
                         else
                         {
                             increasedVersion = versionUpdate[version - 1] + 1;
-                            versionNumber = versionNumber + increasedVersion.ToString();
+                            versionNumber = versionNumber + increasedVersion.ToString() + ".";
                         }
                     }
-                    else if (version == 2 || version == 4)
+                    else if (version == 4)
                     {
                         if (versionUpdate.Count == 2)
                         {
-                            versionNumber = versionNumber + "0" + ".";
+                            versionNumber = versionNumber + "0";
                         }
                         else
                         {
-                            versionNumber = versionNumber + versionUpdate[version - 1].ToString() + ".";
+                            versionNumber = versionNumber + versionUpdate[version - 1].ToString();
                         }
                     }
-                    else
+                    else if (version == 2 || version == 1)
                     {
                         versionNumber = versionNumber + versionUpdate[version - 1].ToString() + ".";
                     }

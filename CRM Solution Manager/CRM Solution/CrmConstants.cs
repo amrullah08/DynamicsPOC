@@ -11,9 +11,12 @@ namespace CrmSolution
     using System.Configuration;
     using System.Net;
     using System.ServiceModel.Description;
+    using System.Threading.Tasks;
+    using Microsoft.IdentityModel.Clients.ActiveDirectory;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Client;
     using Microsoft.Xrm.Sdk.Query;
+    using Microsoft.Xrm.Sdk.WebServiceClient;
 
     /// <summary>
     /// class contains constants for dynamics
@@ -53,7 +56,7 @@ namespace CrmSolution
         /// <summary>
         /// service proxy
         /// </summary>
-        private OrganizationServiceProxy serviceProxy;
+        private IOrganizationService serviceProxy;
 
         /// <summary>
         /// power apps checker azure client app id
@@ -176,7 +179,7 @@ namespace CrmSolution
         /// <summary>
         /// Gets or sets Organization Service Proxy
         /// </summary>
-        public OrganizationServiceProxy ServiceProxy
+        public IOrganizationService ServiceProxy
         {
             get
             {
@@ -218,6 +221,8 @@ namespace CrmSolution
             }
         }
 
+
+
         /// <summary>
         /// Method returns configuration settings entity collection list
         /// </summary>
@@ -227,12 +232,44 @@ namespace CrmSolution
             this.clientCredentials = new ClientCredentials();
             this.clientCredentials.UserName.UserName = this.DynamicsUserName;
             this.clientCredentials.UserName.Password = this.DynamicsPassword;
-            this.serviceProxy = this.InitializeOrganizationService();
+
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["SolutionCheckerAppClientId"]) && !string.IsNullOrEmpty(ConfigurationManager.AppSettings["ClientApplicationSecret"]))
+            {
+                Task<string> callTask = Task.Run(() => this.AccessTokenGenerator());
+                callTask.Wait();
+                string token = callTask.Result;
+                Uri serviceUrl = new Uri(ConfigurationManager.AppSettings["CRMSourceInstanceUrl"] + @"/xrmservices/2011/organization.svc/web?SdkClientVersion=8.2");
+                OrganizationWebProxyClient sdkService = null;
+                using (sdkService = new OrganizationWebProxyClient(serviceUrl, false))
+                {
+                    sdkService.HeaderToken = token;
+                    sdkService.InnerChannel.OperationTimeout= new TimeSpan(1, 30, 0);
+                    System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                    this.serviceProxy = (IOrganizationService)sdkService != null ? (IOrganizationService)sdkService : null;
+                }
+            }
+            else
+            {
+                this.serviceProxy = this.InitializeOrganizationService();
+            }
 
             EntityCollection retrievedConfigurationSettingsList = this.RetrieveConfigurationSettings(this.serviceProxy);
-
             return retrievedConfigurationSettingsList;
         }
+
+        /// <summary>
+        /// Method generated access token to authenticate dynamics CRM
+        /// </summary>
+        /// <returns>returns access token</returns>
+        private async Task<string> AccessTokenGenerator()
+        {
+            string authority = "https://login.microsoftonline.com/" + ConfigurationManager.AppSettings["TenantId"];
+            var credentials = new ClientCredential(ConfigurationManager.AppSettings["SolutionCheckerAppClientId"], ConfigurationManager.AppSettings["ClientApplicationSecret"]);
+            var authContext = new AuthenticationContext(authority);
+            var result = await authContext.AcquireTokenAsync(ConfigurationManager.AppSettings["CRMSourceInstanceUrl"], credentials).ConfigureAwait(true);
+            return result.AccessToken;
+        }
+
 
         /// <summary>
         /// Method sets crm constant property values
@@ -278,7 +315,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <returns>returns entity collection</returns>
-        private EntityCollection RetrieveConfigurationSettings(OrganizationServiceProxy serviceProxy)
+        private EntityCollection RetrieveConfigurationSettings(IOrganizationService serviceProxy)
         {
             try
             {
@@ -307,12 +344,13 @@ namespace CrmSolution
         /// Method returns new instance of organization service
         /// </summary>
         /// <returns>returns organization service proxy</returns>
-        private OrganizationServiceProxy InitializeOrganizationService()
+        private IOrganizationService InitializeOrganizationService()
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             OrganizationServiceProxy organizationServiceProxy = new OrganizationServiceProxy(new Uri(this.OrgServiceUrl), null, this.clientCredentials, null);
-            organizationServiceProxy.Timeout = new TimeSpan(0, 30, 0);
-            return organizationServiceProxy;
+            organizationServiceProxy.Timeout = new TimeSpan(1, 30, 0);
+            IOrganizationService organizationService = (IOrganizationService)organizationServiceProxy;
+            return organizationService;
         }
     }
 }

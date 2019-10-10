@@ -193,7 +193,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
         /// <param name="componentId">component Id</param>
         /// <param name="componentDetails">component Details</param>
         /// <param name="targetService">target Instance Service</param>
-        public void GetComponentDetails(CopySettings settings, Entity target, Entity component, int componentType, Guid componentId, string componentDetails, OrganizationServiceProxy targetService)
+        public void GetComponentDetails(CopySettings settings, Entity target, Entity component, int componentType, Guid componentId, string componentDetails, IOrganizationService targetService)
         {
             Entity sourceSolution = null;
 
@@ -637,7 +637,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
         /// <param name="serviceProxy">service proxy</param>
         /// <param name="retrieveResponse">retrieve response</param>
         /// <param name="type">type of component </param>
-        private void QueryTargetComponents(OrganizationServiceProxy serviceProxy, RetrieveResponse retrieveResponse, string type)
+        private void QueryTargetComponents(IOrganizationService serviceProxy, RetrieveResponse retrieveResponse, string type)
         {
             var qe = new QueryExpression(type)
             {

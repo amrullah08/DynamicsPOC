@@ -48,7 +48,7 @@ namespace CrmSolution
 
                 var authContext = new AuthenticationContext(authority);
                 ClientCredential clientCred = new ClientCredential(clientid, clientsecret);
-                result = await authContext.AcquireTokenAsync(resource, clientCred);
+                result = await authContext.AcquireTokenAsync(resource, clientCred).ConfigureAwait(true);
 
                 if (result == null)
                 {
@@ -70,6 +70,7 @@ namespace CrmSolution
         private static void Main(string[] args)
         {
             string mode = string.Empty;
+          
             if (args != null && args.Length != 0)
             {
                 KeyVaultClient kvc = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(GetToken));

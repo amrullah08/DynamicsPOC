@@ -38,7 +38,7 @@ namespace CrmSolution
         /// Initializes a new instance of the <see cref="SolutionFileInfo" /> class
         /// </summary>
         /// <param name="organizationServiceProxy">organization service proxy</param>
-        public SolutionFileInfo(Microsoft.Xrm.Sdk.Client.OrganizationServiceProxy organizationServiceProxy)
+        public SolutionFileInfo(IOrganizationService organizationServiceProxy)
         {
             this.OrganizationServiceProxy = organizationServiceProxy;
         }
@@ -49,7 +49,7 @@ namespace CrmSolution
         /// <param name="solution">solution entity</param>
         /// <param name="organizationServiceProxy">organization service proxy</param>
         /// <param name="solutionDetail">solution detail</param>
-        public SolutionFileInfo(Entity solution, OrganizationServiceProxy organizationServiceProxy, Entity solutionDetail)
+        public SolutionFileInfo(Entity solution, IOrganizationService organizationServiceProxy, Entity solutionDetail)
         {
             this.OrganizationServiceProxy = organizationServiceProxy;
             this.SolutionsToBeMerged = new List<string>();
@@ -212,7 +212,7 @@ namespace CrmSolution
         /// <summary>
         /// Gets or sets value of Organization service
         /// </summary>
-        public Microsoft.Xrm.Sdk.Client.OrganizationServiceProxy OrganizationServiceProxy { get; set; }
+        public IOrganizationService OrganizationServiceProxy { get; set; }
 
         /// <summary>
         /// Gets value of solution extraction path
@@ -293,7 +293,7 @@ namespace CrmSolution
         /// <param name="solution">solution entity</param>
         /// <param name="organizationServiceProxy">organization proxy</param>
         /// <returns>returns list of solution file info by splitting source solution by comma</returns>
-        public List<SolutionFileInfo> GetSolutionFileInfo(Entity solution, OrganizationServiceProxy organizationServiceProxy)
+        public List<SolutionFileInfo> GetSolutionFileInfo(Entity solution, IOrganizationService organizationServiceProxy)
         {
             List<SolutionFileInfo> solutionFileInfos = new List<SolutionFileInfo>();
             EntityCollection retrievedMasterSolution = Singleton.CrmSolutionHelperInstance.RetrieveMasterSolutionDetailsByListOfSolutionId(organizationServiceProxy, solution.Id);

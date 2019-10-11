@@ -367,6 +367,7 @@ namespace CrmSolution
                         {
                             this.solutionText = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
                         }
+
                         break;
 
                     case Constants.SolutionCheckerPath:
@@ -374,6 +375,7 @@ namespace CrmSolution
                         {
                             this.solutionCheckerPath = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
                         }
+
                         break;
 
                     case Constants.TimeTriggerPath:
@@ -381,6 +383,7 @@ namespace CrmSolution
                         {
                             this.timeTriggerPath = Path.Combine(this.LocalDirectory, setting.GetAttributeValue<string>("syed_value"));
                         }
+
                         break;
 
                     case Constants.SolutionTextPathForRelease:

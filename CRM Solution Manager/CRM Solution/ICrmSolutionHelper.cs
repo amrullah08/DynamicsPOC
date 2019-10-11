@@ -38,7 +38,8 @@ namespace CrmSolution
         /// Method download solutions file
         /// </summary>
         /// <param name="solutionUnqiueName">unique solution name</param>
+        /// <param name="mode">mode of flow</param>
         /// <returns>returns list of downloaded solutions</returns>
-        List<SolutionFileInfo> DownloadSolutionFile(string solutionUnqiueName,string mode);
+        List<SolutionFileInfo> DownloadSolutionFile(string solutionUnqiueName, string mode);
     }
 }

@@ -1,8 +1,4 @@
-﻿#
-
-# Filename: SolutionChecker.ps1.
-
-#
+﻿
                      Param([string] $clientAppId,
 
                                 [string] $tenantId,                               

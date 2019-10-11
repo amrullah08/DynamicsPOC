@@ -1,6 +1,4 @@
-﻿#
-# Filename: ImportSolution.ps1.
-#
+﻿
 param(
 $dllPath,
 $solutionListFile,

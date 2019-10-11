@@ -118,6 +118,7 @@ namespace SolutionManagement
                 throw new InvalidPluginExecutionException(ex.Message.ToString(), ex);
             }
         }
+
         /// <summary>
         /// To retrieve CRM solutions entity, to check patch and versions.
         /// </summary>
@@ -307,7 +308,6 @@ namespace SolutionManagement
                 throw new InvalidPluginExecutionException(ex.Message.ToString(), ex);
             }
         }
-
 
         /// <summary>
         /// Method retrieves Master solution from Dynamics source control Template.

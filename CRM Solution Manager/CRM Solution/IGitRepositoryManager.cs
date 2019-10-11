@@ -7,7 +7,6 @@
 
 namespace CrmSolution
 {
-    using Microsoft.TeamFoundation.VersionControl.Client;
     using System.Collections.Generic;
 
     /// <summary>
@@ -20,6 +19,9 @@ namespace CrmSolution
         /// </summary>
         /// <param name="solutionFileInfo">solution file info</param>
         /// <param name="solutionFilePath">path of file having release solution list</param>
+        /// <param name="hashSet">Hash Set</param>
+        /// <param name="solutionCheckerPath">Solution Checker Path</param>
+        /// <param name="timeTriggerPath">Time Trigger Path</param>
         void CommitAllChanges(SolutionFileInfo solutionFileInfo, string solutionFilePath, HashSet<string> hashSet, string solutionCheckerPath, string timeTriggerPath);
 
         /// <summary>

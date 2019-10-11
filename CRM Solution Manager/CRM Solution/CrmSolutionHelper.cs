@@ -60,11 +60,11 @@ namespace CrmSolution
             this.Branch = branch;
             this.RemoteName = remoteName;
             this.SolutionPackagerPath = solutionPackagerPath;
-            this.serviceUri = new Uri(organizationServiceUrl);
-            this.clientCredentials = new ClientCredentials();
-            this.clientCredentials.UserName.UserName = userName;
-            this.clientCredentials.UserName.Password = password;
-            this.InitializeOrganizationService();
+            //this.serviceUri = new Uri(organizationServiceUrl);
+            //this.clientCredentials = new ClientCredentials();
+            //this.clientCredentials.UserName.UserName = userName;
+            //this.clientCredentials.UserName.Password = password;
+            //this.InitializeOrganizationService();
         }
 
         /// <summary>
@@ -115,15 +115,14 @@ namespace CrmSolution
         /// Method downloads unique solution name
         /// </summary>
         /// <param name="solutionUnqiueName">unique solution name</param>
+        /// <param name="mode">mode of the flow</param>
         /// <returns>returns list of solution file info</returns>
         public List<SolutionFileInfo> DownloadSolutionFile(string solutionUnqiueName, string mode)
         {
-            this.InitializeOrganizationService();
             this.CanPush = false;
             List<SolutionFileInfo> solutionFileInfos = new List<SolutionFileInfo>();
-            Console.WriteLine("Connecting to the " + this.serviceUri.OriginalString);
-            var serviceProxy = this.InitializeOrganizationService();
-            serviceProxy.EnableProxyTypes();
+            //Console.WriteLine("Connecting to the " + this.serviceUri.OriginalString);
+            var serviceProxy = Singleton.CrmConstantsInstance.ServiceProxy;
             EntityCollection querySampleSolutionResults = this.FetchSourceControlQueues(serviceProxy, mode);
             if (querySampleSolutionResults.Entities.Count > 0)
             {
@@ -132,7 +131,7 @@ namespace CrmSolution
                     try
                     {
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Clear();
-                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Connected to the " + this.serviceUri.OriginalString + "<br>");
+                        // Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Connected to the " + this.serviceUri.OriginalString + "<br>");
                         var infos = Singleton.SolutionFileInfoInstance.GetSolutionFileInfo(querySampleSolutionResults.Entities[i], serviceProxy);
                         foreach (var info in infos)
                         {
@@ -195,7 +194,7 @@ namespace CrmSolution
         /// <param name="service">organization service proxy</param>
         /// <param name="sourceControlId"> Source Control Id</param>
         /// <returns>returns entity collection</returns>
-        public EntityCollection RetrieveMasterSolutionDetailsByListOfSolutionId(OrganizationServiceProxy service, Guid sourceControlId)
+        public EntityCollection RetrieveMasterSolutionDetailsByListOfSolutionId(IOrganizationService service, Guid sourceControlId)
         {
             try
             {
@@ -226,7 +225,7 @@ namespace CrmSolution
         /// <param name="service">organization service proxy</param>
         /// <param name="masterSolutionId">Master Solution Id</param>
         /// <returns>returns entity collection</returns>
-        public EntityCollection RetrieveSolutionsToBeMergedByListOfSolutionId(OrganizationServiceProxy service, Guid masterSolutionId)
+        public EntityCollection RetrieveSolutionsToBeMergedByListOfSolutionId(IOrganizationService service, Guid masterSolutionId)
         {
             try
             {
@@ -260,7 +259,7 @@ namespace CrmSolution
         /// <param name="serviceProxy">organization service proxy</param>
         /// <param name="solutionFile">solution file</param>
         /// <param name="uri">URL of Instance</param>
-        public void ImportSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile, Uri uri)
+        public void ImportSolution(IOrganizationService serviceProxy, SolutionFileInfo solutionFile, Uri uri)
         {
             string solutionImportPath = solutionFile.SolutionFilePathManaged ?? solutionFile.SolutionFilePath;
             Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Started importing solution to Organization " + uri + "<br>");
@@ -276,7 +275,7 @@ namespace CrmSolution
                 SkipProductUpdateDependencies = true,
                 PublishWorkflows = false,
             };
-            serviceProxy.Timeout = new TimeSpan(0, 30, 0);
+
             ExecuteAsyncRequest importRequest = new ExecuteAsyncRequest()
             {
                 Request = impSolReq
@@ -284,7 +283,7 @@ namespace CrmSolution
             ExecuteAsyncResponse importRequestResponse = (ExecuteAsyncResponse)serviceProxy.Execute(importRequest);
 
             string solutionImportResult = string.Empty;
-            while (String.IsNullOrEmpty(solutionImportResult))
+            while (string.IsNullOrEmpty(solutionImportResult))
             {
                 Guid asyncJobId = importRequestResponse.AsyncJobId;
                 Entity job = (Entity)serviceProxy.Retrieve("asyncoperation", asyncJobId, new ColumnSet(new string[] { "asyncoperationid", "statuscode", "message" }));
@@ -343,10 +342,9 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <param name="solutionFile">solution File</param>
-        public void PublishAllCustomizationChanges(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
+        public void PublishAllCustomizationChanges(IOrganizationService serviceProxy, SolutionFileInfo solutionFile)
         {
             PublishAllXmlRequest publishAllXmlRequest = new PublishAllXmlRequest();
-            serviceProxy.Timeout = new TimeSpan(0, 30, 0);
             serviceProxy.Execute(publishAllXmlRequest);
             Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine("Successfully published solution components." + "<br>");
             solutionFile.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuePublishSuccessfulStatus;
@@ -391,7 +389,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">service proxy</param>
         /// <param name="solutionFile">solution file</param>
-        private async void CallPublishAllCustomizationChanges(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
+        private async void CallPublishAllCustomizationChanges(IOrganizationService serviceProxy, SolutionFileInfo solutionFile)
         {
             await Task.Run(() => this.PublishAllCustomizationChanges(serviceProxy, solutionFile));
         }
@@ -435,7 +433,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="solutionFileInfo">solution file info</param>
         /// <param name="organizationServiceProxy">organization service proxy</param>
-        private void MergeSolutions(SolutionFileInfo solutionFileInfo, OrganizationServiceProxy organizationServiceProxy)
+        private void MergeSolutions(SolutionFileInfo solutionFileInfo, IOrganizationService organizationServiceProxy)
         {
             SolutionManager solutionManager = new SolutionManager(organizationServiceProxy);
             solutionManager.CopyComponents(solutionFileInfo);
@@ -446,7 +444,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <param name="solutionFile">solution file info</param>
-        private void ExportMasterSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
+        private void ExportMasterSolution(IOrganizationService serviceProxy, SolutionFileInfo solutionFile)
         {
             this.MergeSolutions(solutionFile, serviceProxy);
 
@@ -498,7 +496,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <param name="solutionFile">solution file info</param>
-        private void ExportListOfSolutionsToBeMerged(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
+        private void ExportListOfSolutionsToBeMerged(IOrganizationService serviceProxy, SolutionFileInfo solutionFile)
         {
             if (solutionFile.SolutionsToBeMerged.Count > 0)
             {
@@ -514,7 +512,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="serviceProxy">organization service proxy</param>
         /// <param name="solutionFile">solution file info</param>        
-        private void ImportSolutionToTargetInstance(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile)
+        private void ImportSolutionToTargetInstance(IOrganizationService serviceProxy, SolutionFileInfo solutionFile)
         {
             Entity sourceControl = solutionFile.Solution;
             EntityCollection deploymentInstance = this.FetchDeplopymentInstance(serviceProxy, sourceControl.Id);
@@ -535,11 +533,14 @@ namespace CrmSolution
                     {
                         instance.Attributes["syed_password"] = "Reset_Password";
                     }
+
                     checkDependency = (bool)instance.Attributes["syed_checkdependency"];
                     import = (bool)instance.Attributes["syed_import"];
                     serviceProxy.Update(instance);
                     OrganizationServiceProxy targetserviceProxy = new OrganizationServiceProxy(new Uri(instance.Attributes["syed_instanceurl"].ToString()), null, clientCredentials, null);
                     targetserviceProxy.EnableProxyTypes();
+                    IOrganizationService targetService = (IOrganizationService)targetserviceProxy;
+
                     List<EntityCollection> componentDependency = this.GetDependentComponents(serviceProxy, new Guid(solutionFile.MasterSolutionId), solutionFile.SolutionUniqueName);
                     SolutionManager sol = new SolutionManager(serviceProxy);
                     Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<br><br><table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt;font-family:Arial'><tr><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Dependent Components in Source Instance</th><th style='background-color: #B8DBFD;border: 1px solid #ccc'>Required Components</th></tr>");
@@ -583,7 +584,7 @@ namespace CrmSolution
                     {
                         foreach (var comDependency in componentDependency)
                         {
-                            checkTarget = this.CheckDependency(targetserviceProxy, comDependency, sol, checkTarget, serviceProxy);
+                            checkTarget = this.CheckDependency(targetService, comDependency, sol, checkTarget, serviceProxy);
                         }
                     }
 
@@ -598,7 +599,7 @@ namespace CrmSolution
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</td>");
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</tr>");
                         Singleton.SolutionFileInfoInstance.WebJobsLog.Append("</table><br><br>");
-                        this.ImportSolution(targetserviceProxy, solutionFile, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
+                        this.ImportSolution(targetService, solutionFile, new Uri(instance.Attributes["syed_instanceurl"].ToString()));
                     }
                     else if (checkDependency)
                     {
@@ -619,12 +620,12 @@ namespace CrmSolution
         /// <returns> Decrypted string </returns>
         private string DecryptString(string encryptString)
         {
-            string EncryptionKey = Constants.EncryptionKey;
+            string encryptionKey = Constants.EncryptionKey;
             encryptString = encryptString.Replace(" ", "+");
             byte[] cipherBytes = Convert.FromBase64String(encryptString);
             using (Aes encryptor = Aes.Create())
             {
-                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(EncryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(encryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
                 encryptor.Key = pdb.GetBytes(32);
                 encryptor.IV = pdb.GetBytes(16);
                 using (MemoryStream ms = new MemoryStream())
@@ -634,9 +635,11 @@ namespace CrmSolution
                         cs.Write(cipherBytes, 0, cipherBytes.Length);
                         cs.Close();
                     }
+
                     encryptString = Encoding.Unicode.GetString(ms.ToArray());
                 }
             }
+
             return encryptString;
         }
 
@@ -648,7 +651,7 @@ namespace CrmSolution
         /// <param name="solutionName">solution name</param>
         /// <param name="message">message to be printed on console</param>
         /// <param name="isManaged">Managed Property</param>
-        private void ExportSolution(OrganizationServiceProxy serviceProxy, SolutionFileInfo solutionFile, string solutionName, string message, bool isManaged)
+        private void ExportSolution(IOrganizationService serviceProxy, SolutionFileInfo solutionFile, string solutionName, string message, bool isManaged)
         {
             try
             {
@@ -660,7 +663,6 @@ namespace CrmSolution
 
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + message + solutionName + "<br>");
                 Console.WriteLine(message + solutionName);
-                serviceProxy.Timeout = new TimeSpan(0, 30, 0);
                 ExportSolutionResponse exportResponse = (ExportSolutionResponse)serviceProxy.Execute(exportRequest);
 
                 // Handles the response
@@ -694,7 +696,7 @@ namespace CrmSolution
         /// <param name="serviceProxy">organization service proxy</param>
         /// <param name="mode">web or Scheduled mode</param>
         /// <returns>returns entity collection</returns>
-        private EntityCollection FetchSourceControlQueues(OrganizationServiceProxy serviceProxy, string mode)
+        private EntityCollection FetchSourceControlQueues(IOrganizationService serviceProxy, string mode)
         {
             QueryExpression querySampleSolution = new QueryExpression
             {
@@ -725,7 +727,7 @@ namespace CrmSolution
         /// <param name="masterSolutionId">master solution id</param>
         /// <param name="solutionUniqueName">solution unique name</param>
         /// <returns>returns components dependency entity collection</returns>
-        private List<EntityCollection> GetDependentComponents(OrganizationServiceProxy serviceProxy, Guid masterSolutionId, string solutionUniqueName)
+        private List<EntityCollection> GetDependentComponents(IOrganizationService serviceProxy, Guid masterSolutionId, string solutionUniqueName)
         {
             List<EntityCollection> dependentDetails = new List<EntityCollection>();
 
@@ -750,7 +752,7 @@ namespace CrmSolution
         /// <param name="serviceProxy">service proxy</param>
         /// <param name="masterSolutionId">master solution id</param>
         /// <returns>returns entity components</returns>
-        private DataCollection<Entity> RetrieveComponentsFromSolutions(OrganizationServiceProxy serviceProxy, Guid masterSolutionId)
+        private DataCollection<Entity> RetrieveComponentsFromSolutions(IOrganizationService serviceProxy, Guid masterSolutionId)
         {
             var qe = new QueryExpression("solutioncomponent")
             {
@@ -776,7 +778,7 @@ namespace CrmSolution
         /// <param name="checkTarget">check target</param>
         /// <param name="sourceServiceProxy">source service proxy</param>
         /// <returns>returns boolean value</returns>
-        private bool CheckDependency(OrganizationServiceProxy serviceProxy, EntityCollection dependencyComponents, SolutionManager solutionManager, bool checkTarget, OrganizationServiceProxy sourceServiceProxy)
+        private bool CheckDependency(IOrganizationService serviceProxy, EntityCollection dependencyComponents, SolutionManager solutionManager, bool checkTarget, IOrganizationService sourceServiceProxy)
         {
             foreach (Entity component in dependencyComponents.Entities)
             {

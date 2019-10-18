@@ -1,4 +1,6 @@
-﻿
+﻿﻿#
+# Filename: SolutionToBeImported.ps1.
+#
 param(
 $solutionListFile,
 $configListFile

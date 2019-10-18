@@ -106,6 +106,13 @@
 
         -   And do the similar thing for rest of the task replace DD365
             > with the path that is there in the repo 
+            
+            -   And in copy zip file powershell task , we need to give the zip files location in source folder field based on project repository changes.
+            
+        -   And in trigger tab in build definition need to change the trigger files path specification
+          ex: DD365/Release/solutions.txt 
+              DD365/Release/trigger.txt         
+             -   validate all the argument of all powershell tasks with respect to the powershell script before saving pipelines.
 
     -   Modify copy zip files to from release source folder to the path
         > where you want managed and unmanaged solution to be deployed 

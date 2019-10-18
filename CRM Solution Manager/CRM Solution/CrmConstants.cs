@@ -233,7 +233,7 @@ namespace CrmSolution
             this.clientCredentials.UserName.UserName = this.DynamicsUserName;
             this.clientCredentials.UserName.Password = this.DynamicsPassword;
 
-            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["SolutionCheckerAppClientId"]) && !string.IsNullOrEmpty(ConfigurationManager.AppSettings["ClientApplicationSecret"]))
+            if (this.DynamicsUserName == "CRMSourceUserName" && this.DynamicsPassword == "CRMSourcePassword")
             {
                 Task<string> callTask = Task.Run(() => this.AccessTokenGenerator());
                 callTask.Wait();
@@ -243,7 +243,7 @@ namespace CrmSolution
                 using (sdkService = new OrganizationWebProxyClient(serviceUrl, false))
                 {
                     sdkService.HeaderToken = token;
-                    sdkService.InnerChannel.OperationTimeout= new TimeSpan(1, 30, 0);
+                    sdkService.InnerChannel.OperationTimeout = new TimeSpan(1, 30, 0);
                     System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                     this.serviceProxy = (IOrganizationService)sdkService != null ? (IOrganizationService)sdkService : null;
                 }

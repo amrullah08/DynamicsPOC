@@ -43,7 +43,7 @@
 
 -   Commit the branch and push the branch 
 
--   Configure Azure keyVault with the details as mentioned in the excel 
+-   Configure Azure keyVault with the details as mentioned in the excel (path : E:\1\DynamicsPOC-master\CRM Solution Manager\Release\WebJob\AzureKeyVaultNames.xlsx)
 
 -   Create Service connection 
 

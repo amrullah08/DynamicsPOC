@@ -61,7 +61,7 @@
 
     -   Open folder DynamicsPOC\\CRM Solution Manager\\Release\\Build
         > and Release template 
-
+    -   Only for techincal reosurce (Find dd365 in build pipelines replace with relative location of folder with your repository dd365 folder like Main/DD365)
     -   Import both build and release json 
 
     -   Click on build, click on new, click on import and select the

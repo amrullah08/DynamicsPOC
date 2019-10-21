@@ -29,6 +29,7 @@
 -   In the keyvault go to access policies, add access policy secret
     > management , select get and list, in principal select your above
     > create AAD app 
+    > click on Add button
 
 -   Create a DD365 branch 
 

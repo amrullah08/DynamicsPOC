@@ -28,13 +28,6 @@
       "triggerType": 2
     }
   ],
-  "variables": {
-    "crmConnectionString": { "value": "AuthType=Office365;Username=igdsa36@IGDCRM.onmicrosoft.com;Password=6e%\\pbw}zBySp@tY;Url=https://igdcicd2.crm8.dynamics.com" },
-    "system.debug": {
-      "value": "false",
-      "allowOverride": true
-    }
-  },
   "variableGroups": [
     {
       "variables": {

@@ -5,7 +5,7 @@
 // <author>Syed Amrullah Mazhar</author>
 //-----------------------------------------------------------------------
 
-namespace CrmSolution
+namespace CrmSolutionLibrary
 {
     using System;
     using System.Configuration;

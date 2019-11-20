@@ -5,7 +5,7 @@
 // <author>Syed Amrullah Mazhar</author>
 //-----------------------------------------------------------------------
 
-namespace CrmSolution
+namespace CrmSolutionLibrary
 {
     using System;
     using System.Collections.Generic;
@@ -330,7 +330,7 @@ namespace CrmSolution
         /// </summary>
         /// <param name="solutionPackagerPath"> solution packager path</param>
         public void ProcessSolutionZipFile(string solutionPackagerPath)
-        {
+         {
             try
             {
                 var tempSolutionPackagerPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Singleton.CrmConstantsInstance.SolutionPackagerRelativePath);
@@ -357,11 +357,21 @@ namespace CrmSolution
                 return;
             }
 
-            var result = Cli.Wrap(solutionPackagerPath)
-                            .SetArguments("/action:Extract /zipfile:\"" + this.SolutionFilePath + "\" /folder:\"" + this.SolutionExtractionPath + "\"")
-                           .SetStandardOutputCallback(l => Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine($"StdOut> {l}" + "<br>")) // triggered on every line in stdout
-                           .SetStandardErrorCallback(l => Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine($"StdErr> {l}" + "<br>")) // triggered on every line in stderr
-                           .Execute();
+
+            try
+            {
+                var result = Cli.Wrap(solutionPackagerPath)
+                                .SetArguments("/action:Extract /zipfile:\"" + this.SolutionFilePath + "\" /folder:\"" + this.SolutionExtractionPath + "\"")
+                                                         .SetStandardOutputCallback(l => Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine($"StdOut> {l}" + "<br>")) // triggered on every line in stdout
+                               .SetStandardErrorCallback(l => Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine($"StdErr> {l}" + "<br>")) // triggered on every line in stderr
+                               .Execute()
+                               ;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Error " + ex.Message + " Inner Exceptoin " + ex.InnerException);
+                
+            }
         }
     }
 }

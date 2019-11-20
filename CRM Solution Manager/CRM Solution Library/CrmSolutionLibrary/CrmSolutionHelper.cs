@@ -5,12 +5,12 @@
 // <author>Syed Amrullah Mazhar</author>
 //-----------------------------------------------------------------------
 
-namespace CrmSolution
+namespace CrmSolutionLibrary
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Management.Automation;
+    //using System.Management.Automation;
     using System.Security.Cryptography;
     using System.ServiceModel.Description;
     using System.Text;
@@ -513,6 +513,7 @@ namespace CrmSolution
         /// <param name="serviceProxy">organization service proxy</param>
         /// <param name="solutionFile">solution file info</param>        
         private void ImportSolutionToTargetInstance(IOrganizationService serviceProxy, SolutionFileInfo solutionFile)
+
         {
             Entity sourceControl = solutionFile.Solution;
             EntityCollection deploymentInstance = this.FetchDeplopymentInstance(serviceProxy, sourceControl.Id);

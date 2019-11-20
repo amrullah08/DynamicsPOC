@@ -15,7 +15,7 @@ namespace GitDeploy
     using System.Reflection;
     using System.Text.RegularExpressions;
     using System.Xml;
-    using CrmSolution;
+    using CrmSolutionLibrary;
     using LibGit2Sharp;
     using LibGit2Sharp.Handlers;
     using Microsoft.TeamFoundation.Client;
@@ -227,7 +227,7 @@ namespace GitDeploy
 
                     if (solutionFileInfo.CheckInSolution == true && solutionFileInfo.IncludeInRelease == true)
                     {
-                        repo.Remove((Singleton.RepositoryConfigurationConstantsInstance.LocalDirectory + "solutions.txt").Replace(this.localFolder.FullName, string.Empty), removeFromWorkingDirectory: false);
+                        //--repo.Remove((Singleton.RepositoryConfigurationConstantsInstance.LocalDirectory + "solutions.txt").Replace(this.localFolder.FullName, string.Empty), removeFromWorkingDirectory: false);
                         repo.Index.Add(solutionFilePath.Replace(this.localFolder.FullName, string.Empty));
                         repo.Index.Add(solutionCheckerPath.Replace(this.localFolder.FullName, string.Empty));
                         repo.Index.Add(timeTriggerPath.Replace(this.localFolder.FullName, string.Empty));
@@ -235,7 +235,7 @@ namespace GitDeploy
                     else
                     {
                         repo.Index.Add(solutionFilePath.Replace(this.localFolder.FullName, string.Empty));
-                        repo.Remove((Singleton.RepositoryConfigurationConstantsInstance.LocalDirectory + "solutions.txt").Replace(this.localFolder.FullName, string.Empty), removeFromWorkingDirectory: false);
+                        //--repo.Remove((Singleton.RepositoryConfigurationConstantsInstance.LocalDirectory + "solutions.txt").Replace(this.localFolder.FullName, string.Empty), removeFromWorkingDirectory: false);
                         ////  repo.Remove(solutionFilePath.Replace(this.localFolder.FullName, string.Empty), removeFromWorkingDirectory: false);
                     }
 
@@ -944,27 +944,27 @@ namespace GitDeploy
 
                 if (commitFileLoc != null && commitFileLoc != string.Empty)
                 {
-                    if (repo != null)
-                    {
-                        File.Copy(webResources + "\\" + webResournceName, commitFileLoc, true);
-                        repo.Index.Add(commitFileLoc.Replace(this.localFolder.FullName, string.Empty));
-                    }
-                    else
-                    {
-                        bool fileExit = this.versionControl.ServerItemExists(this.workspace.GetServerItemForLocalItem(commitFileLoc), ItemType.Any);
-                        if (fileExit)
-                        {
-                            var tes = new string[1];
-                            tes[0] = commitFileLoc;
-                            this.workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, false, PendChangesOptions.GetLatestOnCheckout);
-                            File.Copy(webResources + "\\" + webResournceName, commitFileLoc, true);
-                        }
-                        else
-                        {
-                            File.Copy(webResources + "\\" + webResournceName, commitFileLoc, true);
-                            this.workspace.PendAdd(commitFileLoc, true);
-                        }
-                    }
+                    //if (repo != null)
+                    //{
+                    //    File.Copy(webResources + "\\" + webResournceName, commitFileLoc, true);
+                    //    repo.Index.Add(commitFileLoc.Replace(this.localFolder.FullName, string.Empty));
+                    //}
+                    //else
+                    //{
+                    //    bool fileExit = this.versionControl.ServerItemExists(this.workspace.GetServerItemForLocalItem(commitFileLoc), ItemType.Any);
+                    //    if (fileExit)
+                    //    {
+                    //        var tes = new string[1];
+                    //        tes[0] = commitFileLoc;
+                    //        this.workspace.PendEdit(tes, RecursionType.Full, null, LockLevel.None, false, PendChangesOptions.GetLatestOnCheckout);
+                    //        File.Copy(webResources + "\\" + webResournceName, commitFileLoc, true);
+                    //    }
+                    //    else
+                    //    {
+                    //        File.Copy(webResources + "\\" + webResournceName, commitFileLoc, true);
+                    //        this.workspace.PendAdd(commitFileLoc, true);
+                    //    }
+                    //}
                 }
             }
         }

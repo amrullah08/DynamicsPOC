@@ -5,7 +5,7 @@
 // <author>Syed Amrullah Mazhar</author>
 //-----------------------------------------------------------------------
 
-namespace CrmSolution
+namespace CrmSolutionLibrary
 {
     using System;
     using System.Configuration;
@@ -23,6 +23,203 @@ namespace CrmSolution
     /// </summary>
     public class CrmConstants : ConfigurationSettings
     {
+        ///Naresh
+        ///
+
+        /// Solution Folder
+        /// </summary>
+        private string solutionFolder;
+
+        /// <summary>
+        /// JavaScript Directory
+        /// </summary>
+        private string javaScriptDirectory;
+
+        /// <summary>
+        /// Html Directory
+        /// </summary>
+        private string htmlDirectory;
+
+        /// <summary>
+        /// Images Directory
+        /// </summary>
+        private string imagesDirectory;
+
+        /// <summary>
+        /// Repository Url
+        /// </summary>
+        private string repositoryUrl;
+
+
+        /// <summary>
+        /// Repository Remote Name
+        /// </summary>
+        private string repositoryRemoteName;
+
+        /// <summary>
+        /// Branch Name
+        /// </summary>
+        private string branchName;
+
+        /// <summary>
+        /// solution text file 
+        /// </summary>
+        private string solutionText;
+
+        /// <summary>
+        /// Time Trigger text file 
+        /// </summary>
+        private string timeTriggerPath;
+
+        /// <summary>
+        /// solution text file 
+        /// </summary>
+        private string solutionCheckerPath;
+
+        /// <summary>
+        /// solution text file 
+        /// </summary>
+        private string solutionTextRelease;
+
+
+        /// <summary>
+        /// Gets or sets repository release directory containing CRM Solutions
+        /// </summary>
+        public string SolutionFolder
+        {
+            get
+            {
+                return this.solutionFolder;
+            }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets repository script directory
+        /// </summary>
+        public string JsDirectory
+        {
+            get
+            {
+                return this.javaScriptDirectory;
+            }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets repository solution text file
+        /// </summary>
+        public string SolutionText
+        {
+            get
+            {
+                return this.solutionText;
+            }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets solution checker path file
+        /// </summary>
+        public string SolutionCheckerPath
+        {
+            get
+            {
+                return this.solutionCheckerPath;
+            }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets solution checker path file
+        /// </summary>
+        public string TimeTriggerPath
+        {
+            get
+            {
+                return this.timeTriggerPath;
+            }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets repository solution text file for Release
+        /// </summary>
+        public string SolutionTextRelease
+        {
+            get
+            {
+                return this.solutionTextRelease;
+            }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets repository html directory
+        /// </summary>
+        public string HtmlDirectory
+        {
+            get
+            {
+                return this.htmlDirectory;
+            }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets repository Images directory
+        /// </summary>
+        public string ImagesDirectory
+        {
+            get
+            {
+                return this.imagesDirectory;
+            }
+
+            set
+            {
+            }
+        }
+
+
+        /// <summary>
+        /// Gets or sets repository url
+        /// </summary>
+        public string RepositoryUrl
+        {
+            get
+            {
+                return this.repositoryUrl;
+            }
+
+            set
+            {
+            }
+        }
+
+        //Naresh
+
         /// <summary>
         /// Solution Packager Path
         /// </summary>
@@ -75,7 +272,9 @@ namespace CrmSolution
         {
             get
             {
-                return ConfigurationManager.AppSettings["CRMSourceInstanceUrl"];
+                //  return ConfigurationManager.AppSettings["CRMSourceInstanceUrl"]; // if using from webjob
+
+                return ConfigurationManager.AppSettings["CRMSourceServiceUrl"]; // if using Azure function with secrets and cleintid
             }
         }
 
@@ -221,6 +420,10 @@ namespace CrmSolution
             }
         }
 
+        //Naresh
+
+
+
 
 
         /// <summary>
@@ -238,12 +441,13 @@ namespace CrmSolution
                 Task<string> callTask = Task.Run(() => this.AccessTokenGenerator());
                 callTask.Wait();
                 string token = callTask.Result;
-                Uri serviceUrl = new Uri(ConfigurationManager.AppSettings["CRMSourceInstanceUrl"] + @"/xrmservices/2011/organization.svc/web?SdkClientVersion=8.2");
+                //Uri serviceUrl = new Uri(ConfigurationManager.AppSettings["CRMSourceInstanceUrl"] + @"/xrmservices/2011/organization.svc/web?SdkClientVersion=8.2"); // if calling from web job 
+                Uri serviceUrl = new Uri(ConfigurationManager.AppSettings["CRMSourceInstanceUrl"] + @"/xrmservices/2011/organization.svc/web?SdkClientVersion=8.2"); // if calling from azure function
                 OrganizationWebProxyClient sdkService = null;
                 using (sdkService = new OrganizationWebProxyClient(serviceUrl, false))
                 {
                     sdkService.HeaderToken = token;
-                    sdkService.InnerChannel.OperationTimeout= new TimeSpan(1, 30, 0);
+                    sdkService.InnerChannel.OperationTimeout = new TimeSpan(1, 30, 0);
                     System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                     this.serviceProxy = (IOrganizationService)sdkService != null ? (IOrganizationService)sdkService : null;
                 }
@@ -266,7 +470,8 @@ namespace CrmSolution
             string authority = "https://login.microsoftonline.com/" + ConfigurationManager.AppSettings["TenantId"];
             var credentials = new ClientCredential(ConfigurationManager.AppSettings["SolutionCheckerAppClientId"], ConfigurationManager.AppSettings["ClientApplicationSecret"]);
             var authContext = new AuthenticationContext(authority);
-            var result = await authContext.AcquireTokenAsync(ConfigurationManager.AppSettings["CRMSourceInstanceUrl"], credentials).ConfigureAwait(true);
+            var result = await authContext.AcquireTokenAsync(ConfigurationManager.AppSettings["CRMSourceInstanceUrl"], credentials).ConfigureAwait(true); // if calling from webjob
+            //var result = await authContext.AcquireTokenAsync(ConfigurationManager.AppSettings["CRMSourceServiceUrl"], credentials).ConfigureAwait(true); // if calling azure function 
             return result.AccessToken;
         }
 
@@ -303,6 +508,41 @@ namespace CrmSolution
                         break;
                     case Constants.PowerAppsCheckerAzureTenantId:
                         this.powerAppsCheckerAzureTenantId = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.RepositorySolutionFolder:
+                        this.solutionFolder = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.SolutionTextPath:
+                        this.solutionText = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.SolutionCheckerPath:
+                        this.solutionCheckerPath = setting.GetAttributeValue<string>("syed_value");
+                        break;
+
+                    case Constants.TimeTriggerPath:
+                        this.timeTriggerPath = setting.GetAttributeValue<string>("syed_value");
+                        break;
+
+                    case Constants.SolutionTextPathForRelease:
+                        this.solutionTextRelease = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.RepositoryJsDirectory:
+                        this.javaScriptDirectory = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.RepositoryHtmlDirectory:
+                        this.htmlDirectory = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.RepositoryImagesDirectory:
+                        this.imagesDirectory = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.RepositoryUrl:
+                        this.repositoryUrl = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.RemoteName:
+                        this.repositoryRemoteName = setting.GetAttributeValue<string>("syed_value");
+                        break;
+                    case Constants.BranchName:
+                        this.branchName = setting.GetAttributeValue<string>("syed_value");
                         break;
                     default:
                         break;

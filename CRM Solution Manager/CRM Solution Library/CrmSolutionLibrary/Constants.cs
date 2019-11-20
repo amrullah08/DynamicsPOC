@@ -5,7 +5,7 @@
 // <author>Syed Amrullah Mazhar</author>
 //-----------------------------------------------------------------------
 
-namespace CrmSolution
+namespace CrmSolutionLibrary
 {
     using System.Collections.Generic;
 
@@ -133,6 +133,11 @@ namespace CrmSolution
         /// Value for successful push to repo status
         /// </summary>
         public const string SourceControlQueuemPushToRepositorySuccessStatus = "Successfully Pushed To Repository";
+
+        /// <summary>
+        /// Value for successful push to repo status
+        /// </summary>
+        public const string InvalidBranchName = "Invalid Branch Name";
 
         /// <summary>
         /// Value for Source Control for GIT

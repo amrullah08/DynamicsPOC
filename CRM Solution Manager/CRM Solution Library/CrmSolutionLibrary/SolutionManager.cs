@@ -10,7 +10,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using CrmSolution;
+    using CrmSolutionLibrary;
     using Microsoft.Crm.Sdk.Messages;
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Client;

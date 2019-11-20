@@ -315,7 +315,7 @@ namespace CrmSolutionLibrary
                                     }
 
 
-                                    solutionFilePath = TempPath + "/solution.txt";  
+                                    solutionFilePath = TempPath + "/solutions.txt";  
                                     solutionCheckerPath = TempPath + "/config.txt";
                                     timeTriggerPath = TempPath + "/trigger.txt";
                                     try
@@ -392,7 +392,7 @@ namespace CrmSolutionLibrary
 
                                 requestDetail = new RequestDetails();
                                 requestDetail.FileContent = File.ReadAllText(solutionFilePath);
-                                requestDetail.FileName = "solution.txt";
+                                requestDetail.FileName = "solutions.txt";
                                 requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionText.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionText.Replace("\\", "/").Split('/')[1];
                                 requestDetail.ChangeType = "edit";// await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName);
                                 requestDetail.ContentType = "rawtext";

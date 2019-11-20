@@ -433,12 +433,13 @@ namespace CrmSolutionLibrary
         public override EntityCollection GetConfigurationSettings()
         {
             this.clientCredentials = new ClientCredentials();
+
             this.clientCredentials.UserName.UserName = this.DynamicsUserName;
             this.clientCredentials.UserName.Password = this.DynamicsPassword;
 
-            if (this.DynamicsUserName == "CRMSourceUserName" && this.DynamicsPassword == "CRMSourcePassword")
-            {
-                Task<string> callTask = Task.Run(() => this.AccessTokenGenerator());
+            //if (this.DynamicsUserName == "CRMSourceUserName" && this.DynamicsPassword == "CRMSourcePassword") // TODO : Naresh // User Name and password won't work and client id and secret need to use 
+            //{
+            Task<string> callTask = Task.Run(() => this.AccessTokenGenerator());
                 callTask.Wait();
                 string token = callTask.Result;
                 //Uri serviceUrl = new Uri(ConfigurationManager.AppSettings["CRMSourceInstanceUrl"] + @"/xrmservices/2011/organization.svc/web?SdkClientVersion=8.2"); // if calling from web job 
@@ -451,11 +452,11 @@ namespace CrmSolutionLibrary
                     System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                     this.serviceProxy = (IOrganizationService)sdkService != null ? (IOrganizationService)sdkService : null;
                 }
-            }
-            else
-            {
-                this.serviceProxy = this.InitializeOrganizationService();
-            }
+            //} // TODO : Naresh // User Name and password won't work and client id and secret need to use 
+            //else
+            //{
+            //    this.serviceProxy = this.InitializeOrganizationService();
+            //}
 
             EntityCollection retrievedConfigurationSettingsList = this.RetrieveConfigurationSettings(this.serviceProxy);
             return retrievedConfigurationSettingsList;

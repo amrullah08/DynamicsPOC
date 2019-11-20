@@ -436,7 +436,7 @@ namespace CrmSolutionLibrary
             this.clientCredentials.UserName.UserName = this.DynamicsUserName;
             this.clientCredentials.UserName.Password = this.DynamicsPassword;
 
-            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["SolutionCheckerAppClientId"]) && !string.IsNullOrEmpty(ConfigurationManager.AppSettings["ClientApplicationSecret"]))
+            if (this.DynamicsUserName == "CRMSourceUserName" && this.DynamicsPassword == "CRMSourcePassword")
             {
                 Task<string> callTask = Task.Run(() => this.AccessTokenGenerator());
                 callTask.Wait();

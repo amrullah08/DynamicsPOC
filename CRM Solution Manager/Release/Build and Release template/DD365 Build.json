@@ -54,6 +54,18 @@
           "value": null,
           "isSecret": true
         },
+        "CRMTargetInstanceConnectionString": {
+          "value": null,
+          "isSecret": true
+        },
+        "GitPassword": {
+          "value": null,
+          "isSecret": true
+        },
+        "GitUserName": {
+          "value": null,
+          "isSecret": true
+        },
         "SolutionCheckerAppClientId": {
           "value": null,
           "isSecret": true
@@ -62,14 +74,18 @@
           "value": null,
           "isSecret": true
         },
-        "CRMTargetInstanceConnectionString": {
+        "ADAuthorityURL": {
+          "value": null,
+          "isSecret": true
+        },
+        "CRMSourceServiceUrl": {
           "value": null,
           "isSecret": true
         }
       },
       "type": "AzureKeyVault",
-      "name": "KeyValutSecretsVariableGroup",
-      "description": "KeyValutSecretsVariableGroup",
+      "name": "KeyVaultSecrets",
+      "description": "",
       "id": 1
     }
   ],
@@ -78,6 +94,7 @@
   "jobAuthorizationScope": 1,
   "jobTimeoutInMinutes": 60,
   "jobCancelTimeoutInMinutes": 5,
+  "badgeEnabled": true,
   "process": {
     "phases": [
       {
@@ -355,7 +372,7 @@
             "inputs": {
               "targetType": "filePath",
               "filePath": "DD365/ChangeQueueStatus.ps1",
-              "arguments": "-crmServiceUrl \"$(CRMSourceInstanceUrl)\"  -UserName $(CRMSourceUserName)  -Password \"$(CRMSourcePassword)\"   -Status \"Devops Build Completed\" -dllPath '$(Build.ArtifactStagingDirectory)/AssemblyStorage' -resultFileUrls \"\"\"$(resultFileUrls)\"\"\" -buildurl \"$(Build.BuildUri)\"  -releaseurl \"\" -EntityRecordId $(ConfigIds) ",
+              "arguments": "-crmServiceUrl \"$(CRMSourceInstanceUrl)\"  -UserName $(CRMSourceUserName)  -Password \"$(CRMSourcePassword)\"  -Status \"Devops Build Completed\"   -dllPath '$(Build.ArtifactStagingDirectory)/AssemblyStorage'   -resultFileUrls \"\"\"$(resultFileUrls)\"\"\"   -buildurl \"$(Build.BuildUri)\"  -releaseurl \"\"  -EntityRecordId $(ConfigIds)",
               "script": "# Write your PowerShell commands here.\n\nWrite-Host \"Hello World\"\n",
               "errorActionPreference": "stop",
               "failOnStderr": "false",
@@ -390,10 +407,10 @@
       "checkoutNestedSubmodules": "false",
       "fetchDepth": "0"
     },
-    "id": "92d506ef-4ed8-4b7a-b81a-db6c09976634",
+    "id": "1f7abbfa-7775-4a38-a299-34d7c1d164ff",
     "type": "TfsGit",
-    "name": "SyedAmrullahRepository",
-    "url": "https://dev.azure.com/syamrull/SyedAmrullahRepository/_git/SyedAmrullahRepository",
+    "name": "DD365Test",
+    "url": "https://dev.azure.com/TestRepos/DD365Test/_git/DD365Test",
     "defaultBranch": "refs/heads/master",
     "clean": "false",
     "checkoutSubmodules": false
@@ -401,20 +418,20 @@
   "processParameters": {},
   "quality": 1,
   "authoredBy": {
-    "displayName": "Jaiyanthi Hari Krishnan",
-    "url": "https://spsprodsin1.vssps.visualstudio.com/Aa12de001-73f2-4a30-9c5a-c016ce7fad6b/_apis/Identities/5de21861-723e-636a-9dbd-b0d21ddb057f",
-    "_links": { "avatar": { "href": "https://dev.azure.com/syamrull/_apis/GraphProfile/MemberAvatars/aad.NWRlMjE4NjEtNzIzZS03MzZhLTlkYmQtYjBkMjFkZGIwNTdm" } },
-    "id": "5de21861-723e-636a-9dbd-b0d21ddb057f",
-    "uniqueName": "v-jaikri@microsoft.com",
-    "imageUrl": "https://dev.azure.com/syamrull/_apis/GraphProfile/MemberAvatars/aad.NWRlMjE4NjEtNzIzZS03MzZhLTlkYmQtYjBkMjFkZGIwNTdm",
-    "descriptor": "aad.NWRlMjE4NjEtNzIzZS03MzZhLTlkYmQtYjBkMjFkZGIwNTdm"
+    "displayName": "IGD service account 36",
+    "url": "https://spsprodsin1.vssps.visualstudio.com/Aa988d8bf-79ec-489b-9b23-85641ba7d96f/_apis/Identities/fe639ffa-b48e-6d1c-a60a-e03d6ef513fe",
+    "_links": { "avatar": { "href": "https://dev.azure.com/TestRepos/_apis/GraphProfile/MemberAvatars/aad.ZmU2MzlmZmEtYjQ4ZS03ZDFjLWE2MGEtZTAzZDZlZjUxM2Zl" } },
+    "id": "fe639ffa-b48e-6d1c-a60a-e03d6ef513fe",
+    "uniqueName": "igdsa36@IGDCRM.onmicrosoft.com",
+    "imageUrl": "https://dev.azure.com/TestRepos/_apis/GraphProfile/MemberAvatars/aad.ZmU2MzlmZmEtYjQ4ZS03ZDFjLWE2MGEtZTAzZDZlZjUxM2Zl",
+    "descriptor": "aad.ZmU2MzlmZmEtYjQ4ZS03ZDFjLWE2MGEtZTAzZDZlZjUxM2Zl"
   },
   "drafts": [],
   "queue": {
-    "_links": { "self": { "href": "https://dev.azure.com/syamrull/_apis/build/Queues/18" } },
-    "id": 18,
+    "_links": { "self": { "href": "https://dev.azure.com/TestRepos/_apis/build/Queues/27" } },
+    "id": 27,
     "name": "Azure Pipelines",
-    "url": "https://dev.azure.com/syamrull/_apis/build/Queues/18",
+    "url": "https://dev.azure.com/TestRepos/_apis/build/Queues/27",
     "pool": {
       "id": 9,
       "name": "Azure Pipelines",

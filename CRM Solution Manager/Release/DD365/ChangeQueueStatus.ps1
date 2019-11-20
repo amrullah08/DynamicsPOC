@@ -1,4 +1,8 @@
-﻿
+﻿#[void][System.Reflection.Assembly]::LoadFile("D:\PS to save entity\microsoft.xrm.sdk.dll")
+
+#[void][System.Reflection.Assembly]::LoadFile("D:\PS to save entity\microsoft.crm.sdk.proxy.dll")
+
+
 
                             Param(
                                 [string] $crmServiceUrl,                            
@@ -22,6 +26,13 @@ Write-Output "releaseurl :"$releaseurl
 Write-Output "EntityRecordId :"$EntityRecordId
 
 
+#if(-Not (Get-Module -ListAvailable -Name Xrm.Framework.CI.PowerShell.Cmdlets))
+#{
+
+#Import-Module $env:DOWNLOADSECUREFILE1_SECUREFILEPATH
+
+#Import-Module $env:DOWNLOADSECUREFILE4_SECUREFILEPATH
+#}
 $path1=Join-Path -Path $dllPath -ChildPath Microsoft.Xrm.Sdk.dll
 $path2=Join-Path -Path $dllPath -ChildPath Microsoft.Crm.Sdk.Proxy.dll
 
@@ -50,13 +61,19 @@ $query = new-object Microsoft.Xrm.Sdk.Query.QueryExpression("syed_sourcecontrolq
 
 $query.ColumnSet = new-object Microsoft.Xrm.Sdk.Query.ColumnSet($true)
 
+# RetrieveMultiple returns a maximum of 5000 records by default. 
+
+# If you need more, use the response's PagingCookie.
+
 $response = $service.RetrieveMultiple($query)
 
-Write-Output  $response   
+Write-Output  $response   #{955715C8-79D4-E911-A812-000D3A0A7552}
+
+## need to chane the status for record build com0-lete , release compoleted
 
     $entity = New-Object Microsoft.Xrm.Sdk.Entity("syed_sourcecontrolqueue")
 
-    $entity.Id = $EntityRecordId;  
+    $entity.Id = $EntityRecordId; #"955715C8-79D4-E911-A812-000D3A0A7552"
 
     if (-not([string]::IsNullOrEmpty($Status)))
       {
@@ -76,4 +93,6 @@ Write-Output  $response
       $entity.Attributes["syed_devopsreleaseurl"] =$releaseurl;
      }
      
-     $service.Update($entity)
+    #Write-Output ('Updating "{0}" (Id = {1})...' -f $_.name, $entity.Id)
+
+    $service.Update($entity)

@@ -81,6 +81,20 @@ namespace CrmSolutionLibrary
         /// </summary>
         private string solutionTextRelease;
 
+        /// <summary>
+        /// Gets or sets repository release directory containing CRM Solutions
+        /// </summary>
+        public string BranchName
+        {
+            get
+            {
+                return this.branchName;
+            }
+
+            set
+            {
+            }
+        }
 
         /// <summary>
         /// Gets or sets repository release directory containing CRM Solutions
@@ -420,12 +434,7 @@ namespace CrmSolutionLibrary
             }
         }
 
-        //Naresh
-
-
-
-
-
+                    
         /// <summary>
         /// Method returns configuration settings entity collection list
         /// </summary>

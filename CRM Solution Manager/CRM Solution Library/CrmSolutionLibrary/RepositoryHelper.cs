@@ -124,63 +124,67 @@ namespace CrmSolutionLibrary
                     System.Threading.Thread.Sleep(timeOut);
                     //// continue;
                 }
-
                 if (solutionFiles.Count > 0)
                 {
                     string credentials = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(string.Format("{0}:{1}", "", ConfigurationManager.AppSettings["GitPassword"].ToString())));
-                    string branchName = "refs/heads/" + ConfigurationManager.AppSettings["BranchName"];
-                    string lastcomitid = await GetRepositoryDetails.GetLastCommitDetails(credentials, branchName);
+                    string branchName = "refs/heads/" + Singleton.CrmConstantsInstance.BranchName;
                     List<string> BranchesNames = await GetRepositoryDetails.GetBranches(credentials);
-
                     bool BrachExists = BranchesNames.Contains(branchName);
 
-                    ChangeRequest changeRequest = new ChangeRequest();
-                    changeRequest.Comments = "Commited";
-                    changeRequest.SourceBranchName = branchName;
-                    changeRequest.Lastcomitid = lastcomitid;
-                    List<RequestDetails> RequestDetailslist = new List<RequestDetails>();
+                    HashSet<string> hashSet = new HashSet<string>();
+                    //creating temp files
+                    #region creating temp files
+                    string TempPath = Path.GetTempPath() + "DD365CICD";
+                    if (!Directory.Exists(TempPath))
+                    {
+                        Directory.CreateDirectory(TempPath);
+                    }
+                   
+                    solutionFilePath = TempPath + "/solutions.txt";
+                    string solutionCheckerPath = TempPath + "/config.txt";
+                    string timeTriggerPath = TempPath + "/trigger.txt";
+                    if (File.Exists(solutionFilePath))
+                    {
+                        File.WriteAllText(solutionFilePath, string.Empty);
+                    }
+                    else
+                    {
+                        File.Create(solutionFilePath).Dispose();
+                    }
+                    if (File.Exists(solutionCheckerPath))
+                    {
+                        File.WriteAllText(solutionCheckerPath, string.Empty);
 
-
-
-                    //string multilpleSolutionsImportPSPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\MultilpleSolutionsImport.ps1";
-                    //string solutionToBeImportedPSPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\SolutionToBeImported.ps1";
-                    //string SolutionCheckerPSPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\SolutionChecker.ps1";
-                    //string ChangeQueueStatusPSPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\ChangeQueueStatus.ps1";
-
-                    #region PS files
-                    //RequestDetails requestDetail = new RequestDetails();
-                    //requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(multilpleSolutionsImportPSPath));
-                    //requestDetail.FileName = "MultilpleSolutionsImport.ps1";
-                    //requestDetail.FileDestinationPath = @"DD365";
-                    //RequestDetailslist.Add(requestDetail);
-
-                    //requestDetail = new RequestDetails();
-                    //requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(solutionToBeImportedPSPath));
-                    //requestDetail.FileName = "SolutionToBeImported.ps1";
-                    //requestDetail.FileDestinationPath = @"DD365";
-                    //RequestDetailslist.Add(requestDetail);
-
-                    //requestDetail = new RequestDetails();
-                    //requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(SolutionCheckerPSPath));
-                    //requestDetail.FileName = "SolutionChecker.ps1";
-                    //requestDetail.FileDestinationPath = @"DD365";
-                    //RequestDetailslist.Add(requestDetail);
-
-                    //requestDetail = new RequestDetails();
-                    //requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(ChangeQueueStatusPSPath));
-                    //requestDetail.FileName = "ChangeQueueStatus.ps1";
-                    //requestDetail.FileDestinationPath = @"DD365";
-                    //RequestDetailslist.Add(requestDetail);
+                    }
+                    else
+                    {
+                        File.Create(solutionCheckerPath).Dispose();
+                    }
+                    if (File.Exists(timeTriggerPath))
+                    {
+                        File.WriteAllText(timeTriggerPath, string.Empty);
+                    }
+                    else
+                    {
+                        File.Create(timeTriggerPath).Dispose();
+                    }
                     #endregion
 
                     try
                     {
                         foreach (var item in solutionFiles)
                         {
-
+                            ChangeRequest changeRequest = new ChangeRequest();
+                            changeRequest.Comments = "Committed source instance solution files to reposotory.";
+                            changeRequest.SourceBranchName = branchName;
+                            //Getting Last commit id from repository
+                            string lastcomitid = await GetRepositoryDetails.GetLastCommitDetails(credentials, branchName);
+                            changeRequest.Lastcomitid = lastcomitid;
+                            List<RequestDetails> RequestDetailslist = new List<RequestDetails>();
                             if (!BrachExists)
                             {
-                                Console.WriteLine("Invalid Branch Name" + ConfigurationManager.AppSettings["BranchName"]);
+                                //if invalid branch name given in configuration settings in CRM source instance
+                                Console.WriteLine("Invalid Branch Name" + Singleton.CrmConstantsInstance.BranchName);
                                 item.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.InvalidBranchName;
                                 item.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
                                 item.Update();
@@ -188,6 +192,9 @@ namespace CrmSolutionLibrary
                             }
                             if (item.CheckInSolution)
                             {
+                                //Adding solution files to repository 
+                                #region update solutions zip files and etc to repo
+
                                 string fileUnmanaged = string.Empty;
                                 string fileManaged = string.Empty;
 
@@ -206,28 +213,30 @@ namespace CrmSolutionLibrary
                                     Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy unmanaged" + "<br>");
                                     File.Copy(item.SolutionFilePath, fileUnmanaged, true);
                                 }
-
+                                //unmanaged solution zip file
                                 RequestDetails requestDetail = new RequestDetails();
                                 requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(fileUnmanaged));
                                 requestDetail.FileName = item.SolutionUniqueName + "_.zip";
-                                requestDetail.FileDestinationPath = ConfigurationManager.AppSettings["SolutionPath"];//@"Test/Release";
+                                requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionFolder.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionFolder.Replace("\\", "/").Split('/')[1];
                                 requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName);
                                 requestDetail.ContentType = "base64Encoded";
                                 RequestDetailslist.Add(requestDetail);
-
+                                //managed solution zip file
                                 requestDetail = new RequestDetails();
                                 requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(fileManaged));
                                 requestDetail.FileName = item.SolutionUniqueName + "_managed_.zip";
-                                requestDetail.FileDestinationPath = ConfigurationManager.AppSettings["SolutionPath"];//@"Test/Release";
+                                requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionFolder.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionFolder.Replace("\\", "/").Split('/')[1];
                                 requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName);
                                 requestDetail.ContentType = "base64Encoded";
                                 RequestDetailslist.Add(requestDetail);
 
-                                #region webResources
+                                #endregion
+                                // Adding html,js,images from web resources folder of extracted solution files to repository.
+                                #region update webResources to repo
 
                                 string webResources = item.SolutionExtractionPath + "\\WebResources";
 
-                                string localFolder = Singleton.RepositoryConfigurationConstantsInstance.LocalDirectory;
+                                //  string localFolder = Singleton.RepositoryConfigurationConstantsInstance.LocalDirectory;
 
                                 if (Directory.Exists(webResources))
                                 {
@@ -235,7 +244,7 @@ namespace CrmSolutionLibrary
                                     {
                                         XmlDocument xmlDoc = new XmlDocument();
                                         xmlDoc.Load(dataFile);
-                                        var webResourceType = xmlDoc.SelectSingleNode("//WebResource/WebResourceType").InnerText;
+                                        var webResourceType = xmlDoc.SelectSingleNode("//WebResource/WebResourceType").InnerText; // content type of files
                                         string webResournceName = xmlDoc.SelectSingleNode("//WebResource/Name").InnerText;
                                         string modifiedName = string.Empty;
                                         string[] webList = Regex.Split(webResournceName, "/");
@@ -255,7 +264,7 @@ namespace CrmSolutionLibrary
                                                 requestDetail = new RequestDetails();
                                                 requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
                                                 requestDetail.FileName = modifiedName;
-                                                requestDetail.FileDestinationPath = ConfigurationManager.AppSettings["HtmlDirectory"];
+                                                requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.HtmlDirectory.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.HtmlDirectory.Replace("\\", "/").Split('/')[1];
                                                 requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName);
                                                 requestDetail.ContentType = "base64Encoded";
                                                 RequestDetailslist.Add(requestDetail);
@@ -265,17 +274,18 @@ namespace CrmSolutionLibrary
                                                 requestDetail = new RequestDetails();
                                                 requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
                                                 requestDetail.FileName = modifiedName;
-                                                requestDetail.FileDestinationPath = ConfigurationManager.AppSettings["JsDirectory"];
+                                                requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.JsDirectory.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.JsDirectory.Replace("\\", "/").Split('/')[1];
                                                 requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName);
                                                 requestDetail.ContentType = "base64Encoded";
                                                 RequestDetailslist.Add(requestDetail);
                                                 break;
 
                                             case "5":
+                                            case "6":
                                                 requestDetail = new RequestDetails();
                                                 requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
                                                 requestDetail.FileName = modifiedName;
-                                                requestDetail.FileDestinationPath = ConfigurationManager.AppSettings["ImagesDirectory"];
+                                                requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.ImagesDirectory.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.ImagesDirectory.Replace("\\", "/").Split('/')[1];
                                                 requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName);
                                                 requestDetail.ContentType = "base64Encoded";
                                                 RequestDetailslist.Add(requestDetail);
@@ -285,60 +295,34 @@ namespace CrmSolutionLibrary
                                 }
 
                                 #endregion
-
-                                //// solution.txt
-                                //requestDetail = new RequestDetails();
-                                //requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes());
-                                //requestDetail.FileName = "solution.txt";
-                                //requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionText.Replace("\\","/").Split('/')[0]+'/'+ Singleton.CrmConstantsInstance.SolutionText.Replace("\\", "/").Split('/')[1];
-                                //requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName);
-                                //RequestDetailslist.Add(requestDetail);
+                                //Adding txt files to repository
+                                #region update txt files in repo
 
                                 ////433710000 value for Yes
-                                string solutionCheckerPath = string.Empty;
-                                string timeTriggerPath = string.Empty;
-                                HashSet<string> hashSet = new HashSet<string>();
-
 
 
                                 if (item.CheckInSolution == true && item.IncludeInRelease == true)
                                 {
-                                    //solutionFilePath = Singleton.RepositoryConfigurationConstantsInstance.SolutionTextRelease;
-                                    //solutionCheckerPath = Singleton.RepositoryConfigurationConstantsInstance.SolutionCheckerPath;
-                                    //timeTriggerPath = Singleton.RepositoryConfigurationConstantsInstance.TimeTriggerPath;
 
-
-                                    string TempPath = Path.GetTempPath() + "DD365CICD";
-                                    if (!Directory.Exists(TempPath))
-                                    {
-                                        Directory.CreateDirectory(TempPath);
-                                    }
-
-
-                                    solutionFilePath = TempPath + "/solutions.txt";  
-                                    solutionCheckerPath = TempPath + "/config.txt";
-                                    timeTriggerPath = TempPath + "/trigger.txt";
                                     try
                                     {
-                                        if (File.Exists(solutionCheckerPath))
-                                        {
-                                            File.WriteAllText(solutionCheckerPath, string.Empty);
-
-                                        }
-                                        else
-                                        {
-                                            File.Create(solutionCheckerPath).Dispose();
-                                        }
+                                        //if (File.Exists(solutionCheckerPath))
+                                        //{
+                                        //    File.WriteAllText(solutionCheckerPath, string.Empty);
+                                        //}
+                                        //else
+                                        //{
+                                        //    File.Create(solutionCheckerPath).Dispose();
+                                        //}
+                                        //if (File.Exists(timeTriggerPath))
+                                        //{
+                                        //    File.WriteAllText(timeTriggerPath, string.Empty);
+                                        //}
+                                        //else
+                                        //{
+                                        //    File.Create(timeTriggerPath).Dispose();
+                                        //}
                                         File.WriteAllText(solutionCheckerPath, item.Solution.Id.ToString());
-
-                                        if (File.Exists(timeTriggerPath))
-                                        {
-                                            File.WriteAllText(timeTriggerPath, string.Empty);
-                                        }
-                                        else
-                                        {
-                                            File.Create(timeTriggerPath).Dispose();
-                                        }
                                         File.WriteAllText(timeTriggerPath, DateTime.Now.ToString("dddd, dd MMMM yyyy HH:mm:ss"));
                                     }
                                     catch (Exception ex)
@@ -356,19 +340,19 @@ namespace CrmSolutionLibrary
                                     //File.WriteAllText(solutionCheckerPath, item.Solution.Id.ToString());
                                     //File.WriteAllText(timeTriggerPath, DateTime.Now.ToString("dddd, dd MMMM yyyy HH:mm:ss"));
                                 }
-                                else if (item.CheckInSolution == true && item.IncludeInRelease == false) 
-                                {
-                                    solutionFilePath = Singleton.RepositoryConfigurationConstantsInstance.SolutionText;
-                                    if (File.Exists(solutionFilePath))
-                                    {
-                                        File.WriteAllText(solutionFilePath, string.Empty);
+                                //else if (item.CheckInSolution == true && item.IncludeInRelease == false)
+                                //{
+                                //    solutionFilePath = Singleton.RepositoryConfigurationConstantsInstance.SolutionText;
+                                //    if (File.Exists(solutionFilePath))
+                                //    {
+                                //        File.WriteAllText(solutionFilePath, string.Empty);
 
-                                    }
-                                    else
-                                    {
-                                        File.Create(solutionFilePath).Dispose();
-                                    }
-                                }
+                                //    }
+                                //    else
+                                //    {
+                                //        File.Create(solutionFilePath).Dispose();
+                                //    }
+                                //}
 
                                 if (item.SolutionsTxt == 433710000 && File.Exists(solutionFilePath))
                                 {
@@ -393,44 +377,44 @@ namespace CrmSolutionLibrary
                                 requestDetail = new RequestDetails();
                                 requestDetail.FileContent = File.ReadAllText(solutionFilePath);
                                 requestDetail.FileName = "solutions.txt";
-                                requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionText.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionText.Replace("\\", "/").Split('/')[1];
-                                requestDetail.ChangeType = "edit";// await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName);
+                                // based on below condition solution.txt file in release or checkin folder will be updated
+                                if (item.CheckInSolution == true && item.IncludeInRelease == false)
+                                    requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionText.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionText.Replace("\\", "/").Split('/')[1];
+                                else
+                                    requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionTextRelease.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionTextRelease.Replace("\\", "/").Split('/')[1];
+                                requestDetail.ChangeType = "edit";
                                 requestDetail.ContentType = "rawtext";
                                 RequestDetailslist.Add(requestDetail);
+                                //Only if checkin is true and include in release is true then we will update trigger.txt,config.txt in repo release folder
+                                if (item.CheckInSolution == true && item.IncludeInRelease == true)
+                                {
+                                    requestDetail = new RequestDetails();
+                                    requestDetail.FileContent = File.ReadAllText(timeTriggerPath);
+                                    requestDetail.FileName = "trigger.txt";
+                                    requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.TimeTriggerPath.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.TimeTriggerPath.Replace("\\", "/").Split('/')[1];
+                                    requestDetail.ChangeType = "edit";
+                                    requestDetail.ContentType = "rawtext";
+                                    RequestDetailslist.Add(requestDetail);
 
-                                requestDetail = new RequestDetails();
-                                requestDetail.FileContent = File.ReadAllText(timeTriggerPath);
-                                requestDetail.FileName = "trigger.txt";
-                                requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.TimeTriggerPath.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.TimeTriggerPath.Replace("\\", "/").Split('/')[1];
-                                requestDetail.ChangeType = "edit";//await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName);
-                                requestDetail.ContentType = "rawtext";
-                                RequestDetailslist.Add(requestDetail);
+                                    requestDetail = new RequestDetails();
+                                    requestDetail.FileContent = File.ReadAllText(solutionCheckerPath);
+                                    requestDetail.FileName = "config.txt";
+                                    requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionCheckerPath.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionCheckerPath.Replace("\\", "/").Split('/')[1];
+                                    requestDetail.ChangeType = "edit";
+                                    requestDetail.ContentType = "rawtext";
+                                    RequestDetailslist.Add(requestDetail);
+                                }
 
-                                requestDetail = new RequestDetails();
-                                requestDetail.FileContent = File.ReadAllText(solutionCheckerPath);
-                                requestDetail.FileName = "config.txt";
-                                requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionCheckerPath.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionCheckerPath.Replace("\\", "/").Split('/')[1];
-                                requestDetail.ChangeType = "edit";//await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName);
-                                requestDetail.ContentType = "rawtext";
-                                RequestDetailslist.Add(requestDetail);
+                                #endregion
 
-
-                                //config.txt
-                                //trigger.txt
-                                //seperating folder
-
-                                ////Old Code
-                                //GitDeploy.GitRepositoryManager gitRepositoryManager = this.ConfigureRepository(solutionFiles[0], committerName, committerEmail, authorEmail, solutionFilePath);
-                                // this.PushRepository(solutionFiles, committerName, committerEmail, authorEmail, solutionFilePath, gitRepositoryManager);
-                                //System.Threading.Thread.Sleep(timeOut);
                                 item.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushingToStatus;
                                 item.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
                                 item.Update();
 
-
-
                                 changeRequest.RequestDetails = RequestDetailslist;
+                                //Building file input payload to commit
                                 CommitObject cmObject = CreateCommit.FillCommitDetails(changeRequest);
+                                //Calling Api for Commiting changes to repository
                                 string comitURL = await CreateCommit.Commit(credentials, cmObject);
 
                                 System.Threading.Thread.Sleep(timeOut);
@@ -441,19 +425,13 @@ namespace CrmSolutionLibrary
                         }
 
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
 
+                        Console.WriteLine("Error : " + ex.Message.ToString());
                         throw;
                     }
-
-
-
-
                     System.Threading.Thread.Sleep(timeOut);
-
-
-
                 }
             }
             catch (Exception ex)

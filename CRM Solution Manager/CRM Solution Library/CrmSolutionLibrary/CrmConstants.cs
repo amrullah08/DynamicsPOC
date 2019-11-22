@@ -95,7 +95,7 @@ namespace CrmSolutionLibrary
             {
             }
         }
-
+       
         /// <summary>
         /// Gets or sets repository release directory containing CRM Solutions
         /// </summary>
@@ -232,7 +232,22 @@ namespace CrmSolutionLibrary
             }
         }
 
-        //Naresh
+        /// <summary>
+        /// Gets or sets repository url
+        /// </summary>
+        public string RepositoryRemoteName
+        {
+            get
+            {
+                return this.repositoryRemoteName;
+            }
+
+            set
+            {
+            }
+        }
+
+        
 
         /// <summary>
         /// Solution Packager Path

@@ -12,14 +12,14 @@ namespace CrmSolutionLibrary.AzureDevopsAPIs.RestClient
 {
     public class GetRepositoryDetails
     {
-        public static async Task<string> GetLastCommitDetails(string patToken, string sourceBranchName)
+        public static async Task<string> GetLastCommitDetails(string patToken, string sourceBranchName,string AzureDevopsBaseURL)
         {
             string responseContent = string.Empty;
 
             //use the httpclient
             using (var client = new HttpClient())
             {
-                HTTPClientHelper clientHelper = new HTTPClientHelper();
+                HTTPClientHelper clientHelper = new HTTPClientHelper(AzureDevopsBaseURL);
                 string baseURL = clientHelper.GetAzureDevopsLastCommitURL(sourceBranchName.Replace("refs/", ""));
                 client.BaseAddress = new Uri(baseURL);
                 client.DefaultRequestHeaders.Accept.Clear();
@@ -41,13 +41,13 @@ namespace CrmSolutionLibrary.AzureDevopsAPIs.RestClient
             return  json?["value"][0]["objectId"].ToString();
         }
 
-        public static async Task<List<string>> GetBranches(string patToken)
+        public static async Task<List<string>> GetBranches(string patToken, string AzureDevopsBaseURL)
         {
             string responseContent = string.Empty;
             //use the httpclient
             using (var client = new HttpClient())
             {
-                HTTPClientHelper clientHelper = new HTTPClientHelper();
+                HTTPClientHelper clientHelper = new HTTPClientHelper(AzureDevopsBaseURL);
                 string baseURL = clientHelper.GetAzureDevopsRefsURL();
                 client.BaseAddress = new Uri(baseURL);
                 client.DefaultRequestHeaders.Accept.Clear();
@@ -70,14 +70,14 @@ namespace CrmSolutionLibrary.AzureDevopsAPIs.RestClient
         }
 
 
-        public static async Task<string> GetItemDetails(string patToken, string ItemRootPath,string ItemFullPath)
+        public static async Task<string> GetItemDetails(string patToken, string ItemRootPath,string ItemFullPath,string AzureDevopsBaseURL)
         {
             string responseContent = string.Empty;
 
             //use the httpclient
             using (var client = new HttpClient())
             {
-                HTTPClientHelper clientHelper = new HTTPClientHelper();
+                HTTPClientHelper clientHelper = new HTTPClientHelper(AzureDevopsBaseURL);
                 string baseURL = clientHelper.GetAzureDevopsItemURL(ItemRootPath.Replace("refs/", ""));
                 client.BaseAddress = new Uri(baseURL);
                 client.DefaultRequestHeaders.Accept.Clear();

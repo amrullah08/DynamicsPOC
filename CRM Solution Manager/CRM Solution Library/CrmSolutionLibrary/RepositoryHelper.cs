@@ -103,7 +103,8 @@ namespace CrmSolutionLibrary
         /// <param name="committerEmail">committer email</param>
         /// <param name="authorEmail">author email</param>
         /// <param name="mode">mode for flow</param>
-        public async void TryUpdateToRepository(string solutionUniqueName, string committerName, string committerEmail, string authorEmail, string mode)
+        /// public async void TryUpdateToRepository(string solutionUniqueName, string committerName, string committerEmail, string authorEmail, string mode)
+        public async void TryUpdateToRepository(string solutionUniqueName, string mode)
         {
             try
             {
@@ -115,7 +116,9 @@ namespace CrmSolutionLibrary
                                 Singleton.CrmConstantsInstance.OrgServiceUrl,
                                 Singleton.CrmConstantsInstance.DynamicsUserName,
                                 Singleton.CrmConstantsInstance.DynamicsPassword,
-                                Singleton.CrmConstantsInstance.SolutionPackagerPath);
+                                Singleton.CrmConstantsInstance.SolutionPackagerPath
+
+                                );
 
                 int timeOut = Convert.ToInt32(Singleton.CrmConstantsInstance.SleepTimeoutInMillis);
                 var solutionFiles = crmSolutionHelper.DownloadSolutionFile(solutionUniqueName, mode);
@@ -127,10 +130,7 @@ namespace CrmSolutionLibrary
                 if (solutionFiles.Count > 0)
                 {
                     string credentials = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(string.Format("{0}:{1}", "", ConfigurationManager.AppSettings["GitPassword"].ToString())));
-                    string branchName = "refs/heads/" + Singleton.CrmConstantsInstance.BranchName;
-                    List<string> BranchesNames = await GetRepositoryDetails.GetBranches(credentials);
-                    bool BrachExists = BranchesNames.Contains(branchName);
-
+                    
                     HashSet<string> hashSet = new HashSet<string>();
                     //creating temp files
                     #region creating temp files
@@ -139,7 +139,7 @@ namespace CrmSolutionLibrary
                     {
                         Directory.CreateDirectory(TempPath);
                     }
-                   
+
                     solutionFilePath = TempPath + "/solutions.txt";
                     string solutionCheckerPath = TempPath + "/config.txt";
                     string timeTriggerPath = TempPath + "/trigger.txt";
@@ -174,253 +174,281 @@ namespace CrmSolutionLibrary
                     {
                         foreach (var item in solutionFiles)
                         {
-                            ChangeRequest changeRequest = new ChangeRequest();
-                            changeRequest.Comments = "Committed source instance solution files to reposotory.";
-                            changeRequest.SourceBranchName = branchName;
-                            //Getting Last commit id from repository
-                            string lastcomitid = await GetRepositoryDetails.GetLastCommitDetails(credentials, branchName);
-                            changeRequest.Lastcomitid = lastcomitid;
-                            List<RequestDetails> RequestDetailslist = new List<RequestDetails>();
-                            if (!BrachExists)
+
+                            try
                             {
-                                //if invalid branch name given in configuration settings in CRM source instance
-                                Console.WriteLine("Invalid Branch Name" + Singleton.CrmConstantsInstance.BranchName);
-                                item.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.InvalidBranchName;
-                                item.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
-                                item.Update();
-                                return;
-                            }
-                            if (item.CheckInSolution)
-                            {
-                                //Adding solution files to repository 
-                                #region update solutions zip files and etc to repo
+                                string GitRepoUrl = item.GitRepoUrl ?? Singleton.CrmConstantsInstance.RepositoryUrl;
+                                //string RemoteName = item.RemoteName ?? Singleton.CrmConstantsInstance.RepositoryRemoteName;
+                                string branchName = item.BranchName ?? Singleton.CrmConstantsInstance.BranchName;
+                                branchName = "refs/heads/" + branchName;
+                                string RepoJSFolder = item.RepoJSFolder ?? Singleton.CrmConstantsInstance.JsDirectory;
+                                string RepoHTMLFolder = item.RepoHTMLFolder ?? Singleton.CrmConstantsInstance.HtmlDirectory;
+                                string RepoImagesFolder = item.RepoImagesFolder ?? Singleton.CrmConstantsInstance.ImagesDirectory;
+                                string RepoSolutionFolder = item.RepoSolutionFolder ?? Singleton.CrmConstantsInstance.SolutionFolder;
 
-                                string fileUnmanaged = string.Empty;
-                                string fileManaged = string.Empty;
+                                string AzureDevopsBaseURL = "https://dev.azure.com/{organization}/{project}/_apis/git/repositories/{repositoryName}/{action}?api-version=5.0";
+                                AzureDevopsBaseURL = AzureDevopsBaseURL.Replace("{organization}", GitRepoUrl.Split('/')[3]);
+                                AzureDevopsBaseURL = AzureDevopsBaseURL.Replace("{project}", GitRepoUrl.Split('/')[4]);
+                                AzureDevopsBaseURL = AzureDevopsBaseURL.Replace("{repositoryName}", GitRepoUrl.Split('/')[6]);
 
-                                if (item.DoYouWantToCheckInSolutionZipFiles == true)
+                                List<string> BranchesNames = await GetRepositoryDetails.GetBranches(credentials, AzureDevopsBaseURL);
+                                bool BrachExists = BranchesNames.Contains(branchName);
+                                if (!BrachExists)
                                 {
-                                    fileUnmanaged = item.SolutionFilePath + item.SolutionUniqueName + "_.zip";
-                                    fileManaged = item.SolutionFilePathManaged + item.SolutionUniqueName + "_managed_.zip";
+                                    //if invalid branch name given in configuration settings in CRM source instance
+                                    Console.WriteLine("Invalid Branch Name" + Singleton.CrmConstantsInstance.BranchName);
+                                    item.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.InvalidBranchName;
+                                    item.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
+                                    item.Update();
+                                    return;
                                 }
+                                ChangeRequest changeRequest = new ChangeRequest();
+                                changeRequest.Comments = "Committed source instance solution files to reposotory.";
+                                changeRequest.SourceBranchName = branchName;
+                                //Getting Last commit id from repository
+                                string lastcomitid = await GetRepositoryDetails.GetLastCommitDetails(credentials, branchName, AzureDevopsBaseURL);
+                                changeRequest.Lastcomitid = lastcomitid;
+                                List<RequestDetails> RequestDetailslist = new List<RequestDetails>();
 
-                                Console.WriteLine("Committing solutions");
-
-                                if (item.DoYouWantToCheckInSolutionZipFiles == true)
+                                if (item.CheckInSolution)
                                 {
-                                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy managed" + "<br>");
-                                    File.Copy(item.SolutionFilePathManaged, fileManaged, true);
-                                    Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy unmanaged" + "<br>");
-                                    File.Copy(item.SolutionFilePath, fileUnmanaged, true);
-                                }
-                                //unmanaged solution zip file
-                                RequestDetails requestDetail = new RequestDetails();
-                                requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(fileUnmanaged));
-                                requestDetail.FileName = item.SolutionUniqueName + "_.zip";
-                                requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionFolder.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionFolder.Replace("\\", "/").Split('/')[1];
-                                requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName);
-                                requestDetail.ContentType = "base64Encoded";
-                                RequestDetailslist.Add(requestDetail);
-                                //managed solution zip file
-                                requestDetail = new RequestDetails();
-                                requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(fileManaged));
-                                requestDetail.FileName = item.SolutionUniqueName + "_managed_.zip";
-                                requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionFolder.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionFolder.Replace("\\", "/").Split('/')[1];
-                                requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName);
-                                requestDetail.ContentType = "base64Encoded";
-                                RequestDetailslist.Add(requestDetail);
+                                    //Adding solution files to repository 
+                                    #region update solutions zip files and etc to repo
 
-                                #endregion
-                                // Adding html,js,images from web resources folder of extracted solution files to repository.
-                                #region update webResources to repo
+                                    string fileUnmanaged = string.Empty;
+                                    string fileManaged = string.Empty;
 
-                                string webResources = item.SolutionExtractionPath + "\\WebResources";
-
-                                //  string localFolder = Singleton.RepositoryConfigurationConstantsInstance.LocalDirectory;
-
-                                if (Directory.Exists(webResources))
-                                {
-                                    foreach (var dataFile in Directory.GetFiles(webResources, "*.data.xml", SearchOption.AllDirectories))
+                                    if (item.DoYouWantToCheckInSolutionZipFiles == true)
                                     {
-                                        XmlDocument xmlDoc = new XmlDocument();
-                                        xmlDoc.Load(dataFile);
-                                        var webResourceType = xmlDoc.SelectSingleNode("//WebResource/WebResourceType").InnerText; // content type of files
-                                        string webResournceName = xmlDoc.SelectSingleNode("//WebResource/Name").InnerText;
-                                        string modifiedName = string.Empty;
-                                        string[] webList = Regex.Split(webResournceName, "/");
-                                        if (webList.Length != 0)
+                                        fileUnmanaged = item.SolutionFilePath + item.SolutionUniqueName + "_.zip";
+                                        fileManaged = item.SolutionFilePathManaged + item.SolutionUniqueName + "_managed_.zip";
+                                    }
+
+                                    Console.WriteLine("Committing solutions");
+
+                                    if (item.DoYouWantToCheckInSolutionZipFiles == true)
+                                    {
+                                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy managed" + "<br>");
+                                        File.Copy(item.SolutionFilePathManaged, fileManaged, true);
+                                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" Copy unmanaged" + "<br>");
+                                        File.Copy(item.SolutionFilePath, fileUnmanaged, true);
+                                    }
+                                    //unmanaged solution zip file
+                                    RequestDetails requestDetail = new RequestDetails();
+                                    requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(fileUnmanaged));
+                                    requestDetail.FileName = item.SolutionUniqueName + "_.zip";
+                                    requestDetail.FileDestinationPath = RepoSolutionFolder.Replace("\\", "/").Split('/')[0] + '/' + RepoSolutionFolder.Replace("\\", "/").Split('/')[1];
+                                    requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
+                                    requestDetail.ContentType = "base64Encoded";
+                                    RequestDetailslist.Add(requestDetail);
+                                    //managed solution zip file
+                                    requestDetail = new RequestDetails();
+                                    requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(fileManaged));
+                                    requestDetail.FileName = item.SolutionUniqueName + "_managed_.zip";
+                                    requestDetail.FileDestinationPath = RepoSolutionFolder.Replace("\\", "/").Split('/')[0] + '/' + RepoSolutionFolder.Replace("\\", "/").Split('/')[1];
+                                    requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
+                                    requestDetail.ContentType = "base64Encoded";
+                                    RequestDetailslist.Add(requestDetail);
+
+                                    #endregion
+                                    // Adding html,js,images from web resources folder of extracted solution files to repository.
+                                    #region update webResources to repo
+
+                                    string webResources = item.SolutionExtractionPath + "\\WebResources";
+
+                                    //  string localFolder = Singleton.RepositoryConfigurationConstantsInstance.LocalDirectory;
+
+                                    if (Directory.Exists(webResources))
+                                    {
+                                        foreach (var dataFile in Directory.GetFiles(webResources, "*.data.xml", SearchOption.AllDirectories))
                                         {
-                                            modifiedName = webList[webList.Length - 1];
-                                        }
+                                            XmlDocument xmlDoc = new XmlDocument();
+                                            xmlDoc.Load(dataFile);
+                                            var webResourceType = xmlDoc.SelectSingleNode("//WebResource/WebResourceType").InnerText; // content type of files
+                                            string webResournceName = xmlDoc.SelectSingleNode("//WebResource/Name").InnerText;
+                                            string modifiedName = string.Empty;
+                                            string[] webList = Regex.Split(webResournceName, "/");
+                                            if (webList.Length != 0)
+                                            {
+                                                modifiedName = webList[webList.Length - 1];
+                                            }
 
-                                        if (string.IsNullOrEmpty(modifiedName))
-                                        {
-                                            modifiedName = webResournceName;
-                                        }
+                                            if (string.IsNullOrEmpty(modifiedName))
+                                            {
+                                                modifiedName = webResournceName;
+                                            }
 
-                                        switch (webResourceType)
-                                        {
-                                            case "1":
-                                                requestDetail = new RequestDetails();
-                                                requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
-                                                requestDetail.FileName = modifiedName;
-                                                requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.HtmlDirectory.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.HtmlDirectory.Replace("\\", "/").Split('/')[1];
-                                                requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName);
-                                                requestDetail.ContentType = "base64Encoded";
-                                                RequestDetailslist.Add(requestDetail);
-                                                break;
+                                            switch (webResourceType)
+                                            {
+                                                case "1":
+                                                    requestDetail = new RequestDetails();
+                                                    requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
+                                                    requestDetail.FileName = modifiedName;
+                                                    requestDetail.FileDestinationPath = RepoHTMLFolder.Replace("\\", "/").Split('/')[0] + '/' + RepoHTMLFolder.Replace("\\", "/").Split('/')[1];
+                                                    requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
+                                                    requestDetail.ContentType = "base64Encoded";
+                                                    RequestDetailslist.Add(requestDetail);
+                                                    break;
 
-                                            case "3":
-                                                requestDetail = new RequestDetails();
-                                                requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
-                                                requestDetail.FileName = modifiedName;
-                                                requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.JsDirectory.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.JsDirectory.Replace("\\", "/").Split('/')[1];
-                                                requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName);
-                                                requestDetail.ContentType = "base64Encoded";
-                                                RequestDetailslist.Add(requestDetail);
-                                                break;
+                                                case "3":
+                                                    requestDetail = new RequestDetails();
+                                                    requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
+                                                    requestDetail.FileName = modifiedName;
+                                                    requestDetail.FileDestinationPath = RepoJSFolder.Replace("\\", "/").Split('/')[0] + '/' + RepoJSFolder.Replace("\\", "/").Split('/')[1];
+                                                    requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
+                                                    requestDetail.ContentType = "base64Encoded";
+                                                    RequestDetailslist.Add(requestDetail);
+                                                    break;
 
-                                            case "5":
-                                            case "6":
-                                                requestDetail = new RequestDetails();
-                                                requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
-                                                requestDetail.FileName = modifiedName;
-                                                requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.ImagesDirectory.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.ImagesDirectory.Replace("\\", "/").Split('/')[1];
-                                                requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName);
-                                                requestDetail.ContentType = "base64Encoded";
-                                                RequestDetailslist.Add(requestDetail);
-                                                break;
+                                                case "5":
+                                                case "6":
+                                                    requestDetail = new RequestDetails();
+                                                    requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
+                                                    requestDetail.FileName = modifiedName;
+                                                    requestDetail.FileDestinationPath = RepoImagesFolder.Replace("\\", "/").Split('/')[0] + '/' + RepoImagesFolder.Replace("\\", "/").Split('/')[1];
+                                                    requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
+                                                    requestDetail.ContentType = "base64Encoded";
+                                                    RequestDetailslist.Add(requestDetail);
+                                                    break;
+                                            }
                                         }
                                     }
-                                }
 
-                                #endregion
-                                //Adding txt files to repository
-                                #region update txt files in repo
+                                    #endregion
+                                    //Adding txt files to repository
+                                    #region update txt files in repo
 
-                                ////433710000 value for Yes
+                                    ////433710000 value for Yes
 
 
-                                if (item.CheckInSolution == true && item.IncludeInRelease == true)
-                                {
-
-                                    try
+                                    if (item.IncludeInRelease == true)
                                     {
-                                        //if (File.Exists(solutionCheckerPath))
+
+                                        try
+                                        {
+                                            //if (File.Exists(solutionCheckerPath))
+                                            //{
+                                            //    File.WriteAllText(solutionCheckerPath, string.Empty);
+                                            //}
+                                            //else
+                                            //{
+                                            //    File.Create(solutionCheckerPath).Dispose();
+                                            //}
+                                            //if (File.Exists(timeTriggerPath))
+                                            //{
+                                            //    File.WriteAllText(timeTriggerPath, string.Empty);
+                                            //}
+                                            //else
+                                            //{
+                                            //    File.Create(timeTriggerPath).Dispose();
+                                            //}
+                                            File.WriteAllText(solutionCheckerPath, item.Solution.Id.ToString());
+                                            File.WriteAllText(timeTriggerPath, DateTime.Now.ToString("dddd, dd MMMM yyyy HH:mm:ss"));
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message);
+                                            Console.WriteLine(ex.Message);
+                                        }
+
+                                        //if (item.SolutionsTxt == 433710000 && File.Exists(solutionFilePath))  //override existing data
                                         //{
                                         //    File.WriteAllText(solutionCheckerPath, string.Empty);
-                                        //}
-                                        //else
-                                        //{
-                                        //    File.Create(solutionCheckerPath).Dispose();
-                                        //}
-                                        //if (File.Exists(timeTriggerPath))
-                                        //{
                                         //    File.WriteAllText(timeTriggerPath, string.Empty);
                                         //}
-                                        //else
-                                        //{
-                                        //    File.Create(timeTriggerPath).Dispose();
-                                        //}
-                                        File.WriteAllText(solutionCheckerPath, item.Solution.Id.ToString());
-                                        File.WriteAllText(timeTriggerPath, DateTime.Now.ToString("dddd, dd MMMM yyyy HH:mm:ss"));
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message);
-                                        Console.WriteLine(ex.Message);
-                                    }
 
-                                    //if (item.SolutionsTxt == 433710000 && File.Exists(solutionFilePath))  //override existing data
+                                        //File.WriteAllText(solutionCheckerPath, item.Solution.Id.ToString());
+                                        //File.WriteAllText(timeTriggerPath, DateTime.Now.ToString("dddd, dd MMMM yyyy HH:mm:ss"));
+                                    }
+                                    //else if (item.CheckInSolution == true && item.IncludeInRelease == false)
                                     //{
-                                    //    File.WriteAllText(solutionCheckerPath, string.Empty);
-                                    //    File.WriteAllText(timeTriggerPath, string.Empty);
+                                    //    solutionFilePath = Singleton.RepositoryConfigurationConstantsInstance.SolutionText;
+                                    //    if (File.Exists(solutionFilePath))
+                                    //    {
+                                    //        File.WriteAllText(solutionFilePath, string.Empty);
+
+                                    //    }
+                                    //    else
+                                    //    {
+                                    //        File.Create(solutionFilePath).Dispose();
+                                    //    }
                                     //}
 
-                                    //File.WriteAllText(solutionCheckerPath, item.Solution.Id.ToString());
-                                    //File.WriteAllText(timeTriggerPath, DateTime.Now.ToString("dddd, dd MMMM yyyy HH:mm:ss"));
-                                }
-                                //else if (item.CheckInSolution == true && item.IncludeInRelease == false)
-                                //{
-                                //    solutionFilePath = Singleton.RepositoryConfigurationConstantsInstance.SolutionText;
-                                //    if (File.Exists(solutionFilePath))
-                                //    {
-                                //        File.WriteAllText(solutionFilePath, string.Empty);
+                                    if (item.SolutionsTxt == 433710000 && File.Exists(solutionFilePath))
+                                    {
+                                        File.WriteAllText(solutionFilePath, string.Empty);
+                                        hashSet.Clear();
+                                    }
 
-                                //    }
-                                //    else
-                                //    {
-                                //        File.Create(solutionFilePath).Dispose();
-                                //    }
-                                //}
+                                    this.PopulateHashset(solutionFilePath, hashSet);
+                                    if (!hashSet.Contains(item.SolutionFileZipName) && item.IncludeInRelease)
+                                    {
+                                        hashSet.Add(item.SolutionFileZipName);
+                                    }
 
-                                if (item.SolutionsTxt == 433710000 && File.Exists(solutionFilePath))
-                                {
-                                    File.WriteAllText(solutionFilePath, string.Empty);
-                                    hashSet.Clear();
-                                }
+                                    this.SaveHashSet(solutionFilePath, hashSet);
 
-                                this.PopulateHashset(solutionFilePath, hashSet);
-                                if (!hashSet.Contains(item.SolutionFileZipName) && item.IncludeInRelease)
-                                {
-                                    hashSet.Add(item.SolutionFileZipName);
-                                }
+                                    //if (item.SolutionsTxt == 433710000 && File.Exists(solutionFilePath))
+                                    //{
+                                    // File.WriteAllText(solutionFilePath, string.Empty);
 
-                                this.SaveHashSet(solutionFilePath, hashSet);
+                                    //}
 
-                                if (item.SolutionsTxt == 433710000 && File.Exists(solutionFilePath))
-                                {
-                                    File.WriteAllText(solutionFilePath, string.Empty);
-
-                                }
-
-                                requestDetail = new RequestDetails();
-                                requestDetail.FileContent = File.ReadAllText(solutionFilePath);
-                                requestDetail.FileName = "solutions.txt";
-                                // based on below condition solution.txt file in release or checkin folder will be updated
-                                if (item.CheckInSolution == true && item.IncludeInRelease == false)
-                                    requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionText.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionText.Replace("\\", "/").Split('/')[1];
-                                else
-                                    requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionTextRelease.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionTextRelease.Replace("\\", "/").Split('/')[1];
-                                requestDetail.ChangeType = "edit";
-                                requestDetail.ContentType = "rawtext";
-                                RequestDetailslist.Add(requestDetail);
-                                //Only if checkin is true and include in release is true then we will update trigger.txt,config.txt in repo release folder
-                                if (item.CheckInSolution == true && item.IncludeInRelease == true)
-                                {
                                     requestDetail = new RequestDetails();
-                                    requestDetail.FileContent = File.ReadAllText(timeTriggerPath);
-                                    requestDetail.FileName = "trigger.txt";
-                                    requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.TimeTriggerPath.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.TimeTriggerPath.Replace("\\", "/").Split('/')[1];
+                                    requestDetail.FileContent = File.ReadAllText(solutionFilePath);
+                                    requestDetail.FileName = "solutions.txt";
+                                    // based on below condition solution.txt file in release or checkin folder will be updated
+                                    if (item.CheckInSolution == true && item.IncludeInRelease == false)
+                                        requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionText.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionText.Replace("\\", "/").Split('/')[1];
+                                    else
+                                        requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionTextRelease.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionTextRelease.Replace("\\", "/").Split('/')[1];
                                     requestDetail.ChangeType = "edit";
                                     requestDetail.ContentType = "rawtext";
                                     RequestDetailslist.Add(requestDetail);
+                                    //Only if checkin is true and include in release is true then we will update trigger.txt,config.txt in repo release folder
+                                    if (item.CheckInSolution == true && item.IncludeInRelease == true)
+                                    {
+                                        requestDetail = new RequestDetails();
+                                        requestDetail.FileContent = File.ReadAllText(timeTriggerPath);
+                                        requestDetail.FileName = "trigger.txt";
+                                        requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.TimeTriggerPath.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.TimeTriggerPath.Replace("\\", "/").Split('/')[1];
+                                        requestDetail.ChangeType = "edit";
+                                        requestDetail.ContentType = "rawtext";
+                                        RequestDetailslist.Add(requestDetail);
 
-                                    requestDetail = new RequestDetails();
-                                    requestDetail.FileContent = File.ReadAllText(solutionCheckerPath);
-                                    requestDetail.FileName = "config.txt";
-                                    requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionCheckerPath.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionCheckerPath.Replace("\\", "/").Split('/')[1];
-                                    requestDetail.ChangeType = "edit";
-                                    requestDetail.ContentType = "rawtext";
-                                    RequestDetailslist.Add(requestDetail);
+                                        requestDetail = new RequestDetails();
+                                        requestDetail.FileContent = File.ReadAllText(solutionCheckerPath);
+                                        requestDetail.FileName = "config.txt";
+                                        requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionCheckerPath.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionCheckerPath.Replace("\\", "/").Split('/')[1];
+                                        requestDetail.ChangeType = "edit";
+                                        requestDetail.ContentType = "rawtext";
+                                        RequestDetailslist.Add(requestDetail);
+                                    }
+
+                                    #endregion
+
+                                    item.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushingToStatus;
+                                    item.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
+                                    item.Update();
+
+                                    changeRequest.RequestDetails = RequestDetailslist;
+                                    //Building file input payload to commit
+                                    CommitObject cmObject = CreateCommit.FillCommitDetails(changeRequest);
+                                    //Calling Api for Commiting changes to repository
+                                    string comitURL = await CreateCommit.Commit(credentials, cmObject, AzureDevopsBaseURL);
+
+                                    item.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushToRepositorySuccessStatus;
+                                    item.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
+                                    item.Update();
                                 }
-
-                                #endregion
-
-                                item.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushingToStatus;
+                            }
+                            catch (Exception ex)
+                            {
+                                item.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.InvalidRepoConfiguration;
+                                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(ex.Message);
                                 item.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
                                 item.Update();
-
-                                changeRequest.RequestDetails = RequestDetailslist;
-                                //Building file input payload to commit
-                                CommitObject cmObject = CreateCommit.FillCommitDetails(changeRequest);
-                                //Calling Api for Commiting changes to repository
-                                string comitURL = await CreateCommit.Commit(credentials, cmObject);
-
-                                System.Threading.Thread.Sleep(timeOut);
-                                item.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushToRepositorySuccessStatus;
-                                item.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
-                                item.Update();
+                                //throw;
                             }
                         }
 

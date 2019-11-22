@@ -24,7 +24,7 @@ namespace CrmSolutionLibrary.AzureDevopsAPIs.RestClient
         /// </summary>
         /// <param name="commitInputDetails"></param>
         /// <returns></returns>
-        public static async Task<string> Commit(string patToken, CommitObject commitInputDetails)
+        public static async Task<string> Commit(string patToken, CommitObject commitInputDetails, string AzureDevopsBaseURL)
         {
             string responseContent = string.Empty;
 
@@ -33,7 +33,7 @@ namespace CrmSolutionLibrary.AzureDevopsAPIs.RestClient
                 //use the httpclient
                 using (var client = new HttpClient())
                 {
-                    HTTPClientHelper clientHelper = new HTTPClientHelper();
+                    HTTPClientHelper clientHelper = new HTTPClientHelper(AzureDevopsBaseURL);
                     client.BaseAddress = new Uri(clientHelper.GetAzureDevopsPushURL());
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));

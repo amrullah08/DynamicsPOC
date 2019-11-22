@@ -6,12 +6,13 @@ namespace CrmSolutionLibrary
     public class HTTPClientHelper
     {
         private string httpURL = "";
-        public HTTPClientHelper()
+        public HTTPClientHelper(string AzureDevopsBaseURL)
         {
-            this.httpURL = ConfigurationManager.AppSettings["AzureDevopsBaseURL"];
-            this.httpURL = this.httpURL.Replace("{organization}", ConfigurationManager.AppSettings["AzureDevopsOrganization"]);
-            this.httpURL = this.httpURL.Replace("{project}", ConfigurationManager.AppSettings["AzureDevopsProject"]);
-            this.httpURL = this.httpURL.Replace("{repositoryName}", ConfigurationManager.AppSettings["AzureDevopsRepositoryName"]);
+            this.httpURL = AzureDevopsBaseURL;
+            //this.httpURL = ConfigurationManager.AppSettings["AzureDevopsBaseURL"];
+            //this.httpURL = this.httpURL.Replace("{organization}", ConfigurationManager.AppSettings["AzureDevopsOrganization"]);
+            //this.httpURL = this.httpURL.Replace("{project}", ConfigurationManager.AppSettings["AzureDevopsProject"]);
+            //this.httpURL = this.httpURL.Replace("{repositoryName}", ConfigurationManager.AppSettings["AzureDevopsRepositoryName"]);
         }
         public string GetAzureDevopsPushURL()
         {

@@ -135,9 +135,14 @@ namespace CrmSolutionLibrary
         public const string SourceControlQueuemPushToRepositorySuccessStatus = "Successfully Pushed To Repository";
 
         /// <summary>
+        /// Value for InvalidBranchName 
+        /// </summary>
+        public const string InvalidBranchName = "Check In Failed,Invalid Branch Name";
+
+        /// <summary>
         /// Value for successful push to repo status
         /// </summary>
-        public const string InvalidBranchName = "Invalid Branch Name";
+        public const string InvalidRepoConfiguration = "Check In Failed,Invalid Repository Settings";
 
         /// <summary>
         /// Value for Source Control for GIT
@@ -318,6 +323,10 @@ namespace CrmSolutionLibrary
         ///  branch name
         /// </summary>
         public const string BranchName = "BranchName";
+        /// <summary>
+        ///  branch name
+        /// </summary>
+        public const string AzureDevopsBaseURL = "AzureDevopsBaseURL";
 
         /// <summary>
         ///  power apps checker azure client app id

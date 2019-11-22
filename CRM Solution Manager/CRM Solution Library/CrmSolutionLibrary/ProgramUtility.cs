@@ -65,6 +65,7 @@ namespace CrmSolutionLibrary
         /// <param name="args">args for the method</param>
         public static bool UpdateRepository(string[] args)
         {
+
             string mode = string.Empty;
             bool retvalue = false;
             try
@@ -137,7 +138,8 @@ namespace CrmSolutionLibrary
                 configurationSettings = Singleton.RepositoryConfigurationConstantsInstance;
                 Singleton.RepositoryConfigurationConstantsInstance.ResetLocalDirectory();
                 configurationSettings.SetRepositoryConfigurationProperties(configurationSettingsList);
-                Singleton.RepositoryHelperInstance.TryUpdateToRepository(solutionUniqueName, committerName, committerEmail, authorEmail, mode);
+                //Singleton.RepositoryHelperInstance.TryUpdateToRepository(solutionUniqueName, committerName, committerEmail, authorEmail, mode);
+                Singleton.RepositoryHelperInstance.TryUpdateToRepository(solutionUniqueName, mode);
                 retvalue = true;
             }
             catch (Exception ex)

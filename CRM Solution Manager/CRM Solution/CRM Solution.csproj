@@ -326,7 +326,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
-    <None Include="Properties\PublishProfiles\CICDAutomationTools - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\CICDTool - Web Deploy.pubxml" />
     <None Include="Properties\webjob-publish-settings.json" />
     <None Include="Settings.StyleCop" />
     <None Include="SolutionChecker.ps1" />

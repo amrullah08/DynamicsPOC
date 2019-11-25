@@ -40,6 +40,8 @@ namespace CrmSolution
 
 
             bool result=ProgramUtility.UpdateRepository(args);
+            Console.WriteLine("job completed");
+            Console.ReadLine();
 
         }
     }

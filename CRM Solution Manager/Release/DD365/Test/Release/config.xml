@@ -1,0 +1,9 @@
+<entities >
+  <entity name="syed_configurationsettings" displayname="Configuration Settings" etc="10072" primaryidfield="syed_configurationsettingsid" primarynamefield="syed_name" disableplugins="false">
+    <fields>
+      <field displayname="Description" name="syed_description" type="string" customfield="true" />
+      <field displayname="Value" name="syed_value" type="string" customfield="true" />
+      <field displayname="Configuration Key" name="syed_name" type="string" customfield="true" />
+    </fields>
+  </entity>
+</entities>

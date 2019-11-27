@@ -1,0 +1,27 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "AzureWebJobsDashboard": "UseDevelopmentStorage=true",
+    "CRMSourceInstanceUrl": "",
+    "CRMSourceServiceUrl": "",
+    "CRMSourceUserName": "",
+    "CRMSourcePassword": "",
+    "GitUserName": "",
+    "GitPassword": "",
+    "TFSUser": "",
+    "TFSPassword": "",
+    "ClientApplicationSecret": "Iwb20H]R17Bt:d@yWGSyuzGH=Cad86U6",
+    "SolutionCheckerAppClientId": "b92c4c78-376f-4029-b560-847a2cca1635",
+    "TenantId": "d9a1b506-a006-4359-966b-696cb2dad64d",
+    "BASESECRETURI": "https://cicdtoolkeys.vault.azure.net/"
+    ////devops rest api configurations
+    //"AzureDevopsBaseURL": "https://dev.azure.com/{organization}/{project}/_apis/git/repositories/{repositoryName}/{action}?api-version=5.0",
+    //"AzureDevopsOrganization": "ReachHigh",
+    //"AzureDevopsProject": "DD365",
+    //"AzureDevopsRepositoryName": "DD365"
+    //"MergeBranch": "heads/master" // for PullRequestCreation
+  }
+}
+
+ 

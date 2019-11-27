@@ -16,7 +16,11 @@
 
         -   Click on Add permission, select azure keyvault select
             > user\_impersonation 
-
+-Create Storage account and app service hostping plan to deploye azure function in azure portal 
+       -   Login to Azure portal with valid subscription 
+       -   click on menu and click on StorageAccounts link and create a new storage account
+       - go to app service plans and create a new app service hosting plan 
+       
 >  
 
 -   Create a PAT token, in the DevOps go to extreme right,select your

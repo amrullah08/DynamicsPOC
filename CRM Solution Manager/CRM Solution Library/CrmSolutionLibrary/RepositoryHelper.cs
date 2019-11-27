@@ -237,7 +237,7 @@ namespace CrmSolutionLibrary
                                     RequestDetails requestDetail = new RequestDetails();
                                     requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(fileUnmanaged));
                                     requestDetail.FileName = item.SolutionUniqueName + "_.zip";
-                                    requestDetail.FileDestinationPath = RepoSolutionFolder.Replace("\\", "/").Split('/')[0] + '/' + RepoSolutionFolder.Replace("\\", "/").Split('/')[1];
+                                    requestDetail.FileDestinationPath = RepoSolutionFolder.Replace("\\", "/");
                                     requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
                                     requestDetail.ContentType = "base64Encoded";
                                     RequestDetailslist.Add(requestDetail);
@@ -245,7 +245,7 @@ namespace CrmSolutionLibrary
                                     requestDetail = new RequestDetails();
                                     requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(fileManaged));
                                     requestDetail.FileName = item.SolutionUniqueName + "_managed_.zip";
-                                    requestDetail.FileDestinationPath = RepoSolutionFolder.Replace("\\", "/").Split('/')[0] + '/' + RepoSolutionFolder.Replace("\\", "/").Split('/')[1];
+                                    requestDetail.FileDestinationPath = RepoSolutionFolder.Replace("\\", "/");
                                     requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
                                     requestDetail.ContentType = "base64Encoded";
                                     RequestDetailslist.Add(requestDetail);
@@ -284,7 +284,7 @@ namespace CrmSolutionLibrary
                                                     requestDetail = new RequestDetails();
                                                     requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
                                                     requestDetail.FileName = modifiedName;
-                                                    requestDetail.FileDestinationPath = RepoHTMLFolder.Replace("\\", "/").Split('/')[0] + '/' + RepoHTMLFolder.Replace("\\", "/").Split('/')[1];
+                                                    requestDetail.FileDestinationPath = RepoHTMLFolder.Replace("\\", "/");
                                                     requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
                                                     requestDetail.ContentType = "base64Encoded";
                                                     RequestDetailslist.Add(requestDetail);
@@ -294,7 +294,7 @@ namespace CrmSolutionLibrary
                                                     requestDetail = new RequestDetails();
                                                     requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
                                                     requestDetail.FileName = modifiedName;
-                                                    requestDetail.FileDestinationPath = RepoJSFolder.Replace("\\", "/").Split('/')[0] + '/' + RepoJSFolder.Replace("\\", "/").Split('/')[1];
+                                                    requestDetail.FileDestinationPath = RepoJSFolder.Replace("\\", "/");
                                                     requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
                                                     requestDetail.ContentType = "base64Encoded";
                                                     RequestDetailslist.Add(requestDetail);
@@ -305,7 +305,7 @@ namespace CrmSolutionLibrary
                                                     requestDetail = new RequestDetails();
                                                     requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
                                                     requestDetail.FileName = modifiedName;
-                                                    requestDetail.FileDestinationPath = RepoImagesFolder.Replace("\\", "/").Split('/')[0] + '/' + RepoImagesFolder.Replace("\\", "/").Split('/')[1];
+                                                    requestDetail.FileDestinationPath = RepoImagesFolder.Replace("\\", "/");
                                                     requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
                                                     requestDetail.ContentType = "base64Encoded";
                                                     RequestDetailslist.Add(requestDetail);
@@ -399,9 +399,9 @@ namespace CrmSolutionLibrary
                                     requestDetail.FileName = "solutions.txt";
                                     // based on below condition solution.txt file in release or checkin folder will be updated
                                     if (item.CheckInSolution == true && item.IncludeInRelease == false)
-                                        requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionText.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionText.Replace("\\", "/").Split('/')[1];
+                                        requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionText.Replace("\\", "/");
                                     else
-                                        requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionTextRelease.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionTextRelease.Replace("\\", "/").Split('/')[1];
+                                        requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionTextRelease.Replace("\\", "/");
                                     requestDetail.ChangeType = "edit";
                                     requestDetail.ContentType = "rawtext";
                                     RequestDetailslist.Add(requestDetail);
@@ -411,7 +411,7 @@ namespace CrmSolutionLibrary
                                         requestDetail = new RequestDetails();
                                         requestDetail.FileContent = File.ReadAllText(timeTriggerPath);
                                         requestDetail.FileName = "trigger.txt";
-                                        requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.TimeTriggerPath.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.TimeTriggerPath.Replace("\\", "/").Split('/')[1];
+                                        requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.TimeTriggerPath.Replace("\\", "/");
                                         requestDetail.ChangeType = "edit";
                                         requestDetail.ContentType = "rawtext";
                                         RequestDetailslist.Add(requestDetail);
@@ -419,7 +419,7 @@ namespace CrmSolutionLibrary
                                         requestDetail = new RequestDetails();
                                         requestDetail.FileContent = File.ReadAllText(solutionCheckerPath);
                                         requestDetail.FileName = "config.txt";
-                                        requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionCheckerPath.Replace("\\", "/").Split('/')[0] + '/' + Singleton.CrmConstantsInstance.SolutionCheckerPath.Replace("\\", "/").Split('/')[1];
+                                        requestDetail.FileDestinationPath = Singleton.CrmConstantsInstance.SolutionCheckerPath.Replace("\\", "/");
                                         requestDetail.ChangeType = "edit";
                                         requestDetail.ContentType = "rawtext";
                                         RequestDetailslist.Add(requestDetail);

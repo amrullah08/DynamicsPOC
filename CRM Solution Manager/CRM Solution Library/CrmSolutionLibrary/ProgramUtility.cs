@@ -112,7 +112,7 @@ namespace CrmSolutionLibrary
                         //}
                         #endregion
 
-                        if (item == "WEB")
+                        if (item == "WEB" || item == "Scheduled")
                         {
                             mode = item;
                         }

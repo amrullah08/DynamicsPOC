@@ -10,7 +10,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\CRM Solution Library\CrmSolutionLibrary\CrmSolutionLibrary.csproj" />
+    <ProjectReference Include="..\..\CrmSolutionLibrary\CrmSolutionLibrary.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />

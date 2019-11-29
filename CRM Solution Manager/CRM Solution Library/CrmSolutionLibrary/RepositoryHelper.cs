@@ -281,34 +281,43 @@ namespace CrmSolutionLibrary
                                             switch (webResourceType)
                                             {
                                                 case "1":
-                                                    requestDetail = new RequestDetails();
-                                                    requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
-                                                    requestDetail.FileName = modifiedName;
-                                                    requestDetail.FileDestinationPath = RepoHTMLFolder.Replace("\\", "/");
-                                                    requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
-                                                    requestDetail.ContentType = "base64Encoded";
-                                                    RequestDetailslist.Add(requestDetail);
+                                                    if (!string.IsNullOrEmpty(RepoHTMLFolder))
+                                                    {
+                                                        requestDetail = new RequestDetails();
+                                                        requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
+                                                        requestDetail.FileName = modifiedName;
+                                                        requestDetail.FileDestinationPath = RepoHTMLFolder.Replace("\\", "/");
+                                                        requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
+                                                        requestDetail.ContentType = "base64Encoded";
+                                                        RequestDetailslist.Add(requestDetail);
+                                                    }
                                                     break;
 
                                                 case "3":
-                                                    requestDetail = new RequestDetails();
-                                                    requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
-                                                    requestDetail.FileName = modifiedName;
-                                                    requestDetail.FileDestinationPath = RepoJSFolder.Replace("\\", "/");
-                                                    requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
-                                                    requestDetail.ContentType = "base64Encoded";
-                                                    RequestDetailslist.Add(requestDetail);
+                                                    if (!string.IsNullOrEmpty(RepoJSFolder))
+                                                    {
+                                                        requestDetail = new RequestDetails();
+                                                        requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
+                                                        requestDetail.FileName = modifiedName;
+                                                        requestDetail.FileDestinationPath = RepoJSFolder.Replace("\\", "/");
+                                                        requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
+                                                        requestDetail.ContentType = "base64Encoded";
+                                                        RequestDetailslist.Add(requestDetail);
+                                                    }
                                                     break;
 
                                                 case "5":
                                                 case "6":
-                                                    requestDetail = new RequestDetails();
-                                                    requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
-                                                    requestDetail.FileName = modifiedName;
-                                                    requestDetail.FileDestinationPath = RepoImagesFolder.Replace("\\", "/");
-                                                    requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
-                                                    requestDetail.ContentType = "base64Encoded";
-                                                    RequestDetailslist.Add(requestDetail);
+                                                    if (!string.IsNullOrEmpty(RepoImagesFolder))
+                                                    {
+                                                        requestDetail = new RequestDetails();
+                                                        requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
+                                                        requestDetail.FileName = modifiedName;
+                                                        requestDetail.FileDestinationPath = RepoImagesFolder.Replace("\\", "/");
+                                                        requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
+                                                        requestDetail.ContentType = "base64Encoded";
+                                                        RequestDetailslist.Add(requestDetail);
+                                                    }
                                                     break;
                                             }
                                         }

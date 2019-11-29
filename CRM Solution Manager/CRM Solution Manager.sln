@@ -5,9 +5,9 @@ VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CRM Solution", "CRM Solution\CRM Solution.csproj", "{F8466E10-11EC-408F-8B18-837EB6052DAB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrmSolutionLibrary", "CRM Solution Library\CrmSolutionLibrary\CrmSolutionLibrary.csproj", "{089E1143-1572-499A-9A32-92575405D715}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CrmSolutionAzureFunction", "AzureFunctions\CrmSolutionAzureFunction\CrmSolutionAzureFunction.csproj", "{C2BED4A0-CABB-441B-930C-F192F14F588E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrmSolutionAzureFunction", "AzureFunctions\CrmSolutionAzureFunction\CrmSolutionAzureFunction.csproj", "{C2BED4A0-CABB-441B-930C-F192F14F588E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrmSolutionLibrary", "CrmSolutionLibrary\CrmSolutionLibrary.csproj", "{089E1143-1572-499A-9A32-92575405D715}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,14 +19,14 @@ Global
 		{F8466E10-11EC-408F-8B18-837EB6052DAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8466E10-11EC-408F-8B18-837EB6052DAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8466E10-11EC-408F-8B18-837EB6052DAB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{089E1143-1572-499A-9A32-92575405D715}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{089E1143-1572-499A-9A32-92575405D715}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{089E1143-1572-499A-9A32-92575405D715}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{089E1143-1572-499A-9A32-92575405D715}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C2BED4A0-CABB-441B-930C-F192F14F588E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C2BED4A0-CABB-441B-930C-F192F14F588E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2BED4A0-CABB-441B-930C-F192F14F588E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2BED4A0-CABB-441B-930C-F192F14F588E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{089E1143-1572-499A-9A32-92575405D715}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{089E1143-1572-499A-9A32-92575405D715}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{089E1143-1572-499A-9A32-92575405D715}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{089E1143-1572-499A-9A32-92575405D715}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

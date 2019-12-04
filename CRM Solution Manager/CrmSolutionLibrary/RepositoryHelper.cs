@@ -131,8 +131,11 @@ namespace CrmSolutionLibrary
                 {
                     string credentials = ConfigurationManager.AppSettings["GitPassword"];
 
-                        //todo: Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(string.Format("{0}:{1}", "", ConfigurationManager.AppSettings["GitPassword"].ToString())));
+                    //todo: Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(string.Format("{0}:{1}", "", ConfigurationManager.AppSettings["GitPassword"].ToString())));
 
+                    credentials = Convert.ToBase64String(
+                        System.Text.ASCIIEncoding.ASCII.GetBytes(
+                            string.Format("{0}:{1}", "", credentials)));
                     HashSet<string> hashSet = new HashSet<string>();
                     //creating temp files
                     #region creating temp files
@@ -213,7 +216,7 @@ namespace CrmSolutionLibrary
                                     return;
                                 }
                                 ChangeRequest changeRequest = new ChangeRequest();
-                                changeRequest.Comments = "Committed source instance solution files to reposotory.";
+                                changeRequest.Comments = item.Message;
                                 changeRequest.SourceBranchName = branchName;
                                 //Getting Last commit id from repository
                                 string lastcomitid = await GetRepositoryDetails.GetLastCommitDetails(credentials, branchName, AzureDevopsBaseURL);
@@ -248,7 +251,7 @@ namespace CrmSolutionLibrary
                                     requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(fileUnmanaged));
                                     requestDetail.FileName = item.SolutionUniqueName + "_.zip";
                                     requestDetail.FileDestinationPath = RepoSolutionFolder.Replace("\\", "/");
-                                    requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
+                                    requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL, branchName);
                                     requestDetail.ContentType = "base64Encoded";
                                     RequestDetailslist.Add(requestDetail);
                                     //managed solution zip file
@@ -256,7 +259,7 @@ namespace CrmSolutionLibrary
                                     requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(fileManaged));
                                     requestDetail.FileName = item.SolutionUniqueName + "_managed_.zip";
                                     requestDetail.FileDestinationPath = RepoSolutionFolder.Replace("\\", "/");
-                                    requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
+                                    requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL, branchName);
                                     requestDetail.ContentType = "base64Encoded";
                                     RequestDetailslist.Add(requestDetail);
 
@@ -297,7 +300,7 @@ namespace CrmSolutionLibrary
                                                         requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
                                                         requestDetail.FileName = modifiedName;
                                                         requestDetail.FileDestinationPath = RepoHTMLFolder.Replace("\\", "/");
-                                                        requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
+                                                        requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL, branchName);
                                                         requestDetail.ContentType = "base64Encoded";
                                                         RequestDetailslist.Add(requestDetail);
                                                     }
@@ -310,7 +313,7 @@ namespace CrmSolutionLibrary
                                                         requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
                                                         requestDetail.FileName = modifiedName;
                                                         requestDetail.FileDestinationPath = RepoJSFolder.Replace("\\", "/");
-                                                        requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
+                                                        requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL, branchName);
                                                         requestDetail.ContentType = "base64Encoded";
                                                         RequestDetailslist.Add(requestDetail);
                                                     }
@@ -324,7 +327,7 @@ namespace CrmSolutionLibrary
                                                         requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName));
                                                         requestDetail.FileName = modifiedName;
                                                         requestDetail.FileDestinationPath = RepoImagesFolder.Replace("\\", "/");
-                                                        requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL);
+                                                        requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL, branchName);
                                                         requestDetail.ContentType = "base64Encoded";
                                                         RequestDetailslist.Add(requestDetail);
                                                     }

@@ -50,9 +50,13 @@ namespace CrmSolutionLibrary.AzureDevopsAPIs.RestClient
                 HTTPClientHelper clientHelper = new HTTPClientHelper(AzureDevopsBaseURL);
                 string baseURL = clientHelper.GetAzureDevopsRefsURL();
                 client.BaseAddress = new Uri(baseURL);
-                client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", patToken);
+
+                //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
+                //    Convert.ToBase64String(
+                //        System.Text.ASCIIEncoding.ASCII.GetBytes(
+                //            string.Format("{0}:{1}", "", patToken))));
 
                 //connect to the REST endpoint            
                 HttpResponseMessage httpResponse = client.GetAsync("").Result;
@@ -70,7 +74,7 @@ namespace CrmSolutionLibrary.AzureDevopsAPIs.RestClient
         }
 
 
-        public static async Task<string> GetItemDetails(string patToken, string ItemRootPath,string ItemFullPath,string AzureDevopsBaseURL)
+        public static async Task<string> GetItemDetails(string patToken, string ItemRootPath,string ItemFullPath,string AzureDevopsBaseURL, string branchname)
         {
             string responseContent = string.Empty;
 
@@ -78,7 +82,7 @@ namespace CrmSolutionLibrary.AzureDevopsAPIs.RestClient
             using (var client = new HttpClient())
             {
                 HTTPClientHelper clientHelper = new HTTPClientHelper(AzureDevopsBaseURL);
-                string baseURL = clientHelper.GetAzureDevopsItemURL(ItemRootPath.Replace("refs/", ""));
+                string baseURL = clientHelper.GetAzureDevopsItemURL(ItemFullPath.Replace("refs/", ""), branchname.Replace("refs/heads/", ""));
                 client.BaseAddress = new Uri(baseURL);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
@@ -87,8 +91,6 @@ namespace CrmSolutionLibrary.AzureDevopsAPIs.RestClient
                 //connect to the REST endpoint            
                 HttpResponseMessage httpResponse = client.GetAsync("").Result;
 
-                //check to see if we have a successful response
-                if (httpResponse.IsSuccessStatusCode)
                 {
                     responseContent = await httpResponse.Content.ReadAsStringAsync();
                 }
@@ -98,19 +100,7 @@ namespace CrmSolutionLibrary.AzureDevopsAPIs.RestClient
             JObject json = responseContent != string.Empty ? JObject.Parse(responseContent) : null;
 
             //string FilePath = @"/Test/Release/TemplateSolution";
-            string result = "add";
-            for (int i = 0; i < json["value"].Count(); i++)
-            {
-                if (json["value"][i]["path"].ToString().ToLower() == ItemFullPath.ToLower())
-                {
-                    //Console.WriteLine(json["value"][i]["path"].ToString().ToLower());
-                    //result = json["value"][i]["path"].ToString();
-                    result = "edit";
-                }
-             }
-
-            return result;
-
+            return Convert.ToInt32(json["count"]) > 0 ? "edit" : "add";
         }
     }
 }

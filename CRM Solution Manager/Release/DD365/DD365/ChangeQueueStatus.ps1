@@ -52,7 +52,7 @@ Write-Output $path3
 
          Write-Output "Azure Service principal Mode."
 
-       $CRMSourceUrlwithSDKVersion='https://igdcicd2.api.crm8.dynamics.com/XRMServices/2011/Organization.svc/web?SdkClientVersion=8.2'
+       #$CRMSourceUrlwithSDKVersion='https://igdcicd2.api.crm8.dynamics.com/XRMServices/2011/Organization.svc/web?SdkClientVersion=8.2'
 
         #$ADAuthorityURL = "https://login.microsoftonline.com/d9a1b506-a006-4359-966b-696cb2dad64d"   
 

@@ -9,8 +9,6 @@
                                 [string]  $ADAuthorityURL,                               
                                 [string]  $CRMSourceServiceUrl,
                                 [string]  $CRMSourceUrlwithSDKVersion,
-                                [string]  $UserName,
-                                [string]  $Password,
                                 [string]  $Status,
                                 [string]  $dllPath,
                                 [string]  $resultFileUrls,
@@ -28,8 +26,7 @@ Write-Output "ClientApplicationSecret :" $ApplicationSecret
 Write-Output "ADAuthorityURL :" $ADAuthorityURL
 Write-Output "CRMSourceServiceUrl :" $CRMSourceServiceUrl
 Write-Output "CRMSourceUrlwithSDKVersion :" $CRMSourceUrlwithSDKVersion
-Write-Output "UserName :"$UserName
-Write-Output "Password :"$Password
+
 Write-Output "Status :"$Status
 Write-Output "resultFileUrls :"$resultFileUrls 
 Write-Output "buildurl :"$buildurl
@@ -51,25 +48,8 @@ Write-Output $path3
 [void][System.Reflection.Assembly]::LoadFile($path3)
 [void][System.Reflection.Assembly]::LoadWithPartialName("system.servicemodel")
 
- if (-NOT($UserName -eq "CRMSourceUserName") -and -NOT($Password -eq "CRMSourcePassword"))
-      {
-Write-Output "UserName-Password Mode."
-        $clientCredentials = new-object System.ServiceModel.Description.ClientCredentials
 
-        $clientCredentials.UserName.UserName =  $UserName
 
-        $clientCredentials.UserName.Password = $Password
-
-        $service = new-object Microsoft.Xrm.Sdk.Client.OrganizationServiceProxy($CRMSourceInstanceUrl, $null, $clientCredentials, $null)
-
-        $service.Timeout = new-object System.Timespan(0, 10, 0);
-
-        $request = new-object Microsoft.Crm.Sdk.Messages.WhoAmIRequest
-
-        $service.Execute($request)
-       }
- else
-       {
          Write-Output "Azure Service principal Mode."
 
        $CRMSourceUrlwithSDKVersion='https://igdcicd2.api.crm8.dynamics.com/XRMServices/2011/Organization.svc/web?SdkClientVersion=8.2'
@@ -101,7 +81,7 @@ Write-Output "UserName-Password Mode."
         $service=New-Object Microsoft.Xrm.Sdk.WebServiceClient.OrganizationWebProxyClient($CRMSourceUrlwithSDKVersion,$Timeoutvalue,$false);
 
         $service.HeaderToken= $ResultAAD;
-       }
+       
 
 $query = new-object Microsoft.Xrm.Sdk.Query.QueryExpression("syed_sourcecontrolqueue")
 

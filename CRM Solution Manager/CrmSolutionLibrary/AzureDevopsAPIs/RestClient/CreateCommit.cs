@@ -50,7 +50,7 @@ namespace CrmSolutionLibrary.AzureDevopsAPIs.RestClient
                     HttpResponseMessage httpResponse = client.PostAsync("", httpContent).Result;
 
                     //check to see if we have a successful response
-                    if (httpResponse.IsSuccessStatusCode)
+                    //if (httpResponse.IsSuccessStatusCode)
                     {
                         responseContent = await httpResponse.Content.ReadAsStringAsync();
                     }

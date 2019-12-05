@@ -1,7 +1,0 @@
-All below scenerios should be tested in UCI
-    
-1. Single solution deployment
-2. Multiple solution merge 
-3. Multi solution deployment
-4. Direct check-in release
-5. Direct check-in release using Templates

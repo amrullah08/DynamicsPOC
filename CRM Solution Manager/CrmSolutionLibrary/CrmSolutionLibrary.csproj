@@ -388,6 +388,7 @@
     <None Include="CoreTools\LicenseTerms.docx" />
     <None Include="CoreTools\SolutionPackager.exe.config" />
     <None Include="packages.config" />
+    <None Include="Settings.StyleCop" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CoreTools\CrmSvcUtil.exe" />

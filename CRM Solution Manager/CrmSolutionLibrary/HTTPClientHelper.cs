@@ -39,12 +39,12 @@ namespace CrmSolutionLibrary
 
             return this.httpURL;
         }
-        public string GetAzureDevopsItemURL(string filterItemName)
+        public string GetAzureDevopsItemURL(string filterItemName, string branchName)
         {
             this.httpURL = this.httpURL.Replace("{action}", "items");
-            
+
             //this.httpURL = this.httpURL.Replace("api-version=5.0", "scopePath=" + filterItemName + "&api-version=5.0");
-            this.httpURL = this.httpURL.Replace("api-version=5.0", "scopePath=" + filterItemName+ "&recursionLevel=Full&includeContentMetadata=true&api-version=5.0");
+            this.httpURL = this.httpURL.Replace("api-version=5.0", "scopePath=" + filterItemName + "&recursionLevel=Full&includeContentMetadata=true&api-version=5.0&version=" + branchName);
 
             return this.httpURL;
         }

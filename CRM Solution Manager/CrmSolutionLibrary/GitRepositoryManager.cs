@@ -41,7 +41,7 @@ namespace GitDeploy
         /// <summary>
         /// Repository url
         /// </summary>
-        private readonly string repoUrl;
+        private readonly Uri repoUrl;
 
         /// <summary>
         /// Author name for the commit
@@ -148,7 +148,7 @@ namespace GitDeploy
             string password,
             string tfsUsername,
             string tfsPassWord,
-            string gitRepoUrl,
+            Uri gitRepoUrl,
             string remoteName,
             string branchName,
             bool cloneAlways,
@@ -256,7 +256,7 @@ namespace GitDeploy
                         commitIds = string.Empty;
                     }
 
-                    commitIds += string.Format("Commit Info <br/><a href='{0}/commit/{1}'>{2}</a>", this.repoUrl.Replace(".git", string.Empty), commit.Id.Sha, commit.Message);
+                    commitIds += string.Format("Commit Info <br/><a href='{0}/commit/{1}'>{2}</a>", this.repoUrl.ToString().Replace(".git", string.Empty), commit.Id.Sha, commit.Message);
                     solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForCommitIds] = commitIds;
                 }
             }
@@ -511,7 +511,7 @@ namespace GitDeploy
                 var remote = repo.Network.Remotes.FirstOrDefault(r => r.Name == remoteName);
                 if (remote == null)
                 {
-                    repo.Network.Remotes.Add(remoteName, this.repoUrl);
+                    repo.Network.Remotes.Add(remoteName, this.repoUrl.ToString());
                     remote = repo.Network.Remotes.FirstOrDefault(r => r.Name == remoteName);
                 }
 
@@ -573,7 +573,7 @@ namespace GitDeploy
                 VssBasicCredential basicCredential = new VssBasicCredential(networkCredential);
                 VssCredentials tfsCredentials = new VssCredentials(basicCredential);
 
-                this.tfs = new TfsTeamProjectCollection(new Uri(this.repoUrl), tfsCredentials);
+                this.tfs = new TfsTeamProjectCollection(repoUrl, tfsCredentials);
                 this.tfs.Authenticate();
 
                 // Get a reference to Version Control.              
@@ -636,7 +636,7 @@ namespace GitDeploy
 
             string remoteName = this.remoteName, branchName = this.branchName;
             bool cloneAlways = this.cloneAlways;
-            string url = this.repoUrl;
+            string url = this.repoUrl.ToString();
             Credentials crednt(string curl, string usernameFromUrl, SupportedCredentialTypes types) => this.credentials;
 
             string workingDirectory = this.localFolder.FullName;
@@ -1101,7 +1101,12 @@ namespace GitDeploy
                     File.Create(solutionFilePath).Dispose();
                 }
             }
-            catch (Exception ex)
+            catch (FileIdNotFoundException ex)
+            {
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message);
+                Console.WriteLine(ex.Message);
+            }
+            catch (ArgumentNullException ex)
             {
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message);
                 Console.WriteLine(ex.Message);

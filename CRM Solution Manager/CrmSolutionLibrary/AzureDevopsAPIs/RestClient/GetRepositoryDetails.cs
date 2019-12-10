@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CrmSolutionLibrary.AzureDevopsAPIs.RestClient
 {
-    public class GetRepositoryDetails
+    public static class GetRepositoryDetails
     {
         public static async Task<string> GetLastCommitDetails(string patToken, string sourceBranchName,string AzureDevopsBaseURL)
         {

@@ -44,16 +44,15 @@
   <ItemGroup>
     <Compile Include="AzureDevopsAPIs\RestClient\CreateCommit.cs" />
     <Compile Include="AzureDevopsAPIs\RestClient\GetRepositoryDetails.cs" />
-    <Compile Include="AzureDevopsAPIs\RestClient\PullRequestCreation.cs" />
     <Compile Include="AzureDevopsAPIs\Schemas\ChangeRequest.cs" />
     <Compile Include="AzureDevopsAPIs\Schemas\CommitObject.cs" />
-    <Compile Include="AzureDevopsAPIs\Schemas\PullRequestObject.cs" />
     <Compile Include="ConfigurationSettings.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="CopySettings.cs" />
     <Compile Include="CrmConstants.cs" />
     <Compile Include="CrmSolutionHelper.cs" />
     <Compile Include="GitRepositoryManager.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HTTPClientHelper.cs" />
     <Compile Include="ICrmSolutionHelper.cs" />
     <Compile Include="IGitRepositoryManager.cs" />

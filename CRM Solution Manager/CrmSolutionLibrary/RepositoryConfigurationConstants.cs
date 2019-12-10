@@ -46,7 +46,7 @@ namespace CrmSolutionLibrary
         /// <summary>
         /// Repository Url
         /// </summary>
-        private string repositoryUrl;
+        private System.Uri repositoryUrl;
 
         /// <summary>
         /// Clone Repository Always
@@ -275,7 +275,7 @@ namespace CrmSolutionLibrary
         /// <summary>
         /// Gets or sets repository url
         /// </summary>
-        public string RepositoryUrl
+        public System.Uri RepositoryUrl
         {
             get
             {
@@ -415,7 +415,7 @@ namespace CrmSolutionLibrary
 
                         break;
                     case Constants.RepositoryUrl:
-                        this.repositoryUrl = setting.GetAttributeValue<string>("syed_value");
+                        this.repositoryUrl = new System.Uri(setting.GetAttributeValue<string>("syed_value"));
                         break;
                     case Constants.CloneRepositoryAlways:
                         this.cloneRepositoryAlways = setting.GetAttributeValue<string>("syed_value");

@@ -10,7 +10,6 @@ namespace CrmSolutionLibrary
     using System;
     using System.Collections.Generic;
     using System.IO;
-    //using System.Management.Automation;
     using System.Security.Cryptography;
     using System.ServiceModel.Description;
     using System.Text;
@@ -27,15 +26,7 @@ namespace CrmSolutionLibrary
     /// </summary>
     public class CrmSolutionHelper : ICrmSolutionHelper
     {
-        /// <summary>
-        /// Gets or sets client credentials
-        /// </summary>
-        private readonly ClientCredentials clientCredentials;
-
-        /// <summary>
-        /// Organization service uri
-        /// </summary>
-        private readonly Uri serviceUri;
+       
 
         /// <summary>
         ///  /// Initializes a new instance of the <see cref="CrmSolutionHelper" /> class without parameter.
@@ -54,23 +45,18 @@ namespace CrmSolutionLibrary
         /// <param name="userName">user name</param>
         /// <param name="password">password token</param>
         /// <param name="solutionPackagerPath">solution package path</param>
-        public CrmSolutionHelper(string repositoryUrl, string branch, string remoteName, string organizationServiceUrl, string userName, string password, string solutionPackagerPath)
+        public CrmSolutionHelper(System.Uri repositoryUrl, string branch, string remoteName, string organizationServiceUrl, string userName, string password, string solutionPackagerPath)
         {
             this.RepositoryUrl = repositoryUrl;
             this.Branch = branch;
             this.RemoteName = remoteName;
             this.SolutionPackagerPath = solutionPackagerPath;
-            //this.serviceUri = new Uri(organizationServiceUrl);
-            //this.clientCredentials = new ClientCredentials();
-            //this.clientCredentials.UserName.UserName = userName;
-            //this.clientCredentials.UserName.Password = password;
-            //this.InitializeOrganizationService();
         }
 
         /// <summary>
         /// Gets or sets Repository url
         /// </summary>
-        public string RepositoryUrl { get; set; }
+        public System.Uri RepositoryUrl { get; set; }
 
         /// <summary>
         /// Gets or sets Repository branch
@@ -418,16 +404,7 @@ namespace CrmSolutionLibrary
                 Directory.Delete(path);
             }
         }
-
-        /// <summary>
-        /// returns new instance of organization service
-        /// </summary>
-        /// <returns>returns organization service</returns>
-        private OrganizationServiceProxy InitializeOrganizationService()
-        {
-            return new OrganizationServiceProxy(this.serviceUri, null, this.clientCredentials, null);
-        }
-
+        
         /// <summary>
         /// Method merges solution
         /// </summary>
@@ -461,7 +438,7 @@ namespace CrmSolutionLibrary
 
             if (solutionFile.CheckInSolution)
             {
-                if (string.IsNullOrEmpty(solutionFile.GitRepoUrl))
+                if (solutionFile.GitRepoUrl == null)
                 {
                     solutionFile.Solution[Constants.SourceControlQueueAttributeNameForRepositoryUrl] = this.RepositoryUrl;
                 }
@@ -498,9 +475,9 @@ namespace CrmSolutionLibrary
         /// <param name="solutionFile">solution file info</param>
         private void ExportListOfSolutionsToBeMerged(IOrganizationService serviceProxy, SolutionFileInfo solutionFile)
         {
-            if (solutionFile.SolutionsToBeMerged.Count > 0)
+            if (solutionFile.GetSolutionsToBeMerged().Count > 0)
             {
-                foreach (string solutionNAme in solutionFile.SolutionsToBeMerged)
+                foreach (string solutionNAme in solutionFile.GetSolutionsToBeMerged())
                 {
                     this.ExportSolution(serviceProxy, solutionFile, solutionNAme, "Downloading solutions to be merged: ", false);
                 }

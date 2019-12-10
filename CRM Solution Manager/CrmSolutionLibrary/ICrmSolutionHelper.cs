@@ -17,7 +17,7 @@ namespace CrmSolutionLibrary
         /// <summary>
         /// Gets or sets a value of http repository url
         /// </summary>
-        string RepositoryUrl { get; set; }
+        System.Uri RepositoryUrl { get; set; }
 
         /// <summary>
         /// Gets or sets a value of branch

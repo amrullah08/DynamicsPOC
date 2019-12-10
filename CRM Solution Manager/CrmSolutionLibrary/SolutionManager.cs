@@ -92,16 +92,16 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                 {
                     copySettings.TargetSolutions.Add(solution);
                 }
-                else if (solutionFileInfo.SolutionsToBeMerged.Count > 0)
+                else if (solutionFileInfo.GetSolutionsToBeMerged().Count > 0)
                 {
-                    if (solutionFileInfo.SolutionsToBeMerged.Any(cc => cc.ToString().ToLower().Equals(solution["uniquename"].ToString().ToLower())))
+                    if (solutionFileInfo.GetSolutionsToBeMerged().Any(cc => cc.ToString().ToLower().Equals(solution["uniquename"].ToString().ToLower())))
                     {
                         copySettings.SourceSolutions.Add(solution);
                     }
                 }
             }
 
-            if (solutionFileInfo.SolutionsToBeMerged.Count > 0)
+            if (solutionFileInfo.GetSolutionsToBeMerged().Count > 0)
             {
                 solutionFileInfo.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
                 solutionFileInfo.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemMergingStatus;
@@ -205,8 +205,10 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
             switch (componentType)
             {
                 case Constants.Entity:
-                    var entityReq = new RetrieveEntityRequest();
-                    entityReq.MetadataId = componentId;
+                    var entityReq = new RetrieveEntityRequest
+                    {
+                        MetadataId = componentId
+                    };
                     var retrievedEntity = (RetrieveEntityResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(entityReq);
                     if (targetService == null)
                     {
@@ -214,17 +216,21 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     }
                     else
                     {
-                        var targetEntityReq = new RetrieveEntityRequest();
-                        targetEntityReq.LogicalName = retrievedEntity.EntityMetadata.LogicalName;
+                        var targetEntityReq = new RetrieveEntityRequest
+                        {
+                            LogicalName = retrievedEntity.EntityMetadata.LogicalName
+                        };
                         var targetRetrievedEntity = (RetrieveEntityResponse)targetService.Execute(targetEntityReq);
                     }
 
                     break;
 
                 case Constants.WebResources:
-                    var webresource = new RetrieveRequest();
-                    webresource.Target = new EntityReference("webresource", componentId);
-                    webresource.ColumnSet = new ColumnSet(true);
+                    var webresource = new RetrieveRequest
+                    {
+                        Target = new EntityReference("webresource", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedWebresource = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(webresource);
                     if (targetService == null)
                     {
@@ -238,8 +244,10 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.Attribute:
-                    var attributeReq = new RetrieveAttributeRequest();
-                    attributeReq.MetadataId = componentId;
+                    var attributeReq = new RetrieveAttributeRequest
+                    {
+                        MetadataId = componentId
+                    };
                     var retrievedAttribute = (RetrieveAttributeResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(attributeReq);
                     if (targetService == null)
                     {
@@ -247,17 +255,21 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     }
                     else
                     {
-                        var targetAttributeReq = new RetrieveAttributeRequest();
-                        targetAttributeReq.EntityLogicalName = retrievedAttribute.AttributeMetadata.EntityLogicalName;
-                        targetAttributeReq.LogicalName = retrievedAttribute.AttributeMetadata.LogicalName;
+                        var targetAttributeReq = new RetrieveAttributeRequest
+                        {
+                            EntityLogicalName = retrievedAttribute.AttributeMetadata.EntityLogicalName,
+                            LogicalName = retrievedAttribute.AttributeMetadata.LogicalName
+                        };
                         var targetRetrievedAttribute = (RetrieveAttributeResponse)targetService.Execute(targetAttributeReq);
                     }
 
                     break;
 
                 case Constants.Relationship:
-                    var relationshipReq = new RetrieveRelationshipRequest();
-                    relationshipReq.MetadataId = componentId;
+                    var relationshipReq = new RetrieveRelationshipRequest
+                    {
+                        MetadataId = componentId
+                    };
                     var retrievedrelationshipReq = (RetrieveRelationshipResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(relationshipReq);
                     if (targetService == null)
                     {
@@ -265,17 +277,21 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     }
                     else
                     {
-                        var targetRelationshipReq = new RetrieveRelationshipRequest();
-                        targetRelationshipReq.Name = retrievedrelationshipReq.RelationshipMetadata.SchemaName;
+                        var targetRelationshipReq = new RetrieveRelationshipRequest
+                        {
+                            Name = retrievedrelationshipReq.RelationshipMetadata.SchemaName
+                        };
                         var targetRetrievedrelationshipReq = (RetrieveRelationshipResponse)targetService.Execute(targetRelationshipReq);
                     }
 
                     break;
 
                 case Constants.DisplayString:
-                    var displayStringRequest = new RetrieveRequest();
-                    displayStringRequest.Target = new EntityReference("displaystring", componentId);
-                    displayStringRequest.ColumnSet = new ColumnSet(true);
+                    var displayStringRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("displaystring", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedDisplayString = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(displayStringRequest);
                     if (targetService == null)
                     {
@@ -289,9 +305,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.SavedQuery:
-                    var savedQueryRequest = new RetrieveRequest();
-                    savedQueryRequest.Target = new EntityReference("savedquery", componentId);
-                    savedQueryRequest.ColumnSet = new ColumnSet(true);
+                    var savedQueryRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("savedquery", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedSavedQuery = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(savedQueryRequest);
                     if (targetService == null)
                     {
@@ -305,9 +323,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.SavedQueryVisualization:
-                    var savedQueryVisualizationRequest = new RetrieveRequest();
-                    savedQueryVisualizationRequest.Target = new EntityReference("savedqueryvisualization", componentId);
-                    savedQueryVisualizationRequest.ColumnSet = new ColumnSet(true);
+                    var savedQueryVisualizationRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("savedqueryvisualization", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedSavedQueryVisualization = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(savedQueryVisualizationRequest);
                     if (targetService == null)
                     {
@@ -321,9 +341,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.SystemForm:
-                    var systemFormRequest = new RetrieveRequest();
-                    systemFormRequest.Target = new EntityReference("systemform", componentId);
-                    systemFormRequest.ColumnSet = new ColumnSet(true);
+                    var systemFormRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("systemform", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedSystemForm = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(systemFormRequest);
                     if (targetService == null)
                     {
@@ -337,9 +359,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.HierarchyRule:
-                    var hierarchyRuleRequest = new RetrieveRequest();
-                    hierarchyRuleRequest.Target = new EntityReference("hierarchyrule", componentId);
-                    hierarchyRuleRequest.ColumnSet = new ColumnSet(true);
+                    var hierarchyRuleRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("hierarchyrule", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedHierarchyRule = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(hierarchyRuleRequest);
                     if (targetService == null)
                     {
@@ -353,9 +377,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.SiteMap:
-                    var siteMapRequest = new RetrieveRequest();
-                    siteMapRequest.Target = new EntityReference("sitemap", componentId);
-                    siteMapRequest.ColumnSet = new ColumnSet(true);
+                    var siteMapRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("sitemap", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedSiteMap = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(siteMapRequest);
                     if (targetService == null)
                     {
@@ -369,9 +395,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.PluginAssembly:
-                    var pluginAssemblyRequest = new RetrieveRequest();
-                    pluginAssemblyRequest.Target = new EntityReference("pluginassembly", componentId);
-                    pluginAssemblyRequest.ColumnSet = new ColumnSet(true);
+                    var pluginAssemblyRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("pluginassembly", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedPluginAssembly = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(pluginAssemblyRequest);
                     if (targetService == null)
                     {
@@ -385,9 +413,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.PluginType:
-                    var pluginTypeRequest = new RetrieveRequest();
-                    pluginTypeRequest.Target = new EntityReference("plugintype", componentId);
-                    pluginTypeRequest.ColumnSet = new ColumnSet(true);
+                    var pluginTypeRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("plugintype", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedPluginTypeRequest = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(pluginTypeRequest);
                     if (targetService == null)
                     {
@@ -401,9 +431,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.SDKMessageProcessingStep:
-                    var sdkMessageProcessingStepRequest = new RetrieveRequest();
-                    sdkMessageProcessingStepRequest.Target = new EntityReference("sdkmessageprocessingstep", componentId);
-                    sdkMessageProcessingStepRequest.ColumnSet = new ColumnSet(true);
+                    var sdkMessageProcessingStepRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("sdkmessageprocessingstep", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedSDKMessageProcessingStep = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(sdkMessageProcessingStepRequest);
                     if (targetService == null)
                     {
@@ -417,9 +449,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.ServiceEndpoint:
-                    var serviceEndpointRequest = new RetrieveRequest();
-                    serviceEndpointRequest.Target = new EntityReference("serviceendpoint", componentId);
-                    serviceEndpointRequest.ColumnSet = new ColumnSet(true);
+                    var serviceEndpointRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("serviceendpoint", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedServiceEndpoint = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(serviceEndpointRequest);
                     if (targetService == null)
                     {
@@ -433,9 +467,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.Report:
-                    var reportRequest = new RetrieveRequest();
-                    reportRequest.Target = new EntityReference("report", componentId);
-                    reportRequest.ColumnSet = new ColumnSet(true);
+                    var reportRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("report", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedReport = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(reportRequest);
                     if (targetService == null)
                     {
@@ -449,9 +485,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.Role:
-                    var roleRequest = new RetrieveRequest();
-                    roleRequest.Target = new EntityReference("role", componentId);
-                    roleRequest.ColumnSet = new ColumnSet(true);
+                    var roleRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("role", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedRole = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(roleRequest);
                     if (targetService == null)
                     {
@@ -465,9 +503,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.FieldSecurityProfile:
-                    var fieldSecurityProfileRequest = new RetrieveRequest();
-                    fieldSecurityProfileRequest.Target = new EntityReference("fieldsecurityprofile", componentId);
-                    fieldSecurityProfileRequest.ColumnSet = new ColumnSet(true);
+                    var fieldSecurityProfileRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("fieldsecurityprofile", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedFieldSecurityProfile = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(fieldSecurityProfileRequest);
                     if (targetService == null)
                     {
@@ -481,9 +521,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.ConnectionRole:
-                    var connectionRoleRequest = new RetrieveRequest();
-                    connectionRoleRequest.Target = new EntityReference("connectionrole", componentId);
-                    connectionRoleRequest.ColumnSet = new ColumnSet(true);
+                    var connectionRoleRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("connectionrole", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedConnectionRole = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(connectionRoleRequest);
                     if (targetService == null)
                     {
@@ -497,9 +539,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.Workflow:
-                    var workflowRequest = new RetrieveRequest();
-                    workflowRequest.Target = new EntityReference("workflow", componentId);
-                    workflowRequest.ColumnSet = new ColumnSet(true);
+                    var workflowRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("workflow", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedWorkflow = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(workflowRequest);
                     if (targetService == null)
                     {
@@ -513,9 +557,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.KBArticleTemplate:
-                    var articleTemplateRequest = new RetrieveRequest();
-                    articleTemplateRequest.Target = new EntityReference("kbarticletemplate", componentId);
-                    articleTemplateRequest.ColumnSet = new ColumnSet(true);
+                    var articleTemplateRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("kbarticletemplate", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedKBArticleTemplate = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(articleTemplateRequest);
                     if (targetService == null)
                     {
@@ -529,9 +575,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.MailMergeTemplate:
-                    var mailMergeTemplateRequest = new RetrieveRequest();
-                    mailMergeTemplateRequest.Target = new EntityReference("mailmergetemplate", componentId);
-                    mailMergeTemplateRequest.ColumnSet = new ColumnSet(true);
+                    var mailMergeTemplateRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("mailmergetemplate", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedMailMergeTemplate = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(mailMergeTemplateRequest);
                     if (targetService == null)
                     {
@@ -545,9 +593,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.ContractTemplate:
-                    var contractTemplateRequest = new RetrieveRequest();
-                    contractTemplateRequest.Target = new EntityReference("contracttemplate", componentId);
-                    contractTemplateRequest.ColumnSet = new ColumnSet(true);
+                    var contractTemplateRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("contracttemplate", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedContractTemplate = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(contractTemplateRequest);
                     if (targetService == null)
                     {
@@ -561,9 +611,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.EmailTemplate:
-                    var emailTemplateRequest = new RetrieveRequest();
-                    emailTemplateRequest.Target = new EntityReference("template", componentId);
-                    emailTemplateRequest.ColumnSet = new ColumnSet(true);
+                    var emailTemplateRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("template", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedEmailTemplate = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(emailTemplateRequest);
                     if (targetService == null)
                     {
@@ -577,9 +629,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.SLA:
-                    var slaRequest = new RetrieveRequest();
-                    slaRequest.Target = new EntityReference("sla", componentId);
-                    slaRequest.ColumnSet = new ColumnSet(true);
+                    var slaRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("sla", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedSLA = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(slaRequest);
                     if (targetService == null)
                     {
@@ -593,9 +647,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.ConvertRule:
-                    var convertRuleRequest = new RetrieveRequest();
-                    convertRuleRequest.Target = new EntityReference("convertrule", componentId);
-                    convertRuleRequest.ColumnSet = new ColumnSet(true);
+                    var convertRuleRequest = new RetrieveRequest
+                    {
+                        Target = new EntityReference("convertrule", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedConvertRule = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(convertRuleRequest);
                     if (targetService == null)
                     {
@@ -609,9 +665,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                     break;
 
                 case Constants.SDKMessageProcessingStepImage:
-                    var sdkmessageprocessingstepimage = new RetrieveRequest();
-                    sdkmessageprocessingstepimage.Target = new EntityReference("sdkmessageprocessingstepimage", componentId);
-                    sdkmessageprocessingstepimage.ColumnSet = new ColumnSet(true);
+                    var sdkmessageprocessingstepimage = new RetrieveRequest
+                    {
+                        Target = new EntityReference("sdkmessageprocessingstepimage", componentId),
+                        ColumnSet = new ColumnSet(true)
+                    };
                     var retrievedSdkmessageprocessingstepimage = (RetrieveResponse)Singleton.CrmConstantsInstance.ServiceProxy.Execute(sdkmessageprocessingstepimage);
                     if (targetService == null)
                     {

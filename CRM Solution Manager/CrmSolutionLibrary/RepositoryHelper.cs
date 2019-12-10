@@ -118,13 +118,7 @@ namespace CrmSolutionLibrary
                                 Singleton.CrmConstantsInstance.DynamicsPassword,
                                 Singleton.CrmConstantsInstance.SolutionPackagerPath
                                 );
-                int timeOut = Convert.ToInt32(Singleton.CrmConstantsInstance.SleepTimeoutInMillis);
                 var solutionFiles = crmSolutionHelper.DownloadSolutionFile(solutionUniqueName, mode);
-                if (!crmSolutionHelper.CanPush)
-                {
-                    System.Threading.Thread.Sleep(timeOut);
-                    //// continue;
-                }
                 if (solutionFiles.Count > 0)
                 {
                     string credentials = ConfigurationManager.AppSettings["GitPassword"];
@@ -213,25 +207,12 @@ namespace CrmSolutionLibrary
                                         File.Copy(item.SolutionFilePath, fileUnmanaged, true);
                                     }
 
-
-                                    //RequestDetails requestDetail = new RequestDetails();
-                                    //requestDetail.FileContent = Convert.ToBase64String(File.ReadAllBytes(fileUnmanaged));
-                                    //requestDetail.FileName = item.SolutionUniqueName + "_.zip";
-                                    //requestDetail.FileDestinationPath = RepoSolutionFolder.Replace("\\", "/");
-                                    //requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL, branchName);
-                                    //requestDetail.ContentType = "base64Encoded";
-                                    //RequestDetailslist.Add(requestDetail);
-
-
-
                                     //unmanaged solution zip file
-                                    //string ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + RepoSolutionFolder.Replace("\\", "/"), @"/" + RepoSolutionFolder.Replace("\\", "/") + @"/" + item.SolutionUniqueName + "_.zip", AzureDevopsBaseURL, branchName);
                                     RequestDetails requestDetail = new RequestDetails(Convert.ToBase64String(File.ReadAllBytes(fileUnmanaged)), item.SolutionUniqueName + "_.zip", RepoSolutionFolder.Replace("\\", "/"), "", "base64Encoded");
                                     requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL, branchName);
                                     RequestDetailslist.Add(requestDetail);
 
                                     //managed solution zip file
-                                   // ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + RepoSolutionFolder.Replace("\\", "/"), @"/" + RepoSolutionFolder.Replace("\\", "/") + @"/" + item.SolutionUniqueName + "_managed_.zip", AzureDevopsBaseURL, branchName);
                                     requestDetail = new RequestDetails(Convert.ToBase64String(File.ReadAllBytes(fileManaged)), item.SolutionUniqueName + "_managed_.zip", RepoSolutionFolder.Replace("\\", "/"), "", "base64Encoded");
                                     requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL, branchName);
                                     RequestDetailslist.Add(requestDetail);
@@ -269,7 +250,6 @@ namespace CrmSolutionLibrary
                                                     case "1":
                                                         if (!string.IsNullOrEmpty(RepoHTMLFolder))
                                                         {
-                                                           // ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + RepoHTMLFolder.Replace("\\", "/"), @"/" + RepoHTMLFolder.Replace("\\", "/") + @"/" + modifiedName, AzureDevopsBaseURL, branchName);
                                                             requestDetail = new RequestDetails(Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName)), modifiedName, RepoHTMLFolder.Replace("\\", "/"), "", "base64Encoded");
                                                             requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL, branchName);
                                                             RequestDetailslist.Add(requestDetail);
@@ -279,7 +259,6 @@ namespace CrmSolutionLibrary
                                                     case "3":
                                                         if (!string.IsNullOrEmpty(RepoJSFolder))
                                                         {
-                                                            //ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + RepoJSFolder.Replace("\\", "/"), @"/" + RepoJSFolder.Replace("\\", "/") + @"/" + modifiedName, AzureDevopsBaseURL, branchName);
                                                             requestDetail = new RequestDetails(Convert.ToBase64String(File.ReadAllBytes(webResources + "\\" + webResournceName)), modifiedName, RepoJSFolder.Replace("\\", "/"), "", "base64Encoded");
                                                             requestDetail.ChangeType = await GetRepositoryDetails.GetItemDetails(credentials, @"/" + requestDetail.FileDestinationPath, @"/" + requestDetail.FileDestinationPath + @"/" + requestDetail.FileName, AzureDevopsBaseURL, branchName);
                                                             RequestDetailslist.Add(requestDetail);
@@ -378,7 +357,6 @@ namespace CrmSolutionLibrary
                                 item.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
                                 Console.WriteLine("Error : " + ex.Message.ToString() + "Stack " + ex.StackTrace);
                                 item.Update();
-                                //throw;
                             }
                         }
 
@@ -390,7 +368,6 @@ namespace CrmSolutionLibrary
                         Console.WriteLine("Error : " + ex.Message.ToString() + "Stack " + ex.StackTrace);
                         throw;
                     }
-                    System.Threading.Thread.Sleep(timeOut);
                 }
             }
             catch (Exception ex)

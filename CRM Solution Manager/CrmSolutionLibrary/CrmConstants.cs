@@ -48,7 +48,7 @@ namespace CrmSolutionLibrary
         /// <summary>
         /// Repository Url
         /// </summary>
-        private string repositoryUrl;
+        private Uri repositoryUrl;
 
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace CrmSolutionLibrary
             {
             }
         }
-       
+
         /// <summary>
         /// Gets or sets repository release directory containing CRM Solutions
         /// </summary>
@@ -220,7 +220,7 @@ namespace CrmSolutionLibrary
         /// <summary>
         /// Gets or sets repository url
         /// </summary>
-        public string RepositoryUrl
+        public Uri RepositoryUrl
         {
             get
             {
@@ -247,7 +247,7 @@ namespace CrmSolutionLibrary
             }
         }
 
-        
+
 
         /// <summary>
         /// Solution Packager Path
@@ -449,39 +449,26 @@ namespace CrmSolutionLibrary
             }
         }
 
-                    
+
         /// <summary>
         /// Method returns configuration settings entity collection list
         /// </summary>
         /// <returns>returns entity collection</returns>
         public override EntityCollection GetConfigurationSettings()
         {
-            this.clientCredentials = new ClientCredentials();
-
-            this.clientCredentials.UserName.UserName = this.DynamicsUserName;
-            this.clientCredentials.UserName.Password = this.DynamicsPassword;
-
-            //if (this.DynamicsUserName == "CRMSourceUserName" && this.DynamicsPassword == "CRMSourcePassword") // TODO : Naresh // User Name and password won't work and client id and secret need to use 
-            //{
             Task<string> callTask = Task.Run(() => this.AccessTokenGenerator());
-                callTask.Wait();
-                string token = callTask.Result;
-                //Uri serviceUrl = new Uri(ConfigurationManager.AppSettings["CRMSourceInstanceUrl"] + @"/xrmservices/2011/organization.svc/web?SdkClientVersion=8.2"); // if calling from web job 
-                Uri serviceUrl = new Uri(ConfigurationManager.AppSettings["CRMSourceInstanceUrl"] + @"/xrmservices/2011/organization.svc/web?SdkClientVersion=8.2"); // if calling from azure function
-                OrganizationWebProxyClient sdkService = null;
-                using (sdkService = new OrganizationWebProxyClient(serviceUrl, false))
-                {
-                    sdkService.HeaderToken = token;
-                    sdkService.InnerChannel.OperationTimeout = new TimeSpan(1, 30, 0);
-                    System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                    this.serviceProxy = (IOrganizationService)sdkService != null ? (IOrganizationService)sdkService : null;
-                }
-            //} // TODO : Naresh // User Name and password won't work and client id and secret need to use 
-            //else
-            //{
-            //    this.serviceProxy = this.InitializeOrganizationService();
-            //}
+            callTask.Wait();
+            string token = callTask.Result;
+            Uri serviceUrl = new Uri(ConfigurationManager.AppSettings["CRMSourceInstanceUrl"] + @"/xrmservices/2011/organization.svc/web?SdkClientVersion=8.2"); // if calling from azure function
+            OrganizationWebProxyClient sdkService = null;
+            using (sdkService = new OrganizationWebProxyClient(serviceUrl, false))
+            {
+                sdkService.HeaderToken = token;
+                sdkService.InnerChannel.OperationTimeout = new TimeSpan(1, 30, 0);
+                System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                serviceProxy = sdkService ?? null;
 
+            }
             EntityCollection retrievedConfigurationSettingsList = this.RetrieveConfigurationSettings(this.serviceProxy);
             return retrievedConfigurationSettingsList;
         }
@@ -561,7 +548,10 @@ namespace CrmSolutionLibrary
                         this.imagesDirectory = setting.GetAttributeValue<string>("syed_value");
                         break;
                     case Constants.RepositoryUrl:
-                        this.repositoryUrl = setting.GetAttributeValue<string>("syed_value");
+                        if (!string.IsNullOrEmpty(setting.GetAttributeValue<string>("syed_value")))
+                        {
+                            this.repositoryUrl = new Uri(setting.GetAttributeValue<string>("syed_value"));
+                        }
                         break;
                     case Constants.RemoteName:
                         this.repositoryRemoteName = setting.GetAttributeValue<string>("syed_value");
@@ -612,8 +602,10 @@ namespace CrmSolutionLibrary
         private IOrganizationService InitializeOrganizationService()
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            OrganizationServiceProxy organizationServiceProxy = new OrganizationServiceProxy(new Uri(this.OrgServiceUrl), null, this.clientCredentials, null);
-            organizationServiceProxy.Timeout = new TimeSpan(1, 30, 0);
+            OrganizationServiceProxy organizationServiceProxy = new OrganizationServiceProxy(new Uri(OrgServiceUrl), null, clientCredentials, null)
+            {
+                Timeout = new TimeSpan(1, 30, 0)
+            };
             IOrganizationService organizationService = (IOrganizationService)organizationServiceProxy;
             return organizationService;
         }

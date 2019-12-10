@@ -52,51 +52,60 @@ namespace CrmSolutionLibrary
         public SolutionFileInfo(Entity solution, IOrganizationService organizationServiceProxy, Entity solutionDetail)
         {
             this.OrganizationServiceProxy = organizationServiceProxy;
-            this.SolutionsToBeMerged = new List<string>();
-            this.Repository = solution.GetAttributeValue<OptionSetValue>(Constants.SourceControlQueueAttributeNameForRepository).Value;
-            ////solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSolutionName);
-            this.Message = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForComment);
-            this.OwnerName = solution.GetAttributeValue<EntityReference>(Constants.SourceControlQueueAttributeNameForOwnerId).Name;
-            this.IncludeInRelease = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForIncludeInRelease);
-            this.CheckInSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForCheckinSolution);
-            ////this.MergeSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForMergeSolution);
-            this.SolutionsTxt = solution.GetAttributeValue<OptionSetValue>(Constants.SourceControlQueueAttributeNameForOverwriteSolutionsTxt)?.Value ?? 0;
-            this.RemoteName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRemote);
-            this.GitRepoUrl = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryUrl);
-            EntityCollection retrieveSolutionsToBeMerged = Singleton.CrmSolutionHelperInstance.RetrieveSolutionsToBeMergedByListOfSolutionId(organizationServiceProxy, solutionDetail.Id);
-            this.RepoHTMLFolder = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryHTMLFolder);
-            this.RepoImagesFolder = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryImageFolder);
-            this.RepoSolutionFolder = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositorySolutionFolder);
-            this.RepoJSFolder = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryJsFolder);
+            this.SetSolutionsToBeMerged(new List<string>());
 
-            if (solutionDetail != null)
+            if (solution!=null)
             {
-                this.SolutionUniqueName = solutionDetail.GetAttributeValue<string>("syed_listofsolutions");
-                this.MasterSolutionId = solutionDetail.GetAttributeValue<string>("syed_solutionid");
-                this.ExportAsManaged = solutionDetail.GetAttributeValue<bool>("syed_exportas");
-                this.DoYouWantToCheckInSolutionZipFiles = solutionDetail.GetAttributeValue<bool>("syed_doyouwanttocheckinsolutionzipfiles");
-            }
-            else
-            {
-                throw new ArgumentNullException(nameof(solutionDetail), "There is no Master Solution");
-            }
-
-            if (this.CheckInSolution)
-            {
-                this.SolutionExtractionPath = Path.GetTempPath() + this.SolutionUniqueName;
-                this.BranchName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForBranch);
-                Singleton.CrmSolutionHelperInstance.CreateEmptyFolder(this.SolutionExtractionPath);
-            }
-
-            if (retrieveSolutionsToBeMerged.Entities.Count > 0)
-            {
-                foreach (Entity solutionsToBeMerged in retrieveSolutionsToBeMerged.Entities)
+                this.Repository = solution.GetAttributeValue<OptionSetValue>(Constants.SourceControlQueueAttributeNameForRepository).Value;
+                ////solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForSolutionName);
+                this.Message = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForComment);
+                this.OwnerName = solution.GetAttributeValue<EntityReference>(Constants.SourceControlQueueAttributeNameForOwnerId).Name;
+                this.IncludeInRelease = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForIncludeInRelease);
+                this.CheckInSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForCheckinSolution);
+                ////this.MergeSolution = solution.GetAttributeValue<bool>(Constants.SourceControlQueueAttributeNameForMergeSolution);
+                this.SolutionsTxt = solution.GetAttributeValue<OptionSetValue>(Constants.SourceControlQueueAttributeNameForOverwriteSolutionsTxt)?.Value ?? 0;
+                this.RemoteName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRemote);
+                string tempUri = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryUrl);
+                if (!string.IsNullOrEmpty(tempUri))
                 {
-                    this.SolutionsToBeMerged.Add(solutionsToBeMerged.GetAttributeValue<string>("syed_uniquename"));
+                    this.GitRepoUrl = new Uri(tempUri);
                 }
-            }
 
-            this.Solution = solution;
+                EntityCollection retrieveSolutionsToBeMerged = Singleton.CrmSolutionHelperInstance.RetrieveSolutionsToBeMergedByListOfSolutionId(organizationServiceProxy, solutionDetail.Id);
+                this.RepoHTMLFolder = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryHTMLFolder);
+                this.RepoImagesFolder = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryImageFolder);
+                this.RepoSolutionFolder = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositorySolutionFolder);
+                this.RepoJSFolder = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForRepositoryJsFolder);
+
+                if (solutionDetail != null)
+                {
+                    this.SolutionUniqueName = solutionDetail.GetAttributeValue<string>("syed_listofsolutions");
+                    this.MasterSolutionId = solutionDetail.GetAttributeValue<string>("syed_solutionid");
+                    this.ExportAsManaged = solutionDetail.GetAttributeValue<bool>("syed_exportas");
+                    this.DoYouWantToCheckInSolutionZipFiles = solutionDetail.GetAttributeValue<bool>("syed_doyouwanttocheckinsolutionzipfiles");
+                }
+                else
+                {
+                    throw new ArgumentNullException(nameof(solutionDetail), "There is no Master Solution");
+                }
+
+                if (this.CheckInSolution)
+                {
+                    this.SolutionExtractionPath = Path.GetTempPath() + this.SolutionUniqueName;
+                    this.BranchName = solution.GetAttributeValue<string>(Constants.SourceControlQueueAttributeNameForBranch);
+                    Singleton.CrmSolutionHelperInstance.CreateEmptyFolder(this.SolutionExtractionPath);
+                }
+
+                if (retrieveSolutionsToBeMerged.Entities.Count > 0)
+                {
+                    foreach (Entity solutionsToBeMerged in retrieveSolutionsToBeMerged.Entities)
+                    {
+                        this.GetSolutionsToBeMerged().Add(solutionsToBeMerged.GetAttributeValue<string>("syed_uniquename"));
+                    }
+                }
+
+                this.Solution = solution; 
+            }
         }
 
         /// <summary>
@@ -132,7 +141,7 @@ namespace CrmSolutionLibrary
         /// <summary>
         /// Gets or sets repo url
         /// </summary>
-        public string GitRepoUrl { get; set; }
+        public Uri GitRepoUrl { get; set; }
 
         /// <summary>
         /// Gets or sets Repo Solution Folder
@@ -204,10 +213,23 @@ namespace CrmSolutionLibrary
         /// </summary>
         public bool MergeSolution { get; set; }
 
+        private List<string> solutionsToBeMerged;
+
         /// <summary>
         /// Gets or sets solutions to be merged
         /// </summary>
-        public List<string> SolutionsToBeMerged { get; set; }
+        public List<string> GetSolutionsToBeMerged()
+        {
+            return solutionsToBeMerged;
+        }
+
+        /// <summary>
+        /// Gets or sets solutions to be merged
+        /// </summary>
+        public void SetSolutionsToBeMerged(List<string> value)
+        {
+            solutionsToBeMerged = value;
+        }
 
         /// <summary>
         /// Gets or sets value of Organization service
@@ -342,13 +364,28 @@ namespace CrmSolutionLibrary
                     solutionPackagerPath = tempSolutionPackagerPath;
                 }
             }
-            catch (Exception ex)
+            catch (ArgumentOutOfRangeException ex)
             {
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
                 Console.WriteLine(ex.Message);
 
                 throw;
             }
+            catch (ArgumentException ex)
+            {
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
+                Console.WriteLine(ex.Message);
+
+                throw;
+            }
+            catch (PathTooLongException ex)
+            {
+                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
+                Console.WriteLine(ex.Message);
+
+                throw;
+            }
+             
 
             if (!File.Exists(solutionPackagerPath))
             {
@@ -367,7 +404,7 @@ namespace CrmSolutionLibrary
                                .Execute()
                                ;
             }
-            catch(Exception ex)
+            catch(FileNotFoundException ex)
             {
                 Console.WriteLine("Error " + ex.Message + " Inner Exceptoin " + ex.InnerException);
                 

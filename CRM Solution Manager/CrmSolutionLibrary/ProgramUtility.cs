@@ -13,7 +13,7 @@ namespace CrmSolutionLibrary
     using Microsoft.Azure.KeyVault;
     using Microsoft.IdentityModel.Clients.ActiveDirectory;
     using Microsoft.Xrm.Sdk;
-    public class ProgramUtility
+    public static class ProgramUtility
     {
         /// <summary>
         /// Get Azure Secret 
@@ -129,9 +129,9 @@ namespace CrmSolutionLibrary
                 }
 
                 string solutionUniqueName = null; // args[0];
-                string committerName = "Syed Amrullah";
-                string committerEmail = "syamrull@microsoft.com";
-                string authorEmail = "TestSolutionCommitterService@microsoft.com";
+                //string committerName = "Syed Amrullah";
+                //string committerEmail = "syamrull@microsoft.com";
+                //string authorEmail = "TestSolutionCommitterService@microsoft.com";
                 ConfigurationSettings configurationSettings = Singleton.CrmConstantsInstance;
                 EntityCollection configurationSettingsList = configurationSettings.GetConfigurationSettings();
                 configurationSettings.SetCrmProperties(configurationSettingsList);

@@ -160,7 +160,7 @@ namespace CrmSolutionLibrary
                                 string RepoImagesFolder = item.RepoImagesFolder ?? Singleton.CrmConstantsInstance.ImagesDirectory;
                                 string RepoSolutionFolder = item.RepoSolutionFolder ?? Singleton.CrmConstantsInstance.SolutionFolder;
                                 string AzureDevopsBaseURL = null;
-                                if (!GitRepoUrl.ToLower().Contains("dev.azure.com"))
+                                if (GitRepoUrl.ToLower().Contains("dev.azure.com"))
                                     AzureDevopsBaseURL = GitRepoUrl + "/{action}?api-version=5.0";
                                 else
                                 {

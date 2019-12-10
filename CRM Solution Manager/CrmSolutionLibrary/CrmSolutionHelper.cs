@@ -440,7 +440,7 @@ namespace CrmSolutionLibrary
             {
                 if (solutionFile.GitRepoUrl == null)
                 {
-                    solutionFile.Solution[Constants.SourceControlQueueAttributeNameForRepositoryUrl] = this.RepositoryUrl;
+                    solutionFile.Solution[Constants.SourceControlQueueAttributeNameForRepositoryUrl] = this.RepositoryUrl.ToString();
                 }
 
                 if (string.IsNullOrEmpty(solutionFile.BranchName))

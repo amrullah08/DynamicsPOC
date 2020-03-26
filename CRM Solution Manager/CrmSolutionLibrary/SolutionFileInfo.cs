@@ -324,6 +324,8 @@ namespace CrmSolutionLibrary
                 foreach (Entity solutiondetail in retrievedMasterSolution.Entities)
                 {
                     var solutionFile = new SolutionFileInfo(solution, organizationServiceProxy, solutiondetail);
+                    solutiondetail["syed_solutionfilename"] = solutionFile.SolutionFileZipName;
+                    organizationServiceProxy.Update(solutiondetail);
                     solutionFileInfos.Add(solutionFile);
                 }
             }

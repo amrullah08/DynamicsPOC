@@ -145,6 +145,11 @@ namespace CrmSolutionLibrary
         public const string InvalidRepoConfiguration = "Check In Failed,Invalid Repository Settings";
 
         /// <summary>
+        /// Value for successful push to repo status
+        /// </summary>
+        public const string QueuedForRelease = "Queued for Release";
+
+        /// <summary>
         /// Value for Source Control for GIT
         /// </summary>
         public const int SourceControlGitHub = 433710000;

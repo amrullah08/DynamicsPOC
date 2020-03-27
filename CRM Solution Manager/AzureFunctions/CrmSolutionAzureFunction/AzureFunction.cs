@@ -20,10 +20,14 @@ namespace CrmSolutionAzureFunction
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]HttpRequestMessage req, TraceWriter log)
         {
             log.Info("Azure function processing a request.");
+
             IEnumerable<KeyValuePair<string, string>> querystruings = req.GetQueryNameValuePairs();
             List<string> allValues = (from qs in querystruings select qs.Value).Distinct().ToList();
             string[] args = allValues.ToArray();
-            if (ProgramUtility.UpdateRepository(args))
+
+            // string[] args = new string[] { "CRMSourceServiceUrl", "CRMSourceInstanceUrl", "GitUserName", "GitPassword", "TFSUser", "TFSPassword", "WEB" };
+
+            if (ProgramUtility.Execute(args))
             {
                 return req.CreateResponse(HttpStatusCode.OK, "Success");
             }

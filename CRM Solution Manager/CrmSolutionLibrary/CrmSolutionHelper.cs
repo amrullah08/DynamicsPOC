@@ -162,7 +162,7 @@ namespace CrmSolutionLibrary
                         serviceProxy.Update(querySampleSolutionResults.Entities[i]);
                         Singleton.SolutionFileInfoInstance.UploadFiletoDynamics(serviceProxy, querySampleSolutionResults.Entities[i]);
 
-                        throw new Exception();
+                        throw;
                     }
                 }
             }

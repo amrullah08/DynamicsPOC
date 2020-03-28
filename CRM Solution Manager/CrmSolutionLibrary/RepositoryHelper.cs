@@ -7,20 +7,17 @@
 
 namespace CrmSolutionLibrary
 {
+    using CrmSolutionLibrary.AzureDevopsAPIs.RestClient;
+    using CrmSolutionLibrary.AzureDevopsAPIs.Schemas;
+    using Newtonsoft.Json.Linq;
     using System;
     using System.Collections.Generic;
     using System.Configuration;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using System.Xml;
-    using CrmSolutionLibrary.AzureDevopsAPIs.RestClient;
-    using CrmSolutionLibrary.AzureDevopsAPIs.Schemas;
-    using Microsoft.TeamFoundation.Client;
-    using Microsoft.TeamFoundation.VersionControl.Client;
-    using Microsoft.VisualStudio.Services.Common;
 
     /// <summary>
     /// Repository helper
@@ -96,8 +93,9 @@ namespace CrmSolutionLibrary
             }
         }
 
+
         /// <summary>
-        /// Method tries to update repository
+        /// Method Initiate Request
         /// </summary>
         /// <param name="solutionUniqueName">unique solution name</param>
         /// <param name="committerName">committer name</param>
@@ -105,21 +103,13 @@ namespace CrmSolutionLibrary
         /// <param name="authorEmail">author email</param>
         /// <param name="mode">mode for flow</param>
         /// public async void TryUpdateToRepository(string solutionUniqueName, string committerName, string committerEmail, string authorEmail, string mode)
-        public async void TryUpdateToRepository(string solutionUniqueName, string mode)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0018:Inline variable declaration", Justification = "<Pending>")]
+        public async void InitiateRequest(string solutionUniqueName, string mode)
         {
             try
             {
                 string solutionFilePath = string.Empty;
-                ICrmSolutionHelper crmSolutionHelper = new CrmSolutionHelper(
-                                Singleton.RepositoryConfigurationConstantsInstance.RepositoryUrl,
-                                Singleton.RepositoryConfigurationConstantsInstance.BranchName,
-                                Singleton.RepositoryConfigurationConstantsInstance.RepositoryRemoteName,
-                                Singleton.CrmConstantsInstance.OrgServiceUrl,
-                                Singleton.CrmConstantsInstance.DynamicsUserName,
-                                Singleton.CrmConstantsInstance.DynamicsPassword,
-                                Singleton.CrmConstantsInstance.SolutionPackagerPath
-                                );
-                var solutionFiles = crmSolutionHelper.DownloadSolutionFile(solutionUniqueName, mode);
+                List<SolutionFileInfo> solutionFiles = ProcessSourceControlRequest(solutionUniqueName, mode);
                 if (solutionFiles.Count > 0)
                 {
                     string credentials = ConfigurationManager.AppSettings["GitPassword"];
@@ -128,47 +118,39 @@ namespace CrmSolutionLibrary
 
                     credentials = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(string.Format("{0}:{1}", "", credentials)));
                     HashSet<string> hashSet = new HashSet<string>();
-                    
-                    string TempPath = Path.GetTempPath() + "DD365CICD";
-                    if (!Directory.Exists(TempPath))
-                    {
-                        Directory.CreateDirectory(TempPath);
-                    }
-                    solutionFilePath = TempPath + "/solutions.txt";
-                    string solutionCheckerPath = TempPath + "/config.txt";
-                    string timeTriggerPath = TempPath + "/trigger.txt";
-                    CreateTempFiles(solutionFilePath, solutionCheckerPath, timeTriggerPath);
+                    string solutionCheckerPath, timeTriggerPath;
+                    CreateTempSupportingFiles(out solutionFilePath, out solutionCheckerPath, out timeTriggerPath);
                     try
                     {
                         foreach (var item in solutionFiles)
                         {
                             try
                             {
-                                string branchName, RepoJSFolder, RepoHTMLFolder, RepoImagesFolder, RepoSolutionFolder, AzureDevopsBaseURL;
-                                ConfigureAzureDevOps(item, out branchName, out RepoJSFolder, out RepoHTMLFolder, out RepoImagesFolder, out RepoSolutionFolder, out AzureDevopsBaseURL);
-                                List<string> BranchesNames = await GetRepositoryDetails.GetBranches(credentials, AzureDevopsBaseURL);
-                                bool BrachExists = BranchesNames.Contains(branchName);
-                                if (!BrachExists)
-                                {
-                                    //if invalid branch name given in configuration settings in CRM source instance
-                                    Console.WriteLine("Invalid Branch Name" + Singleton.CrmConstantsInstance.BranchName);
-                                    item.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.InvalidBranchName;
-                                    item.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
-                                    item.Update();
-                                    return;
-                                }
-                                ChangeRequest changeRequest = new ChangeRequest
-                                {
-                                    Comments = item.Message,
-                                    SourceBranchName = branchName,
-                                    CommitDate = DateTime.Now.ToString("dddd, dd MMMM yyyy HH:mm:ss"),
-                                    AutherName = item.OwnerName
-                                };
-                                string lastcomitid = await GetRepositoryDetails.GetLastCommitDetails(credentials, branchName, AzureDevopsBaseURL);
-                                changeRequest.Lastcomitid = lastcomitid;
-                                List<RequestDetails> RequestDetailslist = new List<RequestDetails>();
                                 if (item.CheckInSolution)
                                 {
+                                    string branchName, RepoJSFolder, RepoHTMLFolder, RepoImagesFolder, RepoSolutionFolder, AzureDevopsBaseURL;
+                                    ConfigureAzureDevOps(item, out branchName, out RepoJSFolder, out RepoHTMLFolder, out RepoImagesFolder, out RepoSolutionFolder, out AzureDevopsBaseURL);
+                                    List<string> BranchesNames = await GetRepositoryDetails.GetBranches(credentials, AzureDevopsBaseURL);
+                                    bool BrachExists = BranchesNames.Contains(branchName);
+                                    if (!BrachExists)
+                                    {
+                                        //if invalid branch name given in configuration settings in CRM source instance
+                                        Console.WriteLine("Invalid Branch Name" + Singleton.CrmConstantsInstance.BranchName);
+                                        item.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.InvalidBranchName;
+                                        item.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
+                                        item.Update();
+                                        return;
+                                    }
+                                    ChangeRequest changeRequest = new ChangeRequest
+                                    {
+                                        Comments = item.Message,
+                                        SourceBranchName = branchName,
+                                        CommitDate = DateTime.Now.ToString("dddd, dd MMMM yyyy HH:mm:ss"),
+                                        AutherName = item.OwnerName
+                                    };
+                                    string lastcomitid = await GetRepositoryDetails.GetLastCommitDetails(credentials, branchName, AzureDevopsBaseURL);
+                                    changeRequest.Lastcomitid = lastcomitid;
+                                    List<RequestDetails> RequestDetailslist = new List<RequestDetails>();
                                     //Adding solution files to repository 
                                     #region update solutions zip files and etc to repo
                                     RequestDetails requestDetail = await AddSolutionsBeforeCommit(credentials, item, branchName, RepoSolutionFolder, AzureDevopsBaseURL, RequestDetailslist);
@@ -190,8 +172,15 @@ namespace CrmSolutionLibrary
                                     //Building file input payload to commit
                                     CommitObject cmObject = CreateCommit.FillCommitDetails(changeRequest);
                                     //Calling Api for Commiting changes to repository
-                                    string comitURL = await CreateCommit.Commit(credentials, cmObject, new Uri(AzureDevopsBaseURL));
-
+                                    string responseContent = await CreateCommit.Commit(credentials, cmObject, new Uri(AzureDevopsBaseURL));
+                                    try
+                                    {
+                                        Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(responseContent.ToString());
+                                        JObject json = string.IsNullOrEmpty(responseContent) ? JObject.Parse(responseContent) : null;
+                                        var commitURL = json?["commits"][0]["url"].ToString();
+                                        item.UpdateNotes("Commit Url" + commitURL);
+                                    }
+                                    catch { }
                                     item.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.SourceControlQueuemPushToRepositorySuccessStatus;
                                     item.Solution.Attributes["syed_webjobs"] = Singleton.SolutionFileInfoInstance.WebJobs();
                                     item.Update();
@@ -223,6 +212,34 @@ namespace CrmSolutionLibrary
                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(ex.Message);
                 Console.WriteLine(ex.Message);
             }
+        }
+
+        private void CreateTempSupportingFiles(out string solutionFilePath, out string solutionCheckerPath, out string timeTriggerPath)
+        {
+            string TempPath = Path.GetTempPath() + "DD365CICD";
+            if (!Directory.Exists(TempPath))
+            {
+                Directory.CreateDirectory(TempPath);
+            }
+            solutionFilePath = TempPath + "/solutions.txt";
+            solutionCheckerPath = TempPath + "/config.txt";
+            timeTriggerPath = TempPath + "/trigger.txt";
+            CreateTempFiles(solutionFilePath, solutionCheckerPath, timeTriggerPath);
+        }
+
+        private static List<SolutionFileInfo> ProcessSourceControlRequest(string solutionUniqueName, string mode)
+        {
+            ICrmSolutionHelper crmSolutionHelper = new CrmSolutionHelper(
+                            Singleton.RepositoryConfigurationConstantsInstance.RepositoryUrl,
+                            Singleton.RepositoryConfigurationConstantsInstance.BranchName,
+                            Singleton.RepositoryConfigurationConstantsInstance.RepositoryRemoteName,
+                            Singleton.CrmConstantsInstance.OrgServiceUrl,
+                            Singleton.CrmConstantsInstance.DynamicsUserName,
+                            Singleton.CrmConstantsInstance.DynamicsPassword,
+                            Singleton.CrmConstantsInstance.SolutionPackagerPath
+                            );
+            var solutionFiles = crmSolutionHelper.DownloadSolutionFile(solutionUniqueName, mode);
+            return solutionFiles;
         }
 
         private RequestDetails UpdateAdditionalFilesBeforeCommit(string solutionFilePath, HashSet<string> hashSet, string solutionCheckerPath, string timeTriggerPath, SolutionFileInfo item, List<RequestDetails> RequestDetailslist)

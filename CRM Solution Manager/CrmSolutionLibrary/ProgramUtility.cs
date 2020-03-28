@@ -67,7 +67,6 @@ namespace CrmSolutionLibrary
         {
 
             string mode = string.Empty;
-            bool retvalue = false;
             try
             {
                 mode = GetModeAndConfigureSettings(args, mode);
@@ -83,15 +82,13 @@ namespace CrmSolutionLibrary
                 Singleton.RepositoryConfigurationConstantsInstance.ResetLocalDirectory();
                 configurationSettings.SetRepositoryConfigurationProperties(configurationSettingsList);
                 //Singleton.RepositoryHelperInstance.TryUpdateToRepository(solutionUniqueName, committerName, committerEmail, authorEmail, mode);
-                Singleton.RepositoryHelperInstance.TryUpdateToRepository(solutionUniqueName, mode);
-                retvalue = true;
+                Singleton.RepositoryHelperInstance.InitiateRequest(solutionUniqueName, mode);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                retvalue = false;
-                throw ex;
+                throw;
             }
-            return retvalue;
+            return true;
         }
 
         private static string GetModeAndConfigureSettings(string[] args, string mode)
@@ -102,42 +99,6 @@ namespace CrmSolutionLibrary
 
                 foreach (string item in args)
                 {
-                    #region Commented
-                    //if (item.StartsWith(Constants.ArgumentDU, StringComparison.InvariantCulture))
-                    //{
-                    //    ConfigurationManager.AppSettings["CRMSourceUserName"] = DoVault(item.Replace(Constants.ArgumentDU, string.Empty), kvc);
-                    //}
-                    //else if (item.StartsWith(Constants.ArgumentD365, StringComparison.InvariantCulture))
-                    //{
-                    //    ConfigurationManager.AppSettings["CRMSourceInstanceUrl"] = DoVault(item.Replace(Constants.ArgumentD365, string.Empty), kvc);
-                    //}
-                    //else if (item.StartsWith(Constants.ArgumentDP, StringComparison.InvariantCulture))
-                    //{
-                    //    ConfigurationManager.AppSettings["CRMSourcePassword"] = DoVault(item.Replace(Constants.ArgumentDP, string.Empty), kvc);
-                    //}
-                    //else if (item.StartsWith(Constants.ArgumentGU, StringComparison.InvariantCulture))
-                    //{
-                    //    ConfigurationManager.AppSettings["GitUserName"] = DoVault(item.Replace(Constants.ArgumentGU, string.Empty), kvc);
-                    //}
-                    //else if (item.StartsWith(Constants.ArgumentGP, StringComparison.InvariantCulture))
-                    //{
-                    //    ConfigurationManager.AppSettings["GitPassword"] = DoVault(item.Replace(Constants.ArgumentGP, string.Empty), kvc);
-                    //}
-                    //else if (item.StartsWith(Constants.ArgumentTU, StringComparison.InvariantCulture))
-                    //{
-                    //    ConfigurationManager.AppSettings["TFSUser"] = DoVault(item.Replace(Constants.ArgumentTU, string.Empty), kvc);
-                    //}
-                    //else if (item.StartsWith(Constants.ArgumentTP, StringComparison.InvariantCulture))
-                    //{
-                    //    ConfigurationManager.AppSettings["TFSPassword"] = DoVault(item.Replace(Constants.ArgumentTP, string.Empty), kvc);
-                    //}
-                    //else if (item.StartsWith(Constants.ArgumentAR, StringComparison.InvariantCulture))
-                    //{
-                    //    mode = item.Replace(Constants.ArgumentAR, string.Empty);
-                    //    Console.WriteLine(mode);
-                    //}
-                    #endregion
-
                     if (item == "WEB" || item == "Scheduled")
                     {
                         mode = item;
@@ -154,8 +115,8 @@ namespace CrmSolutionLibrary
                 Console.WriteLine("No Arguments");
             }
 
-            ConfigurationManager.AppSettings["CRMSourceServiceUrl"] = "https://crmorg.api.crm.dynamics.com/XRMServices/2011/Organization.svc";
-            ConfigurationManager.AppSettings["CRMSourceInstanceUrl"] = "https://crmorg.crm.dynamics.com";
+            //ConfigurationManager.AppSettings["CRMSourceServiceUrl"] = "https://compasstest.api.crm.dynamics.com/XRMServices/2011/Organization.svc";
+            //ConfigurationManager.AppSettings["CRMSourceInstanceUrl"] = "https://compasstest.crm.dynamics.com";
             return mode;
         }
     }

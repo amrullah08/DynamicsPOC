@@ -44,6 +44,20 @@ namespace CrmSolutionLibrary
         }
 
         /// <summary>
+        /// method creates notes and associates wtih solution
+        /// </summary>
+        /// <param name="message"></param>
+        public void UpdateNotes(string message)
+        {
+            Entity Annotation = new Entity("annotation");
+            Annotation.Attributes["subject"] = "Azure Function Update";
+            Annotation.Attributes["objectid"] = new EntityReference(Constants.SounceControlQueue, Solution.Id);
+            Annotation.Attributes["objecttypecode"] = Constants.SounceControlQueue;
+            Annotation.Attributes["notetext"] = message;
+            Guid annotationId = this.OrganizationServiceProxy.Create(Annotation);
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SolutionFileInfo" /> class
         /// </summary>
         /// <param name="solution">solution entity</param>

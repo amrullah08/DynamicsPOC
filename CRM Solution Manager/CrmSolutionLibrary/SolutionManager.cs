@@ -847,10 +847,9 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                 {
                     Conditions =
                     {
-                        new ConditionExpression("solutionid", ConditionOperator.In, solutionsIds.ToArray()),
-
+                        new ConditionExpression("solutionid", ConditionOperator.In, solutionsIds.ToArray())
                         // comment below for all components
-                        new ConditionExpression("componenttype", ConditionOperator.In, componentsTypes.ToArray())
+                        //new ConditionExpression("componenttype", ConditionOperator.In, componentsTypes.ToArray())
                     }
                 }
             };

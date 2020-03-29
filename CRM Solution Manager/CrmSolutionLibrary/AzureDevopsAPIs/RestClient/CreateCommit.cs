@@ -52,13 +52,12 @@ namespace CrmSolutionLibrary.AzureDevopsAPIs.RestClient
                     }
                 }
 
-                JObject json = string.IsNullOrEmpty(responseContent) ? JObject.Parse(responseContent) : null;
-                return json?["commits"][0]["url"].ToString();
+                return responseContent;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
-                throw ex;
+                throw;
             }
 
         }

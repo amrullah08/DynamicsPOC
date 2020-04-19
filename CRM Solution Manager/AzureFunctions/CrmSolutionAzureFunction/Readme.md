@@ -5,3 +5,4 @@
 3. in the console window it would show the url, copy that url and paste in browser this would trigger the console with follwoing parameters
 http://localhost:7071/api/AzureFunction?D365=CRMSourceServiceUrl&D365INST=CRMSourceInstanceUrl&GU=GitUserName&GP=GitPassword&TU=TFSUser&TP=TFSPassword&AR=WEB
 4. ensure all the values are there in the configured keyvault
+5. verified for commiting to repository and merging

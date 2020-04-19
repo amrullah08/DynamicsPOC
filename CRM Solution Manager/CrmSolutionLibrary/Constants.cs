@@ -147,7 +147,7 @@ namespace CrmSolutionLibrary
         /// <summary>
         /// Value for successful push to repo status
         /// </summary>
-        public const string QueuedForRelease = "Queued for release";
+        public const string ReadyForRelease = "Ready for release";
 
         /// <summary>
         /// Value for Source Control for GIT

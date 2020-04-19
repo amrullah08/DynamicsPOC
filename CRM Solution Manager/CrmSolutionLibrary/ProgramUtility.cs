@@ -115,8 +115,8 @@ namespace CrmSolutionLibrary
                 Console.WriteLine("No Arguments");
             }
 
-            //ConfigurationManager.AppSettings["CRMSourceServiceUrl"] = "https://compasstest.api.crm.dynamics.com/XRMServices/2011/Organization.svc";
-            //ConfigurationManager.AppSettings["CRMSourceInstanceUrl"] = "https://compasstest.crm.dynamics.com";
+            // ConfigurationManager.AppSettings["CRMSourceServiceUrl"] = "https://compasstest.api.crm.dynamics.com/XRMServices/2011/Organization.svc";
+            // ConfigurationManager.AppSettings["CRMSourceInstanceUrl"] = "https://compasstest.crm.dynamics.com";
             return mode;
         }
     }

@@ -435,7 +435,7 @@ namespace CrmSolutionLibrary
                     string id = (item.Solution.Id.ToString());
                     if (!completeHashSet.Contains(id) && item.IncludeInRelease)
                     {
-                        item.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.QueuedForRelease;
+                        item.Solution[Constants.SourceControlQueueAttributeNameForStatus] = Constants.ReadyForRelease;
                         item.Update();
                     }
                 }

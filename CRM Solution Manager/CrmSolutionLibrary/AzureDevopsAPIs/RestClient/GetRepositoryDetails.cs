@@ -65,7 +65,12 @@ namespace CrmSolutionLibrary.AzureDevopsAPIs.RestClient
                 if (httpResponse.IsSuccessStatusCode)
                 {
                     responseContent = await httpResponse.Content.ReadAsStringAsync();
-                }   
+                }
+                else
+                {
+                    const string message = "Probable Github pat token error";
+                    throw new UnauthorizedAccessException(message);
+                }
             }
 
             JObject json = responseContent != string.Empty ? JObject.Parse(responseContent) : null;

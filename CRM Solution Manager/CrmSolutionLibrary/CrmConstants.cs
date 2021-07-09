@@ -459,12 +459,12 @@ namespace CrmSolutionLibrary
             Task<string> callTask = Task.Run(() => this.AccessTokenGenerator());
             callTask.Wait();
             string token = callTask.Result;
-            Uri serviceUrl = new Uri(ConfigurationManager.AppSettings["CRMSourceInstanceUrl"] + @"/xrmservices/2011/organization.svc/web?SdkClientVersion=8.2"); // if calling from azure function
+            Uri serviceUrl = new Uri(ConfigurationManager.AppSettings["CRMSourceInstanceUrl"] + @"/xrmservices/2011/organization.svc/web?SdkClientVersion=9.2"); // if calling from azure function
             OrganizationWebProxyClient sdkService = null;
             using (sdkService = new OrganizationWebProxyClient(serviceUrl, false))
             {
                 sdkService.HeaderToken = token;
-                sdkService.InnerChannel.OperationTimeout = new TimeSpan(1, 30, 0);
+                sdkService.InnerChannel.OperationTimeout = new TimeSpan(0, 30, 0);
                 System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 serviceProxy = sdkService ?? null;
 
@@ -604,7 +604,7 @@ namespace CrmSolutionLibrary
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             OrganizationServiceProxy organizationServiceProxy = new OrganizationServiceProxy(new Uri(OrgServiceUrl), null, clientCredentials, null)
             {
-                Timeout = new TimeSpan(1, 30, 0)
+                Timeout = new TimeSpan(0, 30, 0)
             };
             IOrganizationService organizationService = (IOrganizationService)organizationServiceProxy;
             return organizationService;

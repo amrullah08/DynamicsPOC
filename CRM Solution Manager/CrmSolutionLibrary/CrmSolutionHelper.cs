@@ -134,6 +134,7 @@ namespace CrmSolutionLibrary
                             catch (Exception ex)
                             {
                                 Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.Message + "<br>");
+                                Singleton.SolutionFileInfoInstance.WebJobsLog.AppendLine(" " + ex.StackTrace + "<br>");
                                 throw new Exception(ex.InnerException.Message, ex);
                             }
                         }

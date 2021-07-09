@@ -464,7 +464,7 @@ namespace CrmSolutionLibrary
             using (sdkService = new OrganizationWebProxyClient(serviceUrl, false))
             {
                 sdkService.HeaderToken = token;
-                sdkService.InnerChannel.OperationTimeout = new TimeSpan(0, 30, 0);
+                sdkService.InnerChannel.OperationTimeout = new TimeSpan(0, 20, 0);
                 System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 serviceProxy = sdkService ?? null;
 
@@ -604,7 +604,7 @@ namespace CrmSolutionLibrary
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             OrganizationServiceProxy organizationServiceProxy = new OrganizationServiceProxy(new Uri(OrgServiceUrl), null, clientCredentials, null)
             {
-                Timeout = new TimeSpan(0, 30, 0)
+                Timeout = new TimeSpan(0, 20, 0)
             };
             IOrganizationService organizationService = (IOrganizationService)organizationServiceProxy;
             return organizationService;

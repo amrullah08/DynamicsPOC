@@ -766,6 +766,12 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                 {
                     foreach (var component in components)
                     {
+                        if(component.GetAttributeValue<OptionSetValue>("componenttype").Value == 66)
+                        {
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr><td> Skipping Copy for the componenttype " + component.GetAttributeValue<Guid>("objectid") + " component type " + component.GetAttributeValue<OptionSetValue>("componenttype").Value + " </td></tr>");
+                            continue;
+                        }
+
                         var request = new AddSolutionComponentRequest
                         {
                             AddRequiredComponents = false,
@@ -781,8 +787,15 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                         request.DoNotIncludeSubcomponents =
         component.GetAttributeValue<OptionSetValue>("rootcomponentbehavior")?.Value == 1 ||
         component.GetAttributeValue<OptionSetValue>("rootcomponentbehavior")?.Value == 2;
-
-                        this.service.Execute(request);
+                        try
+                        {
+                            this.service.Execute(request);
+                        }
+                        catch(Exception ex)
+                        {
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr><td> merged failed for componenttype " + component.GetAttributeValue<Guid>("objectid") + " component type " + component.GetAttributeValue<OptionSetValue>("componenttype").Value  + " "  + ex.Message + "</td></tr>");
+                            throw;
+                        }
                     }
                 }
             }

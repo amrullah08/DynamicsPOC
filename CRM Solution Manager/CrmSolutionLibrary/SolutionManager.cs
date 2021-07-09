@@ -766,11 +766,11 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                 {
                     foreach (var component in components)
                     {
-                        if(component.GetAttributeValue<OptionSetValue>("componenttype").Value == 66)
-                        {
-                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr><td> Skipping Copy for the componenttype " + component.GetAttributeValue<Guid>("objectid") + " component type " + component.GetAttributeValue<OptionSetValue>("componenttype").Value + " </td></tr>");
-                            continue;
-                        }
+                        //if(component.GetAttributeValue<OptionSetValue>("componenttype").Value == 66)
+                        //{
+                        //    Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr><td style='width:100px;background-color:powderblue;border: 1px solid #ccc'> Skipping Copy for the componenttype " + component.GetAttributeValue<Guid>("objectid") + " component type " + component.GetAttributeValue<OptionSetValue>("componenttype").Value + " </td></tr>");
+                        //    continue;
+                        //}
 
                         var request = new AddSolutionComponentRequest
                         {
@@ -793,7 +793,7 @@ namespace MsCrmTools.SolutionComponentsMover.AppCode
                         }
                         catch(Exception ex)
                         {
-                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr><td> merged failed for componenttype " + component.GetAttributeValue<Guid>("objectid") + " component type " + component.GetAttributeValue<OptionSetValue>("componenttype").Value  + " "  + ex.Message + "</td></tr>");
+                            Singleton.SolutionFileInfoInstance.WebJobsLog.Append("<tr><td style='width:100px;background-color:powderblue;border: 1px solid #ccc'> merged failed for componenttype " + component.GetAttributeValue<Guid>("objectid") + " component type " + component.GetAttributeValue<OptionSetValue>("componenttype").Value  + " "  + ex.Message + "</td></tr>");
                             throw;
                         }
                     }
